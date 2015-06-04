@@ -383,10 +383,11 @@ public:
 template <typename K, typename V>
 struct Item{
     K key;
-    V Value;
+    V value;
 
     Item(K&& k, V&& v){
-
+        key = k;
+        value = v;
     };
 };
 
