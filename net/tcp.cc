@@ -159,5 +159,16 @@ tcpv4_connect(tcp<ipv4_traits>& tcpv4, socket_address sa) {
     });
 }
 
+#ifdef __USE_KJ__
+kj::Promise<connected_socket>
+kj_tcpv4_connect(tcp<ipv4_traits>& tcpv4, socket_address sa) {
+    return tcpv4.kj_connect(sa).then([] (tcp<ipv4_traits>::connection conn) mutable {
+        std::unique_ptr<connected_socket_impl> csi(new native_connected_socket_impl<tcp<ipv4_traits>>(std::move(conn)));
+        return kj::Promise<connected_socket>(connected_socket(std::move(csi)));
+    });
+}
+
+#endif 
+
 }
 

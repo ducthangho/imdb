@@ -34,6 +34,11 @@
 #include <sys/socket.h>
 #include <netinet/ip.h>
 
+#ifdef __USE_KJ__
+#include "kj/debug.h"
+#include "kj/async.h"
+#include "kj/async-io.h"
+#endif
 class socket_address {
 public:
     union {
@@ -41,6 +46,10 @@ public:
         ::sockaddr sa;
         ::sockaddr_in in;
     } u;
+    socket_address(sockaddr_in sa) {
+        u.in = sa;
+    }
+    socket_address() = default;
     ::sockaddr& as_posix_sockaddr() { return u.sa; }
     ::sockaddr_in& as_posix_sockaddr_in() { return u.in; }
     const ::sockaddr& as_posix_sockaddr() const { return u.sa; }
@@ -59,6 +68,7 @@ struct ipv4_addr {
     ipv4_addr(uint32_t ip, uint16_t port) : ip(ip), port(port) {}
     ipv4_addr(uint16_t port) : ip(0), port(port) {}
     ipv4_addr(const std::string &addr);
+    ipv4_addr(const std::string &addr, uint16_t port);
 
     ipv4_addr(const socket_address &sa) {
         ip = net::ntoh(sa.u.in.sin_addr.s_addr);
@@ -126,6 +136,11 @@ public:
     virtual future<> send(ipv4_addr dst, const char* msg) = 0;
     virtual future<> send(ipv4_addr dst, packet p) = 0;
     virtual bool is_closed() const = 0;
+#ifdef __USE_KJ__
+    virtual kj::Promise<udp_datagram> kj_receive() = 0;
+    virtual kj::Promise<void> kj_send(ipv4_addr dst, const char* msg) = 0;
+    virtual kj::Promise<void> kj_send(ipv4_addr dst, packet p) = 0;
+#endif    
     virtual void close() = 0;
 };
 
@@ -138,6 +153,11 @@ public:
     future<udp_datagram> receive() { return _impl->receive(); }
     future<> send(ipv4_addr dst, const char* msg) { return _impl->send(std::move(dst), msg); }
     future<> send(ipv4_addr dst, packet p) { return _impl->send(std::move(dst), std::move(p)); }
+#ifdef __USE_KJ__
+    kj::Promise<udp_datagram> kj_receive() { return _impl->kj_receive(); }
+    kj::Promise<void> kj_send(ipv4_addr dst, const char* msg) { return _impl->kj_send(std::move(dst), msg); }
+    kj::Promise<void> kj_send(ipv4_addr dst, packet p) { return _impl->kj_send(std::move(dst), std::move(p)); }
+#endif    
     bool is_closed() const { return _impl->is_closed(); }
     void close() { return _impl->close(); }
 };

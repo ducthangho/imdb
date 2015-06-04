@@ -95,6 +95,25 @@ public:
         });
     }
 
+#ifdef __USE_KJ__
+
+    virtual kj::Promise<udp_datagram> kj_receive() override {
+        return _state->_queue.kj_pop_eventually();
+    }
+
+    virtual kj::Promise<void> kj_send(ipv4_addr dst, const char* msg) override {
+        return kj_send(dst, packet::from_static_data(msg, strlen(msg)));
+    }
+
+    virtual kj::Promise<void> kj_send(ipv4_addr dst, packet p) override {
+        auto len = p.len();
+        return _state->kj_wait_for_send_buffer(len).then([this, dst, p = std::move(p), len] () mutable -> kj::Promise<void> {
+            _proto.send(_reg.port(), dst, std::move(p), _state);            
+            return kj::READY_NOW;
+        });
+    }
+
+#endif    
     virtual bool is_closed() const {
         return _closed;
     }

@@ -46,6 +46,7 @@ struct test {
         c->copy_data();
     }
     void start_accept() {
+        printf("Waiting to accept\n");
         listener.accept().then([this] (pollable_fd fd, socket_address sa) {
             new_connection(std::move(fd), std::move(sa));
             start_accept();
@@ -55,7 +56,9 @@ struct test {
 
 int main(int ac, char** av)
 {
-    ipv4_addr addr{10000};
+    printf("Creating IPv4 address\n");
+    ipv4_addr addr{10000};    
+    printf("Created IPv4 address\n");
     listen_options lo;
     lo.reuse_address = true;
     test t(engine().posix_listen(make_ipv4_address(addr), lo));

@@ -40,6 +40,11 @@
 #include <random>
 #include <stdexcept>
 #include <system_error>
+#ifdef __USE_KJ__
+#include "kj/debug.h"
+#include "kj/async.h"
+#include "kj/async-io.h"
+#endif
 
 #define CRYPTOPP_ENABLE_NAMESPACE_WEAK 1
 #include <cryptopp/md5.h>
@@ -198,6 +203,7 @@ struct tcp_hdr {
     void adjust_endianness(Adjuster a) { a(src_port, dst_port, seq, ack, window, checksum, urgent); }
 } __attribute__((packed));
 
+typedef kj::Own< kj::PromiseFulfiller<void> > Fulfiller;
 template <typename InetTraits>
 class tcp {
 public:
@@ -212,17 +218,17 @@ private:
 
     class tcb : public enable_lw_shared_from_this<tcb> {
         using clock_type = lowres_clock;
-        static constexpr const tcp_state CLOSED         = tcp_state::CLOSED;
-        static constexpr const tcp_state LISTEN         = tcp_state::LISTEN;
-        static constexpr const tcp_state SYN_SENT       = tcp_state::SYN_SENT;
-        static constexpr const tcp_state SYN_RECEIVED   = tcp_state::SYN_RECEIVED;
-        static constexpr const tcp_state ESTABLISHED    = tcp_state::ESTABLISHED;
-        static constexpr const tcp_state FIN_WAIT_1     = tcp_state::FIN_WAIT_1;
-        static constexpr const tcp_state FIN_WAIT_2     = tcp_state::FIN_WAIT_2;
-        static constexpr const tcp_state CLOSE_WAIT     = tcp_state::CLOSE_WAIT;
-        static constexpr const tcp_state CLOSING        = tcp_state::CLOSING;
-        static constexpr const tcp_state LAST_ACK       = tcp_state::LAST_ACK;
-        static constexpr const tcp_state TIME_WAIT      = tcp_state::TIME_WAIT;
+        static constexpr tcp_state CLOSED         = tcp_state::CLOSED;
+        static constexpr tcp_state LISTEN         = tcp_state::LISTEN;
+        static constexpr tcp_state SYN_SENT       = tcp_state::SYN_SENT;
+        static constexpr tcp_state SYN_RECEIVED   = tcp_state::SYN_RECEIVED;
+        static constexpr tcp_state ESTABLISHED    = tcp_state::ESTABLISHED;
+        static constexpr tcp_state FIN_WAIT_1     = tcp_state::FIN_WAIT_1;
+        static constexpr tcp_state FIN_WAIT_2     = tcp_state::FIN_WAIT_2;
+        static constexpr tcp_state CLOSE_WAIT     = tcp_state::CLOSE_WAIT;
+        static constexpr tcp_state CLOSING        = tcp_state::CLOSING;
+        static constexpr tcp_state LAST_ACK       = tcp_state::LAST_ACK;
+        static constexpr tcp_state TIME_WAIT      = tcp_state::TIME_WAIT;
         tcp_state _state = CLOSED;
         tcp& _tcp;
         connection* _conn = nullptr;
@@ -255,6 +261,10 @@ private:
             promise<> _window_opened;
             // Wait for all data are acked
             std::experimental::optional<promise<>> _all_data_acked_promise;
+            #ifdef __USE_KJ__
+            Fulfiller kj__all_data_acked_promise;
+            Fulfiller kj__window_opened;
+            #endif
             // Limit number of data queued into send queue
             semaphore user_queue_space = {212992};
             // Round-trip time variation
@@ -286,6 +296,9 @@ private:
             std::deque<packet> data;
             packet_merger<tcp_seq> out_of_order;
             std::experimental::optional<promise<>> _data_received_promise;
+            #ifdef __USE_KJ__
+            Fulfiller kj__data_received_promise;
+            #endif            
         } _rcv;
         tcp_option _option;
         timer<lowres_clock> _delayed_ack;
@@ -325,6 +338,14 @@ private:
         future<> wait_for_data();
         future<> wait_for_all_data_acked();
         future<> send(packet p);
+#ifdef __USE_KJ__
+        kj::Promise<void> kj_wait_for_data();
+        kj::Promise<void> kj_wait_for_all_data_acked();
+        kj::Promise<void> kj_send(packet p);
+        kj::Promise<void> kj_connect_done() {
+           return make_kj_promise(_connect_done.get_future());
+        }
+#endif
         void connect();
         packet read();
         void close();
@@ -356,6 +377,8 @@ private:
         future<> connect_done() {
             return _connect_done.get_future();
         }
+
+
         tcp_state& state() {
             return _state;
         }
@@ -437,12 +460,22 @@ private:
                 _rcv._data_received_promise->set_value();
                 _rcv._data_received_promise = {};
             }
+#ifdef __USE_KJ__
+            if (_rcv.kj__data_received_promise){
+                _rcv.kj__data_received_promise->fulfill();
+            }
+#endif            
         }
         void signal_all_data_acked() {
             if (_snd._all_data_acked_promise && _snd.unsent_len == 0 && _snd.queued_len == 0) {
                 _snd._all_data_acked_promise->set_value();
                 _snd._all_data_acked_promise = {};
             }
+#ifdef __USE_KJ__
+            if (_snd.kj__all_data_acked_promise && _snd.unsent_len == 0 && _snd.queued_len == 0){
+                _snd.kj__all_data_acked_promise->fulfill();
+            }
+#endif            
         }
         void do_syn_sent() {
             _state = SYN_SENT;
@@ -472,6 +505,15 @@ private:
             if (_snd._all_data_acked_promise) {
                 _snd._all_data_acked_promise->set_exception(tcp_reset_error());
             }
+#ifdef __USE_KJ__
+            kj::Exception exception = KJ_EXCEPTION(FAILED, "connection is reset");            
+            if (_rcv.kj__data_received_promise) {
+                _rcv.kj__data_received_promise->reject(kj::cp(exception) );
+            }
+            if (_snd.kj__all_data_acked_promise) {
+                _snd.kj__all_data_acked_promise->reject( kj::cp(exception) );
+            }
+#endif
         }
         void do_time_wait() {
             // FIXME: Implement TIME_WAIT state timer
@@ -552,6 +594,15 @@ public:
         future<> wait_for_data() {
             return _tcb->wait_for_data();
         }
+#ifdef __USE_KJ__
+        kj::Promise<void> kj_send(packet p) {
+            return _tcb->kj_send(std::move(p));
+        }
+
+        kj::Promise<void> kj_wait_for_data() {
+            return _tcb->kj_wait_for_data();
+        }
+#endif
         packet read() {
             return _tcb->read();
         }
@@ -583,6 +634,13 @@ public:
                 return make_ready_future<connection>(_q.pop());
             });
         }
+#ifdef __USE_KJ__
+        kj::Promise<connection> kj_accept() {
+            return _q.kj_not_empty().then([this] {
+                return kj::Promise<connection>(_q.pop());
+            });
+        }
+#endif        
         friend class tcp;
     };
 public:
@@ -593,6 +651,10 @@ public:
     future<connection> connect(socket_address sa);
     const net::hw_features& hw_features() const { return _inet._inet.hw_features(); }
     future<> poll_tcb(ipaddr to, lw_shared_ptr<tcb> tcb);
+#ifdef __USE_KJ__
+    kj::Promise<connection> kj_connect(socket_address sa);    
+    kj::Promise<void> kj_poll_tcb(ipaddr to, lw_shared_ptr<tcb> tcb);
+#endif    
 private:
     void send_packet_without_tcb(ipaddr from, ipaddr to, packet p);
     void respond_with_reset(tcp_hdr* rth, ipaddr local_ip, ipaddr foreign_ip);
@@ -632,6 +694,17 @@ future<> tcp<InetTraits>::poll_tcb(ipaddr to, lw_shared_ptr<tcb> tcb) {
             _poll_tcbs.emplace_back(std::move(tcb), dst);
     });
 }
+/*******************************************************/
+#ifdef __USE_KJ__
+template <typename InetTraits>
+kj::Promise<void> tcp<InetTraits>::kj_poll_tcb(ipaddr to, lw_shared_ptr<tcb> tcb) {
+    return  make_kj_promise(_inet.get_l2_dst_address(to).then([this, tcb = std::move(tcb)] (ethernet_address dst) {
+        _poll_tcbs.emplace_back(std::move(tcb), dst);
+    }));
+}
+
+#endif
+/*******************************************************/
 
 template <typename InetTraits>
 auto tcp<InetTraits>::listen(uint16_t port, size_t queue_length) -> listener {
@@ -660,6 +733,32 @@ future<typename tcp<InetTraits>::connection> tcp<InetTraits>::connect(socket_add
         return make_ready_future<connection>(connection(tcbp));
     });
 }
+
+#ifdef __USE_KJ__
+template <typename InetTraits>
+kj::Promise<typename tcp<InetTraits>::connection> tcp<InetTraits>::kj_connect(socket_address sa) {
+    uint16_t src_port;
+    connid id;
+    auto src_ip = _inet._inet.host_address();
+    auto dst_ip = ipv4_address(sa);
+    auto dst_port = net::ntoh(sa.u.in.sin_port);
+
+    do {
+        src_port = _port_dist(_e);
+        id = connid{src_ip, dst_ip, src_port, dst_port};
+    } while (_inet._inet.netif()->hash2cpu(id.hash()) != engine().cpu_id()
+            || _tcbs.find(id) != _tcbs.end());
+
+    auto tcbp = make_lw_shared<tcb>(*this, id);
+    _tcbs.insert({id, tcbp});
+    tcbp->connect();
+
+    return tcbp->kj_connect_done().then([tcbp] {
+        return kj::Promise<connection>(connection(tcbp));
+    });
+}
+
+#endif
 
 template <typename InetTraits>
 bool tcp<InetTraits>::forward(forward_hash& out_hash_data, packet& p, size_t off) {
@@ -1534,6 +1633,66 @@ future<> tcp<InetTraits>::tcb::wait_for_all_data_acked() {
     _snd._all_data_acked_promise = promise<>();
     return _snd._all_data_acked_promise->get_future();
 }
+#ifdef __USE_KJ__
+
+template <typename InetTraits>
+kj::Promise<void> tcp<InetTraits>::tcb::kj_send(packet p) {
+    // We can not send after the connection is closed
+    assert(!_snd.closed);
+
+    
+    // auto
+
+    if (in_state(CLOSED)) {
+        auto pair = kj::newPromiseAndFulfiller<void>();
+        kj::Exception exception = KJ_EXCEPTION(FAILED, "connection is reset");
+        pair.fulfiller->reject(kj::cp(exception));
+        return kj::mv(pair.promise);
+        // return make_exception_future<>(tcp_reset_error());
+    }
+
+    // TODO: Handle p.len() > max user_queue_space case
+    auto len = p.len();
+    _snd.queued_len += len;
+    return _snd.user_queue_space.kj_wait(len).then([this, zis = this->shared_from_this(), p = std::move(p)] () mutable -> kj::Promise<void> {
+        assert(!_snd.closed);
+        _snd.unsent_len += p.len();
+        _snd.queued_len -= p.len();
+        _snd.unsent.push_back(std::move(p));
+        if (can_send() > 0) {
+            output();
+        }
+        //pair.fulfiller->fulfill();
+        return kj::READY_NOW;
+    });
+}
+
+
+template <typename InetTraits>
+kj::Promise<void> tcp<InetTraits>::tcb::kj_wait_for_data() {
+    auto pair = kj::newPromiseAndFulfiller<void>();
+    _rcv.kj__data_received_promise = kj::mv(pair.fulfiller);
+    if (!_rcv.data.empty() || foreign_will_not_send()) {
+        return kj::mv(pair.promise);
+    }
+    
+    return kj::mv(pair.promise);
+}
+
+template <typename InetTraits>
+kj::Promise<void> tcp<InetTraits>::tcb::kj_wait_for_all_data_acked() {
+    auto pair = kj::newPromiseAndFulfiller<void>();
+    _snd.kj__all_data_acked_promise = kj::mv(pair.fulfiller);
+    if (_snd.data.empty() && _snd.unsent_len == 0 && _snd.queued_len == 0) {
+        return kj::mv(pair.promise);
+    }
+    
+    return kj::mv(pair.promise);
+}
+
+
+
+#endif
 
 template <typename InetTraits>
 void tcp<InetTraits>::tcb::connect() {

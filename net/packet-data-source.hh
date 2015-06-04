@@ -21,6 +21,11 @@
 #include "core/reactor.hh"
 #include "net/packet.hh"
 
+#ifdef __USE_KJ__
+#include "kj/debug.h"
+#include "kj/async.h"
+#include "kj/async-io.h"
+#endif
 namespace net {
 
 class packet_data_source final : public data_source_impl {
@@ -40,6 +45,21 @@ public:
         }
         return make_ready_future<temporary_buffer<char>>(temporary_buffer<char>());
     }
+#ifdef __USE_KJ__
+
+    virtual void setBuffer(temporary_buffer<char> && buf) override{
+        
+    }
+
+    virtual kj::Promise<temporary_buffer<char>> kj_get(size_t maxBytes = 8192){
+        if (_cur_frag != _p.nr_frags()) {
+            auto& f = _p.fragments()[_cur_frag++];
+            return kj::Promise<temporary_buffer<char>>(temporary_buffer<char>(f.base, f.size,
+                            make_deleter(deleter(), [p = _p.share()] () mutable {} )));
+        }
+        return kj::Promise<temporary_buffer<char>>(temporary_buffer<char>());        
+    };
+#endif    
 };
 
 static inline

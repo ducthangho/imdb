@@ -33,6 +33,7 @@
 
 #include "scollectd.hh"
 #include "core/future-util.hh"
+#include "core/reactor.hh"
 #include "net/api.hh"
 #include "scollectd_api.hh"
 
@@ -69,7 +70,7 @@ class impl {
     net::udp_channel _chan;
     timer<> _timer;
 
-    std::string _host = "localhost";
+    sstring _host = "localhost";
     ipv4_addr _addr = default_addr;
     clock_type::duration _period = default_period;
     uint64_t _num_packets = 0;
@@ -83,10 +84,13 @@ public:
 
     void add_polled(const type_instance_id & id,
             const shared_ptr<value_list> & values) {
-        _values.insert(std::make_pair(id, values));
+        _values[id] = values;
     }
     void remove_polled(const type_instance_id & id) {
-        _values.insert(std::make_pair(id, shared_ptr<value_list>()));
+        auto i = _values.find(id);
+        if (i != _values.end()) {
+            i->second = nullptr;
+        }
     }
     // explicitly send a type_instance value list (outside polling)
     future<> send_metric(const type_instance_id & id,
@@ -98,15 +102,91 @@ public:
         out.put(_host, clock_type::duration(), id, values);
         return _chan.send(_addr, net::packet(out.data(), out.size()));
     }
+
+#ifdef __USE_KJ__
+    kj::Promise<void> kj_send_metric(const type_instance_id & id,
+            const value_list & values) {
+        if (values.empty()) {
+            return kj::READY_NOW;
+        }
+        cpwriter out;
+        out.put(_host, clock_type::duration(), id, values);
+        return _chan.kj_send(_addr, net::packet(out.data(), out.size()));
+    }
+#endif    
+
     future<> send_notification(const type_instance_id & id,
-            const std::string & msg) {
+            const sstring & msg) {
         cpwriter out;
         out.put(_host, id);
         out.put(part_type::Message, msg);
         return _chan.send(_addr, net::packet(out.data(), out.size()));
     }
+
+#ifdef __USE_KJ__
+    kj::Promise<void> kj_send_notification(const type_instance_id & id,
+            const std::string & msg) {
+        cpwriter out;
+        out.put(_host, id);
+        out.put(part_type::Message, msg);
+        return _chan.kj_send(_addr, net::packet(out.data(), out.size()));
+    }
+#endif    
+
     // initiates actual value polling -> send to target "loop"
-    void start(const std::string & host, const ipv4_addr & addr,
+    void start(const sstring & host, const ipv4_addr & addr,
+            const clock_type::duration period) {
+        _period = period;
+        _addr = addr;
+        _host = host;
+        _chan = engine().net().make_udp_channel();
+        _timer.set_callback(std::bind(&impl::run, this));
+
+        // dogfood ourselves
+        _regs = {
+            // total_bytes      value:DERIVE:0:U
+            add_polled_metric(
+                    type_instance_id("scollectd", per_cpu_plugin_instance,
+                            "total_bytes", "sent"),
+                    make_typed(data_type::DERIVE, _bytes)),
+            // total_requests      value:DERIVE:0:U
+            add_polled_metric(
+                    type_instance_id("scollectd", per_cpu_plugin_instance,
+                            "total_requests"),
+                    make_typed(data_type::DERIVE, _num_packets)
+            ),
+            // latency          value:GAUGE:0:U
+            add_polled_metric(
+                    type_instance_id("scollectd", per_cpu_plugin_instance,
+                            "latency"), _avg),
+            // total_time_in_ms    value:DERIVE:0:U
+            add_polled_metric(
+                    type_instance_id("scollectd", per_cpu_plugin_instance,
+                            "total_time_in_ms"),
+                    make_typed(data_type::DERIVE, _millis)
+            ),
+            // total_values     value:DERIVE:0:U
+            add_polled_metric(
+                    type_instance_id("scollectd", per_cpu_plugin_instance,
+                            "total_values"),
+                    make_typed(data_type::DERIVE, std::bind(&value_list_map::size, &_values))
+            ),
+            // records          value:GAUGE:0:U
+            add_polled_metric(
+                    type_instance_id("scollectd", per_cpu_plugin_instance,
+                            "records"),
+                    make_typed(data_type::GAUGE, std::bind(&value_list_map::size, &_values))
+            ),
+        };
+
+        send_notification(
+                type_instance_id("scollectd", per_cpu_plugin_instance,
+                        "network"), "daemon started");
+        arm();
+    }
+
+#ifdef __USE_KJ__
+    kj::Promise<void> kj_start(const std::string & host, const ipv4_addr & addr,
             const clock_type::duration period) {
         _period = period;
         _addr = addr;
@@ -151,11 +231,14 @@ public:
             )
         };
 
-        send_notification(
+        auto pm = kj_send_notification(
                 type_instance_id("scollectd", per_cpu_plugin_instance,
                         "network"), "daemon started");
         arm();
+        return pm;
     }
+#endif    
+
     void stop() {
         _timer.cancel();
         _regs.clear();
@@ -200,8 +283,9 @@ private:
 
         buffer_type _buf;
         mark_type _pos;
+        bool _overflow = false;
 
-        std::unordered_map<uint16_t, std::string> _cache;
+        std::unordered_map<uint16_t, sstring> _cache;
 
         cpwriter()
                 : _pos(_buf.begin()) {
@@ -209,8 +293,12 @@ private:
         mark_type mark() const {
             return _pos;
         }
+        bool overflow() const {
+            return _overflow;
+        }
         void reset(mark_type m) {
             _pos = m;
+            _overflow = false;
         }
         size_t size() const {
             return std::distance(_buf.begin(), const_mark_type(_pos));
@@ -221,6 +309,7 @@ private:
         void clear() {
             reset(_buf.begin());
             _cache.clear();
+            _overflow = false;
         }
         const char * data() const {
             return &_buf.at(0);
@@ -228,17 +317,23 @@ private:
         char * data() {
             return &_buf.at(0);
         }
-        void check(size_t sz) const {
-            size_t av = std::distance(const_mark_type(_pos), _buf.end());
-            if (av < sz) {
-                throw std::length_error("buffer overflow");
-            }
+        cpwriter& check(size_t sz) {
+            size_t av = std::distance(_pos, _buf.end());
+            _overflow |= av < sz;
+            return *this;
+        }
+        explicit operator bool() const {
+            return !_overflow;
         }
 
+        bool operator!() const {
+            return !operator bool();
+        }
         template<typename _Iter>
         cpwriter & write(_Iter s, _Iter e) {
-            check(std::distance(s, e));
-            _pos = std::copy(s, e, _pos);
+            if (check(std::distance(s, e))) {
+                _pos = std::copy(s, e, _pos);
+            }
             return *this;
         }
         template<typename T>
@@ -250,17 +345,17 @@ private:
             write(p, e);
             return *this;
         }
-        cpwriter & write(const std::string & s) {
+        cpwriter & write(const sstring & s) {
             write(s.begin(), s.end() + 1); // include \0
             return *this;
         }
-        cpwriter & put(part_type type, const std::string & s) {
+        cpwriter & put(part_type type, const sstring & s) {
             write(uint16_t(type));
             write(uint16_t(4 + s.size() + 1)); // include \0
             write(s); // include \0
             return *this;
         }
-        cpwriter & put_cached(part_type type, const std::string & s) {
+        cpwriter & put_cached(part_type type, const sstring & s) {
             auto & cached = _cache[uint16_t(type)];
             if (cached != s) {
                 put(type, s);
@@ -279,17 +374,18 @@ private:
         cpwriter & put(part_type type, const value_list & v) {
             auto s = v.size();
             auto sz = 6 + s + s * sizeof(uint64_t);
-            check(sz);
-            write(uint16_t(type));
-            write(uint16_t(sz));
-            write(uint16_t(s));
-            v.types(reinterpret_cast<data_type *>(&(*_pos)));
-            _pos += s;
-            v.values(reinterpret_cast<net::packed<uint64_t> *>(&(*_pos)));
-            _pos += s * sizeof(uint64_t);
+            if (check(sz)) {
+                write(uint16_t(type));
+                write(uint16_t(sz));
+                write(uint16_t(s));
+                v.types(reinterpret_cast<data_type *>(&(*_pos)));
+                _pos += s;
+                v.values(reinterpret_cast<net::packed<uint64_t> *>(&(*_pos)));
+                _pos += s * sizeof(uint64_t);
+            }
             return *this;
         }
-        cpwriter & put(const std::string & host, const type_instance_id & id) {
+        cpwriter & put(const sstring & host, const type_instance_id & id) {
             const auto ts = std::chrono::system_clock::now().time_since_epoch();
             const auto lrts =
                     std::chrono::duration_cast<std::chrono::seconds>(ts).count();
@@ -303,13 +399,13 @@ private:
             // Optional
             put_cached(part_type::PluginInst,
                     id.plugin_instance() == per_cpu_plugin_instance ?
-                            std::to_string(engine().cpu_id()) : id.plugin_instance());
+                            to_sstring(engine().cpu_id()) : id.plugin_instance());
             put_cached(part_type::Type, id.type());
             // Optional
             put_cached(part_type::TypeInst, id.type_instance());
             return *this;
         }
-        cpwriter & put(const std::string & host,
+        cpwriter & put(const sstring & host,
                 const clock_type::duration & period,
                 const type_instance_id & id, const value_list & v) {
             const auto ps = std::chrono::duration_cast<collectd_hres_duration>(
@@ -353,9 +449,8 @@ private:
                     continue;
                 }
                 auto m = out.mark();
-                try {
-                    out.put(_host, _period, i->first, *i->second);
-                } catch (std::length_error &) {
+                out.put(_host, _period, i->first, *i->second);
+                if (!out) {
                     out.reset(m);
                     break;
                 }
@@ -386,23 +481,29 @@ private:
             arm();
         });
     }
+
 public:
     shared_ptr<value_list> get_values(const type_instance_id & id) {
         return _values[id];
     }
 
     std::vector<type_instance_id> get_instance_ids() {
-        std::vector<type_instance_id> res(_values.size());
-        int pos = 0;
+        std::vector<type_instance_id> res;
         for (auto i: _values) {
-            res[pos++] = i.first;
+            // Need to check for empty value_list, since unreg is two-stage.
+            // Not an issue for most uses, but unit testing etc that would like
+            // fully deterministic operation here would like us to only return
+            // actually active ids
+            if (i.second) {
+                res.emplace_back(i.first);
+            }
         }
         return res;
     }
 
 private:
     value_list_map _values;
-    std::vector<registration> _regs;
+    registrations _regs;
 };
 
 impl & get_impl() {
@@ -420,14 +521,30 @@ void remove_polled_metric(const type_instance_id & id) {
 }
 
 future<> send_notification(const type_instance_id & id,
-        const std::string & msg) {
+        const sstring & msg) {
     return get_impl().send_notification(id, msg);
 }
+
+#ifdef __USE_KJ__
+kj::Promise<void> kj_send_notification(const type_instance_id & id,
+        const sstring & msg) {
+    return get_impl().kj_send_notification(id, msg);
+}
+
+#endif
 
 future<> send_metric(const type_instance_id & id,
         const value_list & values) {
     return get_impl().send_metric(id, values);
 }
+
+#ifdef __USE_KJ__
+kj::Promise<void> kj_send_metric(const type_instance_id & id,
+        const value_list & values) {
+    return get_impl().kj_send_metric(id, values);
+}
+
+#endif
 
 void configure(const boost::program_options::variables_map & opts) {
     bool enable = opts["collectd"].as<bool>();
@@ -448,6 +565,35 @@ void configure(const boost::program_options::variables_map & opts) {
         });
     }
 }
+
+#ifdef __USE_KJ__
+void kj_configure(const boost::program_options::variables_map & opts, kj::WaitScope& waitScope) {
+    bool enable = opts["collectd"].as<bool>();
+    if (!enable) {
+        return;
+    }
+    auto addr = ipv4_addr(opts["collectd-address"].as<std::string>());
+    auto period = std::chrono::duration_cast<clock_type::duration>(
+            std::chrono::milliseconds(
+                    opts["collectd-poll-period"].as<unsigned>()));
+
+    auto host = opts["collectd-hostname"].as<std::string>();
+
+
+    // kj::ArrayBuilder< kj::Promise<void> > arr = kj::heapArrayBuilder<kj::Promise<void>>(32);
+    // Now create send loops on each cpu
+    for (unsigned c = 0; c < smp::count; c++) {
+        smp::submit_to(c, [=,&waitScope] () {            
+            KJ_DETACH( get_impl().kj_start(host, addr, period) );
+        });
+    }
+    // auto array = arr.finish();
+    // kj::joinPromises(std::forward<kj::Array<kj::Promise<void> > >(array)).wait(waitScope);
+
+}
+
+#endif
+
 
 boost::program_options::options_description get_options_description() {
     namespace bpo = boost::program_options;

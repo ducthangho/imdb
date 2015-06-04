@@ -27,6 +27,25 @@
 #include <memory>
 #include <type_traits>
 #include <assert.h>
+#ifdef __USE_KJ__
+#include "core/do_with.hh"
+#include "kj/debug.h"
+#include "kj/async.h"
+#include "kj/async-io.h"
+#endif
+namespace seastar {
+
+class thread_context;
+
+namespace thread_impl {
+
+thread_context* get();
+void switch_in(thread_context* to);
+void switch_out(thread_context* from);
+
+}
+
+}
 
 template <class... T>
 class promise;
@@ -50,24 +69,19 @@ void schedule(std::unique_ptr<task> t);
 void engine_exit(std::exception_ptr eptr = {});
 
 template <typename Func>
-class lambda_task : public task {
+class lambda_task final : public task {
     Func _func;
 public:
     lambda_task(const Func& func) : _func(func) {}
     lambda_task(Func&& func) : _func(std::move(func)) {}
-    virtual void run() noexcept { _func(); }
+    virtual void run() noexcept override { _func(); }
 };
 
 template <typename Func>
-std::unique_ptr<task>
-make_task(const Func& func) {
-    return std::unique_ptr<task>(new lambda_task<Func>(func));
-}
-
-template <typename Func>
+inline
 std::unique_ptr<task>
 make_task(Func&& func) {
-    return std::unique_ptr<task>(new lambda_task<Func>(std::move(func)));
+    return std::make_unique<lambda_task<Func>>(std::forward<Func>(func));
 }
 
 void report_failed_future(std::exception_ptr ex);
@@ -125,6 +139,7 @@ struct future_state {
         }
         x._state = state::invalid;
     }
+    __attribute__((always_inline))
     ~future_state() noexcept {
         switch (_state) {
         case state::invalid:
@@ -205,8 +220,8 @@ struct future_state {
 template <>
 struct future_state<> {
     static_assert(sizeof(std::exception_ptr) == sizeof(void*), "exception_ptr not a pointer");
-    static constexpr const bool move_noexcept = true;
-    static constexpr const bool copy_noexcept = true;
+    static constexpr bool move_noexcept = true;
+    static constexpr bool copy_noexcept = true;
     enum class state : uintptr_t {
          invalid = 0,
          future = 1,
@@ -279,14 +294,25 @@ struct future_state<> {
     void forward_to(promise<>& pr) noexcept;
 };
 
+template <typename Func, typename... T>
+struct continuation final : task {
+    continuation(Func&& func, future_state<T...>&& state) : _state(std::move(state)), _func(std::move(func)) {}
+    continuation(Func&& func) : _func(std::move(func)) {}
+    virtual void run() noexcept override {
+        _func(std::move(_state));
+    }
+    future_state<T...> _state;
+    Func _func;
+};
+
 template <typename... T>
 class promise {
     future<T...>* _future = nullptr;
     future_state<T...> _local_state;
     future_state<T...>* _state;
     std::unique_ptr<task> _task;
-    static constexpr const bool move_noexcept = future_state<T...>::move_noexcept;
-    static constexpr const bool copy_noexcept = future_state<T...>::copy_noexcept;
+    static constexpr bool move_noexcept = future_state<T...>::move_noexcept;
+    static constexpr bool copy_noexcept = future_state<T...>::copy_noexcept;
 public:
     promise() noexcept : _state(&_local_state) {}
     promise(promise&& x) noexcept(move_noexcept) : _future(x._future), _state(x._state), _task(std::move(x._task)) {
@@ -299,6 +325,7 @@ public:
         migrated();
     }
     promise(const promise&) = delete;
+    __attribute__((always_inline))
     ~promise() noexcept {
         abandoned();
     }
@@ -335,18 +362,11 @@ public:
 private:
     template <typename Func>
     void schedule(Func&& func) noexcept {
-        struct task_with_state final : task {
-            task_with_state(Func&& func) : _func(std::move(func)) {}
-            virtual void run() noexcept override {
-                _func(std::move(_state));
-            }
-            future_state<T...> _state;
-            Func _func;
-        };
-        auto tws = std::make_unique<task_with_state>(std::move(func));
+        auto tws = std::make_unique<continuation<Func, T...>>(std::move(func));
         _state = &tws->_state;
         _task = std::move(tws);
     }
+    __attribute__((always_inline))
     void make_ready() noexcept;
     void migrated() noexcept;
     void abandoned() noexcept(move_noexcept);
@@ -417,8 +437,8 @@ template <typename... T>
 class future {
     promise<T...>* _promise;
     future_state<T...> _local_state;  // valid if !_promise
-    static constexpr const bool move_noexcept = future_state<T...>::move_noexcept;
-    static constexpr const bool copy_noexcept = future_state<T...>::copy_noexcept;
+    static constexpr bool move_noexcept = future_state<T...>::move_noexcept;
+    static constexpr bool copy_noexcept = future_state<T...>::copy_noexcept;
 private:
     future(promise<T...>* pr) noexcept : _promise(pr) {
         _promise->_future = this;
@@ -442,16 +462,8 @@ private:
     }
     template <typename Func>
     void schedule(Func&& func) noexcept {
-        struct task_with_ready_state final : task {
-            task_with_ready_state(Func&& func, future_state<T...>&& state) : _state(std::move(state)), _func(std::move(func)) {}
-            virtual void run() noexcept override {
-                _func(std::move(_state));
-            }
-            future_state<T...> _state;
-            Func _func;
-        };
         if (state()->available()) {
-            ::schedule(std::make_unique<task_with_ready_state>(std::move(func), std::move(*state())));
+            ::schedule(std::make_unique<continuation<Func, T...>>(std::move(func), std::move(*state())));
         } else {
             _promise->schedule(std::move(func));
             _promise->_future = nullptr;
@@ -505,6 +517,7 @@ public:
         return *this;
     }
     void operator=(const future&) = delete;
+    __attribute__((always_inline))
     ~future() {
         if (_promise) {
             _promise->_future = nullptr;
@@ -514,9 +527,21 @@ public:
         }
     }
     std::tuple<T...> get() {
+        if (!state()->available()) {
+            wait();
+        }
         return state()->get();
     }
 
+    void wait() {
+        auto thread = seastar::thread_impl::get();
+        assert(thread);
+        schedule([this, thread] (future_state<T...>&& new_state) {
+            *state() = std::move(new_state);
+            seastar::thread_impl::switch_in(thread);
+        });
+        seastar::thread_impl::switch_out(thread);
+    }
     bool available() noexcept {
         return state()->available();
     }
@@ -690,5 +715,56 @@ template<typename Func, typename... FuncArgs>
 typename futurize<future<Args...>>::type futurize<future<Args...>>::apply(Func&& func, FuncArgs&&... args) {
     return func(std::forward<FuncArgs>(args)...);
 }
+
+#define KJ_DETACH(x) x.detach([](kj::Exception&& exception) { std::cout<<"Detach ex : "<<exception.getDescription().cStr();})
+
+template <typename T>
+inline kj::Promise<T> make_kj_promise(future<T>&& pm) {
+    auto pair = kj::newPromiseAndFulfiller<T>();
+    
+    auto f = [&pm] (auto&& fulfiller){
+        return pm.then([&fulfiller](auto val){       
+            // printf("Fulfill <T> now\n");
+            fulfiller->fulfill(std::forward<T>(val));
+        });
+    };
+
+    do_with( kj::mv(pair.fulfiller), std::move(f) );  
+
+    return kj::mv(pair.promise);
+}
+
+
+template <typename T,typename V>
+inline kj::Promise< std::pair<T,V> > make_kj_promise(future<T,V>&& pm) {
+    auto pair = kj::newPromiseAndFulfiller<std::pair<T,V>> ();
+    
+    auto f = [&pm] (auto&& fulfiller){
+        return pm.then([&fulfiller](auto t,auto v){       
+            // printf("Fulfill <T> now\n");
+            fulfiller->fulfill( std::make_pair(std::forward<T>(t),std::forward<V>(v)) );
+        });
+    };
+
+    do_with( kj::mv(pair.fulfiller), std::move(f) );  
+
+    return kj::mv(pair.promise);
+}
+
+
+
+inline kj::Promise<void> make_kj_promise(future<>&& pm) {
+    auto pair = kj::newPromiseAndFulfiller<void>();
+    auto f = [&pm] (auto&& fulfiller){
+        return pm.then([&fulfiller]{
+            // printf("Fulfill <void> now\n");            
+            fulfiller->fulfill();
+        });
+    };
+
+    do_with( kj::mv(pair.fulfiller), std::move(f) );  
+    return kj::mv(pair.promise);
+}
+
 
 #endif /* FUTURE_HH_ */

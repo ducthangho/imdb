@@ -22,6 +22,12 @@
 #ifndef REACTOR_HH_
 #define REACTOR_HH_
 
+// #define __USE_KJ__
+#ifdef __USE_KJ__
+// #include "kj/async-prelude.h"
+#include "kj/async.h"
+// #include "kj/async-inl.h" 
+#endif
 #include "seastar.hh"
 #include "iostream.hh"
 #include <memory>
@@ -172,6 +178,13 @@ public:
     int events_known = 0;     // returned from epoll
     promise<> pollin;
     promise<> pollout;
+
+#ifdef __USE_KJ__
+    kj::Own<kj::PromiseFulfiller<void>> kj_pollin;
+    kj::Own<kj::PromiseFulfiller<void>> kj_pollout;
+
+#endif
+
     friend class reactor;
     friend class pollable_fd;
 };
@@ -207,6 +220,22 @@ public:
     future<size_t> sendmsg(struct msghdr *msg);
     future<size_t> recvmsg(struct msghdr *msg);
     future<size_t> sendto(socket_address addr, const void* buf, size_t len);
+#ifdef __USE_KJ__
+    kj::Promise<size_t> kj_read_some(char* buffer, size_t size);
+    kj::Promise<size_t> kj_read_some(uint8_t* buffer, size_t size);
+    kj::Promise<size_t> kj_read_some(const std::vector<iovec>& iov);
+    kj::Promise<void> kj_write_all(const char* buffer, size_t size);
+    kj::Promise<void> kj_write_all(const uint8_t* buffer, size_t size);
+    kj::Promise<size_t> kj_write_some(net::packet& p);
+    kj::Promise<void> kj_write_all(net::packet& p);
+    kj::Promise<void> kj_readable();
+    kj::Promise<void> kj_writeable();
+    // kj::Promise<pollable_fd> kj_accept();
+    kj::Promise< std::pair<pollable_fd, socket_address> > kj_accept();
+    kj::Promise<size_t> kj_sendmsg(struct msghdr *msg);
+    kj::Promise<size_t> kj_recvmsg(struct msghdr *msg);
+    kj::Promise<size_t> kj_sendto(socket_address addr, const void* buf, size_t len);
+#endif    
     file_desc& get_file_desc() const { return _s->fd; }
     void close() { _s.reset(); }
 protected:
@@ -241,6 +270,9 @@ class server_socket_impl {
 public:
     virtual ~server_socket_impl() {}
     virtual future<connected_socket, socket_address> accept() = 0;
+#ifdef __USE_KJ__
+    virtual kj::Promise< std::pair<connected_socket, socket_address> > kj_accept() = 0;
+#endif    
 };
 
 
@@ -265,18 +297,29 @@ public:
     future<connected_socket, socket_address> accept() {
         return _ssi->accept();
     }
+
+#ifdef __USE_KJ__
+    virtual kj::Promise<std::pair<connected_socket, socket_address>> kj_accept(){
+        return _ssi->kj_accept();
+    }
+#endif    
+
 };
 
 class network_stack {
 public:
     virtual ~network_stack() {}
     virtual server_socket listen(socket_address sa, listen_options opts) = 0;
-    virtual future<connected_socket> connect(socket_address sa) = 0;
+    // FIXME: local parameter assumes ipv4 for now, fix when adding other AF
+    virtual future<connected_socket> connect(socket_address sa, socket_address local = socket_address(::sockaddr_in{AF_INET, INADDR_ANY, 0})) = 0;
     virtual net::udp_channel make_udp_channel(ipv4_addr addr = {}) = 0;
     virtual future<> initialize() {
         return make_ready_future();
     }
     virtual bool has_per_core_namespace() = 0;
+#ifdef __USE_KJ__
+    virtual kj::Promise<connected_socket> kj_connect(socket_address sa, socket_address local = socket_address(::sockaddr_in{AF_INET, INADDR_ANY, 0})) = 0;
+#endif    
 };
 
 class network_stack_registry {
@@ -399,6 +442,19 @@ public:
         submit_item(wi);
         return fut;
     }
+#ifdef __USE_KJ__
+    template <typename T, typename Func>
+    kj::Promise<T> kj_submit(Func func) {
+        auto pair = kj::newPromiseAndFulfiller<T>();
+        auto wi = new work_item_returning<T, Func>(std::move(func));
+        auto fut = wi->get_future();
+        submit_item(wi);
+        fut.then([&](T val){
+            pair.fulfiller->fulfill( kj::mv(val) );
+        });
+        return kj::mv(pair.promise);
+    }
+#endif
 private:
     void work();
     void complete();
@@ -506,6 +562,7 @@ private:
 };
 
 class thread_pool {
+    uint64_t _aio_threaded_fallbacks = 0;
 #ifndef HAVE_OSV
     // FIXME: implement using reactor_notifier abstraction we used for SMP
     syscall_work_queue inter_thread_wq;
@@ -517,6 +574,7 @@ public:
     ~thread_pool();
     template <typename T, typename Func>
     future<T> submit(Func func) {return inter_thread_wq.submit<T>(std::move(func));}
+    uint64_t operation_count() const { return _aio_threaded_fallbacks; }
 #else
 public:
     template <typename T, typename Func>
@@ -551,6 +609,12 @@ public:
     virtual future<> notified(reactor_notifier *n) = 0;
     // Methods for allowing sending notifications events between threads.
     virtual std::unique_ptr<reactor_notifier> make_reactor_notifier() = 0;
+#ifdef __USE_KJ__
+    virtual kj::Promise<void> kj_readable(pollable_fd_state& fd) = 0;
+    virtual kj::Promise<void> kj_writeable(pollable_fd_state& fd) = 0;
+    virtual kj::Promise<void> kj_notified(reactor_notifier *n) = 0;
+    virtual bool kj_wait_and_process() = 0;
+#endif    
 };
 
 // reactor backend using file-descriptor & epoll, suitable for running on
@@ -562,6 +626,10 @@ private:
     file_desc _epollfd;
     future<> get_epoll_future(pollable_fd_state& fd,
             promise<> pollable_fd_state::* pr, int event);
+#ifdef __USE_KJ__
+    kj::Promise<void> kj_get_epoll_future(pollable_fd_state& pfd,
+        kj::Own<kj::PromiseFulfiller<void>>& pr, int event);
+#endif    
     void complete_epoll_event(pollable_fd_state& fd,
             promise<> pollable_fd_state::* pr, int events, int event);
 public:
@@ -572,6 +640,14 @@ public:
     virtual future<> writeable(pollable_fd_state& fd) override;
     virtual void forget(pollable_fd_state& fd) override;
     virtual future<> notified(reactor_notifier *n) override;
+#ifdef __USE_KJ__
+    virtual kj::Promise<void> kj_readable(pollable_fd_state& fd) override;
+    virtual kj::Promise<void> kj_writeable(pollable_fd_state& fd) override;
+    virtual kj::Promise<void> kj_notified(reactor_notifier *n) override;
+    virtual bool kj_wait_and_process() override;
+    void kj_complete_epoll_event(pollable_fd_state& pfd, kj::Own<kj::PromiseFulfiller<void>>& pr,
+        int events, int event);
+#endif    
     virtual std::unique_ptr<reactor_notifier> make_reactor_notifier() override;
 };
 
@@ -594,6 +670,14 @@ public:
     virtual future<> writeable(pollable_fd_state& fd) override;
     virtual void forget(pollable_fd_state& fd) override;
     virtual future<> notified(reactor_notifier *n) override;
+#ifdef __USE_KJ__
+    virtual kj::Promise<void> kj_readable(pollable_fd_state& fd) override;
+    virtual kj::Promise<void> kj_writeable(pollable_fd_state& fd) override;
+    virtual kj::Promise<void> kj_notified(reactor_notifier *n) override;
+    virtual bool kj_wait_and_process() override;
+#endif    
+
+    virtual void forget(pollable_fd_state& fd) override;
     virtual std::unique_ptr<reactor_notifier> make_reactor_notifier() override;
     void enable_timer(clock_type::time_point when);
     friend class reactor_notifier_osv;
@@ -606,13 +690,18 @@ enum class open_flags {
     wo = O_WRONLY,
     create = O_CREAT,
     truncate = O_TRUNC,
+    exclusive = O_EXCL,
 };
 
 inline open_flags operator|(open_flags a, open_flags b) {
     return open_flags(static_cast<unsigned int>(a) | static_cast<unsigned int>(b));
 }
 
+#ifdef __USE_KJ__
+class reactor : public kj::EventLoop {
+#else    
 class reactor {
+#endif    
 private:
     struct pollfn {
         virtual ~pollfn() {}
@@ -620,6 +709,9 @@ private:
     };
 
 public:
+    #ifdef __USE_KJ__
+    explicit reactor(kj::EventPort& port);
+    #endif
     class poller {
         std::unique_ptr<pollfn> _pollfn;
         class registration_task;
@@ -669,6 +761,9 @@ private:
     seastar::timer_set<timer<lowres_clock>, &timer<lowres_clock>::_link>::timer_list_t _expired_lowres_timers;
     io_context_t _io_context;
     semaphore _io_context_available;
+    uint64_t _aio_reads = 0;
+    uint64_t _aio_writes = 0;
+    uint64_t _fsyncs = 0;
     circular_buffer<std::unique_ptr<task>> _pending_tasks;
     circular_buffer<std::unique_ptr<task>> _at_destroy_tasks;
     size_t _task_quota;
@@ -691,7 +786,7 @@ private:
      * @return FALSE if at least one of the blockers requires a non-blocking
      *         execution.
      */
-    bool poll_once();
+    //bool poll_once();
     template <typename Func> // signature: bool ()
     static std::unique_ptr<pollfn> make_pollfn(Func&& func);
 
@@ -727,7 +822,7 @@ public:
     ~reactor() {
         auto eraser = [](auto& list) {
             while (!list.empty()) {
-                auto timer = *list.begin();
+                auto& timer = *list.begin();
                 timer.cancel();
             }
         };
@@ -746,7 +841,7 @@ public:
 
     bool posix_reuseport_available() const { return _reuseport; }
 
-    future<pollable_fd> posix_connect(socket_address sa);
+    future<pollable_fd> posix_connect(socket_address sa, socket_address local);
 
     future<pollable_fd, socket_address> accept(pollable_fd_state& listen_fd);
 
@@ -756,16 +851,48 @@ public:
     future<size_t> write_some(pollable_fd_state& fd, const void* buffer, size_t size);
 
     future<> write_all(pollable_fd_state& fd, const void* buffer, size_t size);
+#ifdef __USE_KJ__
+    kj::Promise<size_t> kj_read_some(pollable_fd_state& fd, void* buffer, size_t size);
+    kj::Promise<size_t> kj_read_some(pollable_fd_state& fd, const std::vector<iovec>& iov);
+
+    kj::Promise<size_t> kj_write_some(pollable_fd_state& fd, const void* buffer, size_t size);
+    kj::Promise<std::pair<pollable_fd, socket_address>> kj_accept(pollable_fd_state& listen_fd);
+
+    kj::Promise<void> kj_write_all(pollable_fd_state& fd, const void* buffer, size_t size);
+    kj::Promise<file> kj_open_file_dma(sstring name, open_flags flags);
+    kj::Promise<file> kj_open_directory(sstring name);
+    kj::Promise<std::experimental::optional<directory_entry_type>>  kj_file_type(sstring name);
+    kj::Promise<connected_socket> kj_connect(socket_address sa);
+    kj::Promise<pollable_fd> kj_posix_connect(socket_address sa, socket_address local);
+    
+#endif    
 
     future<file> open_file_dma(sstring name, open_flags flags);
     future<file> open_directory(sstring name);
+    future<> make_directory(sstring name);
     future<std::experimental::optional<directory_entry_type>>  file_type(sstring name);
     future<> remove_file(sstring pathname);
 
     template <typename Func>
     future<io_event> submit_io(Func prepare_io);
+    template <typename Func>
+    future<io_event> submit_io_read(Func prepare_io);
+    template <typename Func>
+    future<io_event> submit_io_write(Func prepare_io);
 
-    int run();
+#ifdef __USE_KJ__
+    // void run(uint maxTurnCount = maxValue){};
+    // int run(uint maxTurnCount = maxValue);
+  // Run the event loop for `maxTurnCount` turns or until there is nothing left to be done,
+  // whichever comes first.  This never calls the `EventPort`'s `sleep()` or `poll()`.  It will
+  // call the `EventPort`'s `setRunnable(false)` if the queue becomes empty.
+
+    bool isRunnable();   
+#endif
+    int run(uint maxTurnCount = kj::maxValue);        
+
+    bool poll_once();
+    void stop();
     void exit(int ret);
     future<> when_started() { return _start_promise.get_future(); }
 
@@ -784,13 +911,24 @@ public:
     network_stack& net() { return *_network_stack; }
     unsigned cpu_id() const { return _id; }
 
-    void start_epoll() {
-        if (!_epoll_poller) {
+    void start_epoll() {        
+        if (!_epoll_poller) {            
             _epoll_poller = poller([this] {
                 return wait_and_process();
             });
         }
     }
+
+#ifdef __USE_KJ__
+    void kj_start_epoll() {
+        // printf("kj_start_epoll\n");
+        if (!_epoll_poller) {        
+            _epoll_poller = poller([this] {
+                return kj_wait_and_process();
+            });
+        }
+    }
+#endif    
 
 #ifdef HAVE_OSV
     void timer_thread_func();
@@ -811,6 +949,9 @@ private:
     struct collectd_registrations;
     collectd_registrations register_collectd_metrics();
     future<> write_all_part(pollable_fd_state& fd, const void* buffer, size_t size, size_t completed);
+#ifdef __USE_KJ__
+    kj::Promise<void> kj_write_all_part(pollable_fd_state& fd, const void* buffer, size_t size, size_t completed);
+#endif    
 
     bool process_io();
 
@@ -822,7 +963,7 @@ private:
     void del_timer(timer<lowres_clock>*);
 
     future<> run_exit_tasks();
-    void stop();
+//    void stop();
     friend class pollable_fd;
     friend class pollable_fd_state;
     friend class posix_file_impl;
@@ -833,6 +974,32 @@ private:
     friend class smp;
     friend class smp_message_queue;
     friend class poller;
+#ifdef __USE_KJ__
+  // kj::EventPort* port;
+
+  // bool running = false;
+  // // True while looping -- wait() is then not allowed.
+
+  // bool lastRunnableState = false;
+  // // What did we last pass to port.setRunnable()?
+
+  // kj::_::Event* head = nullptr;
+  // kj::_::Event** tail = &head;
+  // kj::_::Event** depthFirstInsertPoint = &head;
+
+  // // kj::Own<TaskSetImpl> daemons;
+
+  // bool turn();
+  // void setRunnable(bool runnable);
+  // void enterScope();
+  // void leaveScope();
+
+  // // friend void kj::detach(kj::Promise<void>&& promise);
+  // // friend void kj::waitImpl(kj::Own<kj::_::PromiseNode>&& node, kj::_::ExceptionOrValue& result,
+  // //                         kj::WaitScope& waitScope);
+  // friend class kj::_::Event;
+  // friend class kj::WaitScope;
+#endif    
 public:
     bool wait_and_process() {
         return _backend.wait_and_process();
@@ -850,6 +1017,24 @@ public:
     future<> notified(reactor_notifier *n) {
         return _backend.notified(n);
     }
+#ifdef __USE_KJ__
+
+    bool kj_wait_and_process() {
+        return _backend.kj_wait_and_process();
+    }
+
+    kj::Promise<void> kj_readable(pollable_fd_state& fd) {
+        return _backend.kj_readable(fd);
+    }
+    kj::Promise<void> kj_writeable(pollable_fd_state& fd) {
+        return _backend.kj_writeable(fd);
+    }
+    
+    kj::Promise<void> kj_notified(reactor_notifier *n) {
+        return _backend.kj_notified(n);
+    }
+
+#endif
     void enable_timer(clock_type::time_point when);
     std::unique_ptr<reactor_notifier> make_reactor_notifier() {
         return _backend.make_reactor_notifier();
@@ -898,10 +1083,31 @@ public:
     static void join_all();
     static bool main_thread() { return std::this_thread::get_id() == _tmain; }
 
+    /// Runs a function on a remote core.
+    ///
+    /// \param t designates the core to run the function on (may be a remote
+    ///          core or the local core).
+    /// \param func a callable to run on core \c t.  If \c func is a temporary object,
+    ///          its lifetime will be extended by moving it.  If @func is a reference,
+    ///          the caller must guarantee that it will survive the call.
+    /// \return whatever \c func returns, as a future<> (if \c func does not return a future,
+    ///         submit_to() will wrap it in a future<>).
     template <typename Func>
     static futurize_t<std::result_of_t<Func()>> submit_to(unsigned t, Func&& func) {
+        using ret_type = std::result_of_t<Func()>;
         if (t == engine().cpu_id()) {
-            return futurize<std::result_of_t<Func()>>::apply(std::forward<Func>(func));
+            if (!is_future<ret_type>::value) {
+                // Non-deferring function, so don't worry about func lifetime
+                return futurize<ret_type>::apply(std::forward<Func>(func));
+            } else if (std::is_lvalue_reference<Func>::value) {
+                // func is an lvalue, so caller worries about its lifetime
+                return futurize<ret_type>::apply(func);
+            } else {
+                // Deferring call on rvalue function, make sure to preserve it across call
+                auto w = std::make_unique<Func>(std::move(func));
+                auto ret = futurize<ret_type>::apply(*w);
+                return ret.finally([w = std::move(w)] {});
+            }
         } else {
             return _qs[t][engine().cpu_id()].submit(std::forward<Func>(func));
         }
@@ -959,10 +1165,27 @@ reactor::accept(pollable_fd_state& listenfd) {
     });
 }
 
+#ifdef __USE_KJ__
+inline
+kj::Promise<std::pair<pollable_fd, socket_address>>
+reactor::kj_accept(pollable_fd_state& listenfd) {        
+    return kj_readable(listenfd).then([this, &listenfd] () mutable {
+        socket_address sa;
+        socklen_t sl = sizeof(&sa.u.sas);
+        file_desc fd = listenfd.fd.accept(sa.u.sa, sl, SOCK_NONBLOCK | SOCK_CLOEXEC);
+        pollable_fd pfd(std::move(fd), pollable_fd::speculation(EPOLLOUT));
+        // printf("READABLE sss\n");
+        return kj::Promise<std::pair<pollable_fd, socket_address>>( std::make_pair(std::move(pfd),std::move(sa) ) );
+    });
+}
+
+#endif
+
 inline
 future<size_t>
 reactor::read_some(pollable_fd_state& fd, void* buffer, size_t len) {
     return readable(fd).then([this, &fd, buffer, len] () mutable {
+        printf("READABLE 1\n");
         auto r = fd.fd.read(buffer, len);
         if (!r) {
             return read_some(fd, buffer, len);
@@ -978,6 +1201,7 @@ inline
 future<size_t>
 reactor::read_some(pollable_fd_state& fd, const std::vector<iovec>& iov) {
     return readable(fd).then([this, &fd, iov = iov] () mutable {
+        printf("READABLE 2\n");
         ::msghdr mh = {};
         mh.msg_iov = &iov[0];
         mh.msg_iovlen = iov.size();
@@ -1026,6 +1250,211 @@ reactor::write_all(pollable_fd_state& fd, const void* buffer, size_t len) {
     assert(len);
     return write_all_part(fd, buffer, len, 0);
 }
+#ifdef __USE_KJ__
+
+
+inline
+kj::Promise<size_t>
+reactor::kj_read_some(pollable_fd_state& fd, void* buffer, size_t len) {        
+    return kj_readable(fd).then([this, &fd, buffer, len] () mutable {        
+        // printf("READABLE\n");
+        auto r = fd.fd.read(buffer, len);
+        if (!r) {
+            return kj_read_some(fd, buffer, len);
+        }
+        if (size_t(*r) == len) {
+            fd.speculate_epoll(EPOLLIN);
+        }        
+        // printf("READ : %zu\n",(size_t)*r);
+        return kj::Promise<size_t>(*r);
+    });
+}
+
+inline
+kj::Promise<size_t>
+reactor::kj_read_some(pollable_fd_state& fd, const std::vector<iovec>& iov) {    
+    // printf("Reactor::kj_read_some\n");
+    return  kj_readable(fd).then([this, &fd, iov = iov] () mutable {
+        // printf("READABLE fffff\n");
+        ::msghdr mh = {};
+        mh.msg_iov = &iov[0];
+        mh.msg_iovlen = iov.size();
+        auto r = fd.fd.recvmsg(&mh, 0);
+        if (!r) {
+            return kj_read_some(fd, iov);
+        }
+        if (size_t(*r) == iovec_len(iov)) {
+            fd.speculate_epoll(EPOLLIN);
+        }        
+        // printf("READ fff: %zu\n",(size_t)*r);
+        return kj::Promise<size_t>(*r);
+    });
+    // KJ_DETACH(pm);
+    // return pm;
+}
+
+
+inline
+kj::Promise<size_t>
+reactor::kj_write_some(pollable_fd_state& fd, const void* buffer, size_t len) {
+    return kj_writeable(fd).then([this, &fd, buffer, len] () mutable {
+        auto r = fd.fd.send(buffer, len, MSG_NOSIGNAL);
+        if (!r) {
+            return kj_write_some(fd, buffer, len);
+        }
+        if (size_t(*r) == len) {
+            fd.speculate_epoll(EPOLLOUT);
+        }
+        return kj::Promise<size_t>(*r);
+    });
+}
+
+inline
+kj::Promise<void>
+reactor::kj_write_all_part(pollable_fd_state& fd, const void* buffer, size_t len, size_t completed) {
+    if (completed == len) {
+        return kj::READY_NOW;
+    } else {
+        return kj_write_some(fd, static_cast<const char*>(buffer) + completed, len - completed).then(
+                [&fd, buffer, len, completed, this] (size_t part) mutable {
+            return kj_write_all_part(fd, buffer, len, completed + part);
+        });
+    }
+}
+
+inline
+kj::Promise<void>
+reactor::kj_write_all(pollable_fd_state& fd, const void* buffer, size_t len) {
+    assert(len);
+    return kj_write_all_part(fd, buffer, len, 0);
+}
+
+
+inline
+kj::Promise<size_t> pollable_fd::kj_read_some(char* buffer, size_t size) {
+    return engine().kj_read_some(*_s, buffer, size);
+}
+
+inline
+kj::Promise<size_t> pollable_fd::kj_read_some(uint8_t* buffer, size_t size) {
+    return engine().kj_read_some(*_s, buffer, size);
+}
+
+inline
+kj::Promise<size_t> pollable_fd::kj_read_some(const std::vector<iovec>& iov) {
+    return engine().kj_read_some(*_s, iov);
+}
+
+inline
+kj::Promise<void> pollable_fd::kj_write_all(const char* buffer, size_t size) {
+    return engine().kj_write_all(*_s, buffer, size);
+}
+
+inline
+kj::Promise<void> pollable_fd::kj_write_all(const uint8_t* buffer, size_t size) {
+    return engine().kj_write_all(*_s, buffer, size);
+}
+
+inline
+kj::Promise<size_t> pollable_fd::kj_write_some(net::packet& p) {
+    return engine().kj_writeable(*_s).then([this, &p] () mutable {
+        static_assert(offsetof(iovec, iov_base) == offsetof(net::fragment, base) &&
+            sizeof(iovec::iov_base) == sizeof(net::fragment::base) &&
+            offsetof(iovec, iov_len) == offsetof(net::fragment, size) &&
+            sizeof(iovec::iov_len) == sizeof(net::fragment::size) &&
+            alignof(iovec) == alignof(net::fragment) &&
+            sizeof(iovec) == sizeof(net::fragment)
+            , "net::fragment and iovec should be equivalent");
+
+        iovec* iov = reinterpret_cast<iovec*>(p.fragment_array());
+        auto r = get_file_desc().writev(iov, p.nr_frags());
+        if (!r) {
+            return kj_write_some(p);
+        }
+        if (size_t(*r) == p.len()) {
+            _s->speculate_epoll(EPOLLOUT);
+        }
+        
+        return kj::Promise<size_t>(*r);
+    });
+}
+
+inline
+kj::Promise<void> pollable_fd::kj_write_all(net::packet& p) {
+    return kj_write_some(p).then([this, &p] (size_t size) -> kj::Promise<void>{
+        if (p.len() == size) {
+            return kj::READY_NOW;
+        }
+        p.trim_front(size);
+        return kj_write_all(p);
+    });
+}
+
+inline
+kj::Promise<void> pollable_fd::kj_readable() {
+    return engine().kj_readable(*_s);
+}
+
+inline
+kj::Promise<void> pollable_fd::kj_writeable() {
+    return engine().kj_writeable(*_s);
+}
+
+
+inline
+kj::Promise<size_t> pollable_fd::kj_recvmsg(struct msghdr *msg) {
+    return engine().kj_readable(*_s).then([this, msg] {        
+        auto r = get_file_desc().recvmsg(msg, 0);                
+        if (!r) {            
+            return kj_recvmsg(msg);
+        }
+        // We always speculate here to optimize for throughput in a workload
+        // with multiple outstanding requests. This way the caller can consume
+        // all messages without resorting to epoll. However this adds extra
+        // recvmsg() call when we hit the empty queue condition, so it may
+        // hurt request-response workload in which the queue is empty when we
+        // initially enter recvmsg(). If that turns out to be a problem, we can
+        // improve speculation by using recvmmsg().
+        _s->speculate_epoll(EPOLLIN);        
+        return kj::Promise<size_t>(*r);
+    });
+};
+
+inline
+kj::Promise<size_t> pollable_fd::kj_sendmsg(struct msghdr* msg) {
+    return engine().kj_writeable(*_s).then([this, msg] () mutable {
+        auto r = get_file_desc().sendmsg(msg, 0);
+        if (!r) {
+            return kj_sendmsg(msg);
+        }
+        // For UDP this will always speculate. We can't know if there's room
+        // or not, but most of the time there should be so the cost of mis-
+        // speculation is amortized.
+        if (size_t(*r) == iovec_len(msg->msg_iov, msg->msg_iovlen)) {
+            _s->speculate_epoll(EPOLLOUT);
+        }
+        return kj::Promise<size_t>(*r);
+    });
+}
+
+inline
+kj::Promise<size_t> pollable_fd::kj_sendto(socket_address addr, const void* buf, size_t len) {
+    return engine().kj_writeable(*_s).then([this, buf, len, addr] () mutable {
+        auto r = get_file_desc().sendto(addr, buf, len, 0);
+        if (!r) {
+            return kj_sendto(std::move(addr), buf, len);
+        }
+        // See the comment about speculation in sendmsg().
+        if (size_t(*r) == len) {
+            _s->speculate_epoll(EPOLLOUT);
+        }
+        return kj::Promise<size_t>(*r);
+    });
+}
+
+
+
+#endif
 
 template <typename T, typename E, typename EnableFunc>
 void reactor::complete_timers(T& timers, E& expired_timers, EnableFunc&& enable_fn) {
@@ -1121,6 +1550,14 @@ inline
 future<pollable_fd, socket_address> pollable_fd::accept() {
     return engine().accept(*_s);
 }
+
+#ifdef __USE_KJ__
+inline
+kj::Promise<std::pair<pollable_fd, socket_address>> pollable_fd::kj_accept() {
+    return engine().kj_accept(*_s);
+}
+
+#endif
 
 inline
 future<size_t> pollable_fd::recvmsg(struct msghdr *msg) {

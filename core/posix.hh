@@ -199,8 +199,8 @@ public:
         throw_system_error_on(r == -1);
         return { size_t(r) };
     }
-    boost::optional<size_t> send(const void* buffer, size_t len, int flags) {
-        auto r = ::send(_fd, buffer, len, flags);
+    boost::optional<size_t> send(const void* buffer, size_t len, int flags) {        
+        auto r = ::send(_fd, buffer, len, flags);        
         if (r == -1 && errno == EAGAIN) {
             return {};
         }

@@ -59,6 +59,29 @@ posix_server_socket_impl::accept() {
     });
 }
 
+#ifdef __USE_KJ__
+kj::Promise< std::pair<connected_socket,socket_address> >
+posix_server_socket_impl::kj_accept() {    
+    return _lfd.kj_accept().then([this] ( std::pair<pollable_fd,socket_address> pair) {    
+        static unsigned balance = 0;
+        pollable_fd fd = std::move(pair.first);
+        socket_address sa = std::move(pair.second);
+        auto cpu = balance++ % smp::count;
+
+        if (cpu == engine().cpu_id()) {
+            std::unique_ptr<connected_socket_impl> csi(new posix_connected_socket_impl(std::move(fd)));
+            return kj::Promise<std::pair<connected_socket,socket_address>>( std::make_pair(connected_socket(std::move(csi)), sa ) );
+        } else {
+            smp::submit_to(cpu, [this, fd = std::move(fd.get_file_desc()), sa] () mutable {
+                posix_ap_server_socket_impl::move_connected_socket(_sa, pollable_fd(std::move(fd)), sa);
+            });
+            return kj_accept();
+        }
+    });
+}
+
+#endif
+
 future<connected_socket, socket_address> posix_ap_server_socket_impl::accept() {
     auto conni = conn_q.find(_sa.as_posix_sockaddr_in());
     if (conni != conn_q.end()) {
@@ -81,6 +104,39 @@ posix_reuseport_server_socket_impl::accept() {
             connected_socket(std::move(csi)), sa);
     });
 }
+
+#ifdef __USE_KJ__
+kj::Promise<  std::pair<connected_socket, socket_address> > posix_ap_server_socket_impl::kj_accept() {    
+    auto conni = conn_q.find(_sa.as_posix_sockaddr_in());
+    if (conni != conn_q.end()) {
+        connection c = std::move(conni->second);
+        conn_q.erase(conni);
+        std::unique_ptr<connected_socket_impl> csi(new posix_connected_socket_impl(std::move(c.fd)));
+        return kj::Promise<std::pair<connected_socket, socket_address>>(
+            std::make_pair(connected_socket(std::move(csi)), std::move(c.addr)) );
+    } else {
+        auto i = sockets.emplace(std::piecewise_construct, std::make_tuple(_sa.as_posix_sockaddr_in()), std::make_tuple());
+        assert(i.second);
+        return make_kj_promise(i.first->second.get_future());
+    }
+}
+
+#endif
+
+#ifdef __USE_KJ__
+
+kj::Promise<std::pair<connected_socket, socket_address>>
+posix_reuseport_server_socket_impl::kj_accept() {        
+    return _lfd.kj_accept().then([this] ( std::pair<pollable_fd,socket_address> _pair) {        
+        pollable_fd fd = std::move(_pair.first);
+        socket_address sa = std::move(_pair.second);
+        std::unique_ptr<connected_socket_impl> csi(new posix_connected_socket_impl(std::move(fd)));
+        return kj::Promise<std::pair<connected_socket, socket_address>>(
+            std::make_pair( connected_socket(std::move(csi)), sa ) );
+    });
+}
+
+#endif//*/
 
 void  posix_ap_server_socket_impl::move_connected_socket(socket_address sa, pollable_fd fd, socket_address addr) {
     auto i = sockets.find(sa.as_posix_sockaddr_in());
@@ -106,6 +162,20 @@ posix_data_source_impl::get() {
         return make_ready_future<temporary_buffer<char>>(std::move(ret));
     });
 }
+
+#ifdef __USE_KJ__
+kj::Promise<temporary_buffer<char>>
+posix_data_source_impl::kj_get(size_t maxBytes) {        
+    return _fd.kj_read_some(_buf.get_write(), maxBytes).then([this,maxBytes] (size_t size) {        
+        _buf.trim(size);
+        auto ret = std::move(_buf);
+        _buf = std::move(temporary_buffer<char>((char*)_buf.end(),maxBytes - size, make_free_deleter(NULL) ));
+        return kj::Promise<temporary_buffer<char>>(std::move(ret));
+    });
+}
+
+#endif
+
 
 data_sink posix_data_sink(pollable_fd& fd) {
     return data_sink(std::make_unique<posix_data_sink_impl>(fd));
@@ -140,6 +210,19 @@ posix_data_sink_impl::put(packet p) {
     return _fd.write_all(_p).then([this] { _p.reset(); });
 }
 
+/**********************************************************/
+kj::Promise<void>
+posix_data_sink_impl::kj_put(temporary_buffer<char> buf) {
+    return _fd.kj_write_all(buf.get(), buf.size()).then([d = buf.release()] {});
+}
+
+kj::Promise<void>
+posix_data_sink_impl::kj_put(packet p) {
+    _p = std::move(p);
+    return _fd.kj_write_all(_p).then([this] { _p.reset(); });
+}
+    
+/**********************************************************/
 server_socket
 posix_network_stack::listen(socket_address sa, listen_options opt) {
     if (_reuseport)
@@ -149,12 +232,22 @@ posix_network_stack::listen(socket_address sa, listen_options opt) {
 }
 
 future<connected_socket>
-posix_network_stack::connect(socket_address sa) {
-    return engine().posix_connect(sa).then([] (pollable_fd fd) {
+posix_network_stack::connect(socket_address sa, socket_address local) {
+    return engine().posix_connect(sa, local).then([] (pollable_fd fd) {
         std::unique_ptr<connected_socket_impl> csi(new posix_connected_socket_impl(std::move(fd)));
         return make_ready_future<connected_socket>(connected_socket(std::move(csi)));
     });
 }
+
+#ifdef __USE_KJ__
+kj::Promise<connected_socket>
+posix_network_stack::kj_connect(socket_address sa, socket_address local) {
+    return engine().kj_posix_connect(sa, local).then([] (pollable_fd fd) {
+        std::unique_ptr<connected_socket_impl> csi(new posix_connected_socket_impl(std::move(fd)));
+        return kj::Promise<connected_socket>(connected_socket(std::move(csi)));
+    });
+}
+#endif
 
 thread_local std::unordered_map<::sockaddr_in, promise<connected_socket, socket_address>> posix_ap_server_socket_impl::sockets;
 thread_local std::unordered_multimap<::sockaddr_in, posix_ap_server_socket_impl::connection> posix_ap_server_socket_impl::conn_q;
@@ -168,12 +261,22 @@ posix_ap_network_stack::listen(socket_address sa, listen_options opt) {
 }
 
 future<connected_socket>
-posix_ap_network_stack::connect(socket_address sa) {
-    return engine().posix_connect(sa).then([] (pollable_fd fd) {
+posix_ap_network_stack::connect(socket_address sa, socket_address local) {
+    return engine().posix_connect(sa, local).then([] (pollable_fd fd) {
         std::unique_ptr<connected_socket_impl> csi(new posix_connected_socket_impl(std::move(fd)));
         return make_ready_future<connected_socket>(connected_socket(std::move(csi)));
     });
 }
+
+#ifdef __USE_KJ__
+kj::Promise<connected_socket>
+posix_ap_network_stack::kj_connect(socket_address sa, socket_address local) {
+    return engine().kj_posix_connect(sa, local).then([] (pollable_fd fd) {
+        std::unique_ptr<connected_socket_impl> csi(new posix_connected_socket_impl(std::move(fd)));
+        return kj::Promise<connected_socket>(connected_socket(std::move(csi)));
+    });
+}
+#endif
 
 struct cmsg_with_pktinfo {
     struct cmsghdrcmh;
@@ -249,6 +352,11 @@ public:
     virtual future<udp_datagram> receive() override;
     virtual future<> send(ipv4_addr dst, const char *msg);
     virtual future<> send(ipv4_addr dst, packet p);
+#ifdef __USE_KJ__
+    virtual kj::Promise<udp_datagram> kj_receive() override;
+    virtual kj::Promise<void> kj_send(ipv4_addr dst, const char *msg) override;
+    virtual kj::Promise<void> kj_send(ipv4_addr dst, packet p) override;
+#endif    
     virtual void close() override {
         _closed = true;
         _fd.reset();
@@ -268,6 +376,22 @@ future<> posix_udp_channel::send(ipv4_addr dst, packet p) {
     return _fd->sendmsg(&_send._hdr)
             .then([len] (size_t size) { assert(size == len); });
 }
+/*********************************************************/
+#ifdef __USE_KJ__
+kj::Promise<void> posix_udp_channel::kj_send(ipv4_addr dst, const char *message) {
+    auto len = strlen(message);
+    return _fd->kj_sendto(make_ipv4_address(dst), message, len)
+            .then([len] (size_t size) { assert(size == len); });
+}
+
+kj::Promise<void> posix_udp_channel::kj_send(ipv4_addr dst, packet p) {
+    auto len = p.len();
+    _send.prepare(dst, std::move(p));
+    return _fd->kj_sendmsg(&_send._hdr)
+            .then([len] (size_t size) { assert(size == len); });
+}
+
+#endif
 
 udp_channel
 posix_network_stack::make_udp_channel(ipv4_addr addr) {
@@ -296,6 +420,20 @@ posix_udp_channel::receive() {
             _recv._src_addr, dst, packet(fragment{_recv._buffer, size}, [buf = _recv._buffer] { delete[] buf; }))));
     });
 }
+/******************************/
+#ifdef __USE_KJ__
+kj::Promise<udp_datagram>
+posix_udp_channel::kj_receive() {
+    _recv.prepare();        
+    auto pm = _fd->kj_recvmsg(&_recv._hdr).then([this] (size_t size) {        
+        auto dst = ipv4_addr(_recv._cmsg.pktinfo.ipi_addr.s_addr, _address.port);
+        return kj::Promise<udp_datagram>(udp_datagram(std::make_unique<posix_datagram>(
+            _recv._src_addr, dst, packet(fragment{_recv._buffer, size}, [buf = _recv._buffer] { delete[] buf; }))));
+    });
+    // KJ_DETACH(pm);
+    return pm;
+}
+#endif
 
 network_stack_registrator nsr_posix{"posix",
     boost::program_options::options_description(),

@@ -65,7 +65,51 @@ int main(int ac, char** av) {
                 delete ft;
                 engine().exit(0);
             });
+        });//*/
+#ifdef __USE_KJ__
+        kj::WaitScope waitScope(engine());
+        auto pm = engine().kj_open_file_dma("testfile.tmp", open_flags::rw | open_flags::create).then([] (file f) {
+            kj::WaitScope waitScope(engine());
+            auto ft = new file_test{std::move(f)};
+            for (size_t i = 0; i < max; ++i) {
+                auto pm = ft->par.kj_wait().then([ft, i] {
+                    kj::WaitScope waitScope(engine());
+                    auto wbuf = allocate_aligned_buffer<unsigned char>(4096, 4096);
+                    std::fill(wbuf.get(), wbuf.get() + 4096, i);
+                    auto wb = wbuf.get();
+                    auto pm = ft->f.kj_dma_write(i * 4096, wb, 4096).then(
+                            [ft, i, wbuf = std::move(wbuf)] (size_t ret) mutable {
+                        assert(ret == 4096);
+                        auto rbuf = allocate_aligned_buffer<unsigned char>(4096, 4096);
+                        auto rb = rbuf.get();
+                        kj::WaitScope waitScope(engine());
+                        auto pm = ft->f.kj_dma_read(i * 4096, rb, 4096).then(
+                                [ft, i, rbuf = std::move(rbuf), wbuf = std::move(wbuf)] (size_t ret) mutable {
+                            assert(ret == 4096);
+                            bool eq = std::equal(rbuf.get(), rbuf.get() + 4096, wbuf.get());
+                            assert(eq);
+                            ft->sem.signal(1);
+                            ft->par.signal();
+                        });
+                        KJ_DETACH(pm);
+                    });
+                    KJ_DETACH(pm);
+                });
+                KJ_DETACH(pm);
+            }
+            auto pm = ft->sem.kj_wait(max).then([ft] () mutable {
+                return ft->f.kj_flush();
+            }).then([ft] () mutable {
+                std::cout << "done\n";
+                delete ft;
+                engine().exit(0);
+            });
+            KJ_DETACH(pm);
         });
+
+        KJ_DETACH(pm);
+        
+#endif        
     });
 }
 

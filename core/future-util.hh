@@ -19,14 +19,17 @@
  * Copyright (C) 2014 Cloudius Systems, Ltd.
  */
 
+/** @file */
 #ifndef CORE_FUTURE_UTIL_HH_
 #define CORE_FUTURE_UTIL_HH_
 
 #include "future.hh"
 #include "shared_ptr.hh"
-#include "reactor.hh"
 #include <tuple>
 #include <iterator>
+#include <vector>
+
+extern __thread size_t task_quota;
 
 // parallel_for_each - run tasks in parallel
 //
@@ -46,6 +49,28 @@ parallel_for_each(Iterator begin, Iterator end, Func&& func) {
         ret = std::move(f);
     }
     return ret;
+}
+
+/// \brief parallel_for_each - run tasks in parallel
+///
+/// Given a range [\c begin, \c end) of objects, run \c func(object) for
+/// each object in the range, and return a future<> that resolves when all
+/// the functions complete.  @func should return a future<> that indicates
+/// when it is complete.
+///
+/// \param range A range of objects to iterate run \c func on
+/// \param func  A callable, accepting reference to the range's
+///              \c value_type, and returning a \c future<>.
+/// \return a \c future<> that becomes ready when the entire range
+///         was processed.  If one or more of the invocations of
+///         \c func returned an exceptional future, then the return
+///         value will contain one of those exceptions.
+template <typename Range, typename Func>
+inline
+future<>
+parallel_for_each(Range&& range, Func&& func) {
+    return parallel_for_each(std::begin(range), std::end(range),
+            std::forward<Func>(func));
 }
 
 // The AsyncAction concept represents an action which can complete later than
@@ -95,6 +120,36 @@ future<> do_until(StopCondition&& stop_cond, AsyncAction&& action) {
     return f;
 }
 
+#ifdef __USE_KJ__
+
+template<typename AsyncAction, typename StopCondition>
+static inline
+void kj_do_until_continued(StopCondition&& stop_cond, AsyncAction&& action, kj::Own<kj::PromiseFulfiller<void>> fulfiller) {    
+    while (!stop_cond()) {
+                   
+        auto&& f = 
+            action().then([action = std::forward<AsyncAction>(action),
+                stop_cond = std::forward<StopCondition>(stop_cond), fulfiller = kj::mv(fulfiller)](){                                        
+                kj_do_until_continued(stop_cond, std::forward<AsyncAction>(action), kj::mv(fulfiller));
+            });                    
+        
+    }
+
+    fulfiller->fulfill();
+}
+
+
+// Invokes given action until it fails or given condition evaluates to true.
+template<typename AsyncAction, typename StopCondition>
+static inline
+kj::Promise<void> kj_do_until(StopCondition&& stop_cond, AsyncAction&& action) {
+    auto pair = kj::newPromiseAndFulfiller<void>();    
+    kj_do_until_continued(std::forward<StopCondition>(stop_cond),
+        std::forward<AsyncAction>(action), kj::mv(pair.fulfiller));
+    return kj::mv(pair.promise);
+}
+#endif
+
 // Invoke given action until it fails.
 template<typename AsyncAction>
 static inline
@@ -122,6 +177,27 @@ future<> keep_doing(AsyncAction&& action) {
     }));
     return f;
 }
+
+#ifdef __USE_KJ__
+// Invoke given action until it fails.
+template<typename AsyncAction>
+static inline
+kj::Promise<void> kj_keep_doing(AsyncAction&& action) {
+    while (task_quota) {
+        auto f = action().then([action = std::forward<AsyncAction>(action)] () mutable {
+                return kj_keep_doing(std::forward<AsyncAction>(action));
+            });        
+
+        --task_quota;
+    }
+    
+    auto f = action().then([action = std::forward<AsyncAction>(action)] () mutable {
+                return kj_keep_doing(std::forward<AsyncAction>(action));
+            }); 
+    return f;
+}
+
+#endif
 
 template<typename Iterator, typename AsyncAction>
 static inline

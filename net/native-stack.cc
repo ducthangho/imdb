@@ -145,7 +145,7 @@ private:
 public:
     explicit native_network_stack(boost::program_options::variables_map opts, std::shared_ptr<device> dev);
     virtual server_socket listen(socket_address sa, listen_options opt) override;
-    virtual future<connected_socket> connect(socket_address sa) override;
+    virtual future<connected_socket> connect(socket_address sa, socket_address local) override;
     virtual udp_channel make_udp_channel(ipv4_addr addr) override;
     virtual future<> initialize() override;
     static future<std::unique_ptr<network_stack>> create(boost::program_options::variables_map opts) {
@@ -158,6 +158,9 @@ public:
     void arp_learn(ethernet_address l2, ipv4_address l3) {
         _inet.learn(l2, l3);
     }
+#ifdef __USE_KJ__
+    virtual kj::Promise<connected_socket> kj_connect(socket_address sa, socket_address local = socket_address(::sockaddr_in{AF_INET, INADDR_ANY, 0})) override;
+#endif        
     friend class native_server_socket_impl<tcp4>;
 };
 
@@ -205,10 +208,20 @@ native_network_stack::listen(socket_address sa, listen_options opts) {
 }
 
 future<connected_socket>
-native_network_stack::connect(socket_address sa) {
+native_network_stack::connect(socket_address sa, socket_address local) {
+    // FIXME: local is ignored since native stack does not support multiple IPs yet
     assert(sa.as_posix_sockaddr().sa_family == AF_INET);
     return tcpv4_connect(_inet.get_tcp(), sa);
 }
+
+#ifdef __USE_KJ__
+kj::Promise<connected_socket>
+native_network_stack::kj_connect(socket_address sa, socket_address local) {
+    // FIXME: local is ignored since native stack does not support multiple IPs yet
+    assert(sa.as_posix_sockaddr().sa_family == AF_INET);
+    return kj_tcpv4_connect(_inet.get_tcp(), sa);
+}
+#endif
 
 using namespace std::chrono_literals;
 

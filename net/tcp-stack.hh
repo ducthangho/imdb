@@ -42,6 +42,11 @@ tcpv4_listen(tcp<ipv4_traits>& tcpv4, uint16_t port, listen_options opts);
 future<connected_socket>
 tcpv4_connect(tcp<ipv4_traits>& tcpv4, socket_address sa);
 
+#ifdef __USE_KJ__
+kj::Promise<connected_socket>
+kj_tcpv4_connect(tcp<ipv4_traits>& tcpv4, socket_address sa);
+#endif
+
 }
 
 #endif

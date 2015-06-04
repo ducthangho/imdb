@@ -52,6 +52,9 @@ struct udp_channel_state {
     udp_channel_state(size_t queue_size) : _queue(queue_size) {}
     future<> wait_for_send_buffer(size_t len) { return _user_queue_space.wait(len); }
     void complete_send(size_t len) { _user_queue_space.signal(len); }
+    #ifdef __USE_KJ__
+    kj::Promise<void> kj_wait_for_send_buffer(size_t len) { return _user_queue_space.kj_wait(len); }
+    #endif    
 };
 
 }

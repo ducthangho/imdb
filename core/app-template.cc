@@ -60,6 +60,59 @@ app_template::configuration() {
 }
 
 int
+app_template::kj_run(int ac, char ** av, std::function<void ()>&& func) {
+#ifdef DEBUG
+    print("WARNING: debug mode. Not for benchmarking or production\n");
+#endif
+    bpo::variables_map configuration;
+    try {
+        bpo::store(bpo::command_line_parser(ac, av)
+                    .options(_opts)
+                    .positional(_pos_opts)
+                    .run()
+            , configuration);
+        auto home = std::getenv("HOME");
+        if (home) {
+            std::ifstream ifs(std::string(home) + "/.config/seastar/seastar.conf");
+            if (ifs) {
+                bpo::store(bpo::parse_config_file(ifs, _opts), configuration);
+            }
+        }
+    } catch (bpo::error& e) {
+        print("error: %s\n\nTry --help.\n", e.what());
+        return 2;
+    }
+    bpo::notify(configuration);
+    if (configuration.count("help")) {
+        std::cout << _opts << "\n";
+        return 1;
+    }
+    smp::configure(configuration);
+    _configuration = {std::move(configuration)};    
+    
+    engine().when_started().then([this] {        
+        #ifdef __USE_KJ__        
+        kj::WaitScope waitScope(engine());
+        scollectd::kj_configure( this->configuration(),waitScope);
+        #else
+        scollectd::configure( this->configuration());        
+        #endif
+    }).then(
+        std::move(func)
+    ).then_wrapped([] (auto&& f) {
+        try {
+            f.get();
+        } catch (std::exception& ex) {
+            std::cout << "program failed with uncaught exception: " << ex.what() << "\n";
+            engine().exit(1);
+        }
+    });
+    auto exit_code = engine().run();
+    smp::cleanup();
+    return exit_code;
+}
+
+int
 app_template::run(int ac, char ** av, std::function<void ()>&& func) {
 #ifdef DEBUG
     print("WARNING: debug mode. Not for benchmarking or production\n");
@@ -105,3 +158,4 @@ app_template::run(int ac, char ** av, std::function<void ()>&& func) {
     smp::cleanup();
     return exit_code;
 }
+

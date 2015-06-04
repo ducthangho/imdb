@@ -25,6 +25,13 @@
 #include <boost/optional.hpp>
 #include <functional>
 
+#ifdef __USE_KJ__
+#include "core/do_with.hh"
+#include "kj/debug.h"
+#include "kj/async.h"
+#include "kj/async-io.h"
+#endif
+
 class app_template {
 private:
     boost::program_options::options_description _opts;
@@ -37,12 +44,17 @@ public:
         const char* help;
         int max_count;
     };
+
+
 public:
     app_template();
     boost::program_options::options_description_easy_init add_options();
     void add_positional_options(std::initializer_list<positional_option> options);
     boost::program_options::variables_map& configuration();
     int run(int ac, char ** av, std::function<void ()>&& func);
+#ifdef __USE_KJ__
+    int kj_run(int ac, char ** av, std::function<void ()>&& func);
+#endif    
 };
 
 #endif

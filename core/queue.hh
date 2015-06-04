@@ -75,6 +75,25 @@ public:
     // resolves when data was pushed.
     future<> push_eventually(T&& data);
 
+#ifdef __USE_KJ__
+
+    // Returns a future<> that becomes available when pop() or consume()
+    // can be called.
+    kj::Promise<void> kj_not_empty();
+
+    // Returns a future<> that becomes available when push() can be called.
+    kj::Promise<void> kj_not_full();
+
+    // Pops element now or when ther is some. Returns a future that becomes
+    // available when some element is available.
+    kj::Promise<T> kj_pop_eventually();
+
+    // Pushes the element now or when there is room. Returns a future<> which
+    // resolves when data was pushed.
+    kj::Promise<void> kj_push_eventually(T&& data);
+
+#endif    
+
     size_t size() const { return _q.size(); }
 };
 
@@ -137,6 +156,21 @@ future<T> queue<T>::pop_eventually() {
     }
 }
 
+#ifdef __USE_KJ__
+template <typename T>
+inline
+kj::Promise<T> queue<T>::kj_pop_eventually() {
+    if (empty()) {
+        return kj_not_empty().then([this] () ->  kj::Promise<T>{
+            return kj::Promise<T>(pop());
+        });
+    } else {
+        return kj::Promise<T>(pop());
+    }
+}
+
+#endif
+
 template <typename T>
 inline
 future<> queue<T>::push_eventually(T&& data) {
@@ -151,6 +185,26 @@ future<> queue<T>::push_eventually(T&& data) {
         return make_ready_future<>();
     }
 }
+
+#ifdef __USE_KJ__
+
+template <typename T>
+inline
+kj::Promise<void> queue<T>::kj_push_eventually(T&& data) {
+    if (full()) {
+        return kj_not_full().then([this, data = std::move(data)] () mutable {
+            _q.push(std::move(data));
+            notify_not_empty();
+        });
+    } else {
+        _q.push(std::move(data));
+        notify_not_empty();
+        return kj::READY_NOW;
+    }
+}
+
+
+#endif
 
 template <typename T>
 template <typename Func>
@@ -190,6 +244,23 @@ future<> queue<T>::not_empty() {
     }
 }
 
+
+#ifdef __USE_KJ__
+template <typename T>
+inline
+kj::Promise<void> queue<T>::kj_not_empty() {
+    if (!empty()) {
+        return kj::READY_NOW;
+    } else {
+        _not_empty = promise<>();
+        return make_kj_promise(_not_empty->get_future());
+    }
+}
+
+
+#endif
+
+
 template <typename T>
 inline
 future<> queue<T>::not_full() {
@@ -200,5 +271,21 @@ future<> queue<T>::not_full() {
         return _not_full->get_future();
     }
 }
+
+#ifdef __USE_KJ__
+
+template <typename T>
+inline
+kj::Promise<void> queue<T>::kj_not_full() {
+    if (!full()) {
+        return kj::READY_NOW;
+    } else {
+        _not_full = promise<>();
+        return make_kj_promise(_not_full->get_future());
+    }
+}
+
+
+#endif
 
 #endif /* QUEUE_HH_ */

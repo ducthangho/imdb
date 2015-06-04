@@ -88,7 +88,7 @@ public:
         ret._size = len;
         return ret;
     }
-    void trim_front(size_t pos) {
+    void trim_front(size_t pos) {        
         _buffer += pos;
         _size -= pos;
     }

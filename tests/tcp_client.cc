@@ -37,7 +37,7 @@ distributed<client> clients;
 
 class client {
 private:
-    static constexpr unsigned _pings_per_connection = 10000;
+    static constexpr unsigned _pings_per_connection = 1000;
     unsigned _total_pings;
     unsigned _concurrent_connections;
     ipv4_addr _server_addr;
@@ -82,16 +82,18 @@ public:
             });
         }
 
-        future<> ping(int times) {
-            return _write_buf.write("ping").then([this] {
+        future<> ping(int times) {            
+            return _write_buf.write("ping").then([this] {                
                 return _write_buf.flush();
             }).then([this, times] {
+                // printf("%d\n",times);
                 return _read_buf.read_exactly(4).then([this, times] (temporary_buffer<char> buf) {
                     if (buf.size() != 4) {
                         fprint(std::cerr, "illegal packet received: %d\n", buf.size());
                         return make_ready_future();
                     }
                     auto str = std::string(buf.get(), buf.size());
+                    // printf("%s\n",str.c_str());
                     if (str != "pong") {
                         fprint(std::cerr, "illegal packet received: %d\n", buf.size());
                         return make_ready_future();
@@ -153,6 +155,7 @@ public:
     }
 
     void ping_report(lowres_clock::time_point started, lowres_clock::time_point finished) {
+        printf("Report now %d   %d\n",_num_reported,_concurrent_connections);
         if (_earliest_started > started)
             _earliest_started = started;
         if (_latest_finished < finished)
@@ -204,15 +207,16 @@ public:
         _test = test;
 
         for (unsigned i = 0; i < ncon; i++) {
-            engine().net().connect(make_ipv4_address(server_addr)).then([this, server_addr, test] (connected_socket fd) {
+            engine().net().connect(make_ipv4_address(server_addr)).then([this, server_addr, test] (connected_socket fd) {                
                 auto conn = new connection(std::move(fd));
-                (this->*tests.at(test))(conn).then_wrapped([this, conn] (auto&& f) {
-                    delete conn;
+                (this->*tests.at(test))(conn).then_wrapped([this, conn] (auto&& f) {                    
                     try {
                         f.get();
                     } catch (std::exception& ex) {
                         fprint(std::cerr, "request error: %s\n", ex.what());
+                        _num_reported++;
                     }
+                    delete conn;
                 });
             });
         }

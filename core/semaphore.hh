@@ -26,6 +26,11 @@
 #include "circular_buffer.hh"
 #include <stdexcept>
 
+#ifdef __USE_KJ__
+#include "kj/debug.h"
+#include "kj/async.h"
+#include "kj/async-io.h"
+#endif
 class broken_semaphore : public std::exception {
 public:
     virtual const char* what() const noexcept {
@@ -49,6 +54,21 @@ public:
         _wait_list.push_back({ std::move(pr), nr });
         return fut;
     }
+#ifdef __USE_KJ__
+    kj::Promise<void> kj_wait(size_t nr = 1) {
+        if (_count >= nr && _wait_list.empty()) {
+            _count -= nr;
+            return kj::READY_NOW;
+        }
+        
+
+        promise<> pr;
+        auto fut = pr.get_future();
+        _wait_list.push_back({ std::move(pr), nr });
+        return make_kj_promise(std::forward<future<>>(fut) );
+        
+    }
+#endif
     void signal(size_t nr = 1) {
         _count += nr;
         while (!_wait_list.empty() && _wait_list.front().second <= _count) {

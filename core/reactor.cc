@@ -29,6 +29,7 @@
 #include "scollectd.hh"
 #include "util/conversions.hh"
 #include "core/future-util.hh"
+#include "thread.hh"
 #include <cassert>
 #include <unistd.h>
 #include <fcntl.h>
@@ -186,6 +187,7 @@ reactor::reactor()
     , _io_context_available(max_aio)
     , _reuseport(posix_reuseport_detect()) {
 
+    seastar::thread_impl::init();
     auto r = ::io_setup(max_aio, &_io_context);
     assert(r >= 0);
 #ifdef HAVE_OSV
@@ -288,6 +290,59 @@ void reactor_backend_epoll::forget(pollable_fd_state& fd) {
     }
 }
 
+#ifdef __USE_KJ__
+
+kj::Promise<void> reactor_backend_epoll::kj_get_epoll_future(pollable_fd_state& pfd,
+        kj::Own<kj::PromiseFulfiller<void>>& pr, int event) {
+    if (pfd.events_known & event) {
+        pfd.events_known &= ~event;
+        return kj::READY_NOW;
+    }
+
+    auto pair = kj::newPromiseAndFulfiller<void>();
+    // printf("Before  %zu\n",(int64_t)pair.fulfiller.get());
+    pr = kj::mv(pair.fulfiller);
+    // printf("Created fulfiller  %zu    %zu    %zu\n",(int64_t)pr.get(),(int64_t)pfd.kj_pollin.get(),(int64_t)pfd.kj_pollout.get());
+    // printf("After  %zu\n",(int64_t)pair.fulfiller.get());
+
+    pfd.events_requested |= event;
+    if (!(pfd.events_epoll & event)) {
+        auto ctl = pfd.events_epoll ? EPOLL_CTL_MOD : EPOLL_CTL_ADD;
+        pfd.events_epoll |= event;
+        ::epoll_event eevt;
+        eevt.events = pfd.events_epoll;
+        eevt.data.ptr = &pfd;
+        int r = ::epoll_ctl(_epollfd.get(), ctl, pfd.fd.get(), &eevt);
+        assert(r == 0);        
+        engine().kj_start_epoll();
+        // engine().start_epoll();
+    }        
+    
+    // auto pm = pair.promise.then([](){
+    //     printf("Fired\n");
+    // });
+
+    return kj::mv(pair.promise);    
+}
+
+kj::Promise<void> reactor_backend_epoll::kj_readable(pollable_fd_state& fd) {
+    return  kj_get_epoll_future(fd, fd.kj_pollin, EPOLLIN);    
+}
+
+kj::Promise<void> reactor_backend_epoll::kj_writeable(pollable_fd_state& fd) {
+    return kj_get_epoll_future(fd, fd.kj_pollout, EPOLLOUT);
+}
+
+kj::Promise<void> reactor_backend_epoll::kj_notified(reactor_notifier *n) {
+    // Currently reactor_backend_epoll doesn't need to support notifiers,
+    // because we add to it file descriptors instead. But this can be fixed
+    // later.
+    std::cout << "reactor_backend_epoll does not yet support notifiers!\n";
+    abort();
+}
+
+
+#endif
 future<> reactor_backend_epoll::notified(reactor_notifier *n) {
     // Currently reactor_backend_epoll doesn't need to support notifiers,
     // because we add to it file descriptors instead. But this can be fixed
@@ -300,14 +355,22 @@ future<> reactor_backend_epoll::notified(reactor_notifier *n) {
 pollable_fd
 reactor::posix_listen(socket_address sa, listen_options opts) {
     file_desc fd = file_desc::socket(sa.u.sa.sa_family, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0);
+    printf(".... Socket created\n");    
     if (opts.reuse_address) {
         fd.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1);
     }
+
+    printf(".... Set SO_REUSEADDR\n");    
+
     if (_reuseport)
         fd.setsockopt(SOL_SOCKET, SO_REUSEPORT, 1);
 
+    printf(".... Set SO_REUSEPORT\n");    
+
     fd.bind(sa.u.sa, sizeof(sa.u.sas));
-    fd.listen(100);
+    printf(".... Binding\n");        
+    fd.listen(100);    
+    printf(".... Listening\n");        
     return pollable_fd(std::move(fd));
 }
 
@@ -323,8 +386,9 @@ reactor::posix_reuseport_detect() {
 }
 
 future<pollable_fd>
-reactor::posix_connect(socket_address sa) {
+reactor::posix_connect(socket_address sa, socket_address local) {
     file_desc fd = file_desc::socket(sa.u.sa.sa_family, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0);
+    fd.bind(local.u.sa, sizeof(sa.u.sas));
     fd.connect(sa.u.sa, sizeof(sa.u.sas));
     auto pfd = pollable_fd(std::move(fd));
     auto f = pfd.writeable();
@@ -336,6 +400,23 @@ reactor::posix_connect(socket_address sa) {
     });
 }
 
+#ifdef __USE_KJ__
+kj::Promise<pollable_fd>
+reactor::kj_posix_connect(socket_address sa, socket_address local) {
+    file_desc fd = file_desc::socket(sa.u.sa.sa_family, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0);
+    fd.bind(local.u.sa, sizeof(sa.u.sas));
+    fd.connect(sa.u.sa, sizeof(sa.u.sas));
+    auto pfd = pollable_fd(std::move(fd));
+    auto f = pfd.kj_writeable();
+    return f.then([pfd = std::move(pfd)] () mutable {
+        int err;
+        pfd.get_file_desc().getsockopt(SOL_SOCKET, SO_ERROR, err);
+        throw_system_error_on(err != 0);
+        return kj::Promise<pollable_fd>(std::move(pfd));
+    });
+}
+#endif
+
 server_socket
 reactor::listen(socket_address sa, listen_options opt) {
     return _network_stack->listen(sa, opt);
@@ -346,6 +427,13 @@ reactor::connect(socket_address sa) {
     return _network_stack->connect(sa);
 }
 
+#ifdef __USE_KJ__
+kj::Promise<connected_socket>
+reactor::kj_connect(socket_address sa) {
+    return _network_stack->kj_connect(sa);
+}
+#endif
+
 void reactor_backend_epoll::complete_epoll_event(pollable_fd_state& pfd, promise<> pollable_fd_state::*pr,
         int events, int event) {
     if (pfd.events_requested & events & event) {
@@ -355,6 +443,23 @@ void reactor_backend_epoll::complete_epoll_event(pollable_fd_state& pfd, promise
         pfd.*pr = promise<>();
     }
 }
+
+#ifdef __USE_KJ__
+void reactor_backend_epoll::kj_complete_epoll_event(pollable_fd_state& pfd, kj::Own<kj::PromiseFulfiller<void>>& pr,
+        int events, int event) {
+    if (pfd.events_requested & events & event) {
+        pfd.events_requested &= ~event;
+        pfd.events_known &= ~event;
+        // (pfd.*pr).set_value();
+        // pfd.*pr = promise<>();
+        // printf("Fulfill  %zu\n",(int64_t)pr.get());
+        pr->fulfill();        
+        // auto pair = kj::newPromiseAndFulfiller<void>();
+        // pr = kj::mv(pair.fulfiller);
+    }
+}
+
+#endif
 
 template <typename Func>
 future<io_event>
@@ -371,6 +476,19 @@ reactor::submit_io(Func prepare_io) {
     });
 }
 
+template <typename Func>
+future<io_event>
+reactor::submit_io_read(Func prepare_io) {
+    ++_aio_reads;
+    return submit_io(std::move(prepare_io));
+}
+
+template <typename Func>
+future<io_event>
+reactor::submit_io_write(Func prepare_io) {
+    ++_aio_writes;
+    return submit_io(std::move(prepare_io));
+}
 bool reactor::process_io()
 {
     io_event ev[max_aio];
@@ -388,7 +506,7 @@ bool reactor::process_io()
 
 future<size_t>
 posix_file_impl::write_dma(uint64_t pos, const void* buffer, size_t len) {
-    return engine().submit_io([this, pos, buffer, len] (iocb& io) {
+    return engine().submit_io_write([this, pos, buffer, len] (iocb& io) {
         io_prep_pwrite(&io, _fd, const_cast<void*>(buffer), len, pos);
     }).then([] (io_event ev) {
         throw_kernel_error(long(ev.res));
@@ -398,7 +516,7 @@ posix_file_impl::write_dma(uint64_t pos, const void* buffer, size_t len) {
 
 future<size_t>
 posix_file_impl::write_dma(uint64_t pos, std::vector<iovec> iov) {
-    return engine().submit_io([this, pos, iov = std::move(iov)] (iocb& io) {
+    return engine().submit_io_write([this, pos, iov = std::move(iov)] (iocb& io) {
         io_prep_pwritev(&io, _fd, iov.data(), iov.size(), pos);
     }).then([] (io_event ev) {
         throw_kernel_error(long(ev.res));
@@ -408,7 +526,7 @@ posix_file_impl::write_dma(uint64_t pos, std::vector<iovec> iov) {
 
 future<size_t>
 posix_file_impl::read_dma(uint64_t pos, void* buffer, size_t len) {
-    return engine().submit_io([this, pos, buffer, len] (iocb& io) {
+    return engine().submit_io_read([this, pos, buffer, len] (iocb& io) {
         io_prep_pread(&io, _fd, buffer, len, pos);
     }).then([] (io_event ev) {
         throw_kernel_error(long(ev.res));
@@ -418,7 +536,7 @@ posix_file_impl::read_dma(uint64_t pos, void* buffer, size_t len) {
 
 future<size_t>
 posix_file_impl::read_dma(uint64_t pos, std::vector<iovec> iov) {
-    return engine().submit_io([this, pos, iov = std::move(iov)] (iocb& io) {
+    return engine().submit_io_read([this, pos, iov = std::move(iov)] (iocb& io) {
         io_prep_preadv(&io, _fd, iov.data(), iov.size(), pos);
     }).then([] (io_event ev) {
         throw_kernel_error(long(ev.res));
@@ -439,7 +557,7 @@ reactor::open_file_dma(sstring name, open_flags flags) {
 future<>
 reactor::remove_file(sstring pathname) {
     return engine()._thread_pool.submit<syscall_result<int>>([this, pathname] {
-        return wrap_syscall<int>(::unlink(pathname.c_str()));
+        return wrap_syscall<int>(::remove(pathname.c_str()));
     }).then([] (syscall_result<int> sr) {
         sr.throw_if_error();
         return make_ready_future<>();
@@ -496,7 +614,17 @@ reactor::open_directory(sstring name) {
 }
 
 future<>
+reactor::make_directory(sstring name) {
+    return _thread_pool.submit<syscall_result<int>>([name = std::move(name)] {
+        return wrap_syscall<int>(::mkdir(name.c_str(), S_IRWXU));
+    }).then([] (syscall_result<int> sr) {
+        sr.throw_if_error();
+    });
+}
+
+future<>
 posix_file_impl::flush(void) {
+    ++engine()._fsyncs;
     return engine()._thread_pool.submit<syscall_result<int>>([this] {
         return wrap_syscall<int>(::fsync(_fd));
     }).then([] (syscall_result<int> sr) {
@@ -572,6 +700,168 @@ blockdev_file_impl::size(void) {
         return make_ready_future<size_t>(ret.extra);
     });
 }
+/****************************************************/
+#ifdef __USE_KJ__
+kj::Promise<size_t>
+posix_file_impl::kj_write_dma(uint64_t pos, const void* buffer, size_t len) {
+    return make_kj_promise(engine().submit_io([this, pos, buffer, len] (iocb& io) {
+        io_prep_pwrite(&io, _fd, const_cast<void*>(buffer), len, pos);
+    }).then([] (io_event ev) {
+        throw_kernel_error(long(ev.res));
+        return make_ready_future<size_t>(size_t(ev.res));
+    }));
+}
+
+kj::Promise<size_t>
+posix_file_impl::kj_write_dma(uint64_t pos, std::vector<iovec> iov) {
+    return make_kj_promise(engine().submit_io([this, pos, iov = std::move(iov)] (iocb& io) {
+        io_prep_pwritev(&io, _fd, iov.data(), iov.size(), pos);
+    }).then([] (io_event ev) {
+        throw_kernel_error(long(ev.res));
+        return make_ready_future<size_t>(size_t(ev.res));
+    }));
+}
+
+kj::Promise<size_t>
+posix_file_impl::kj_read_dma(uint64_t pos, void* buffer, size_t len) {
+    return make_kj_promise(engine().submit_io([this, pos, buffer, len] (iocb& io) {
+        io_prep_pread(&io, _fd, buffer, len, pos);
+    }).then([] (io_event ev) {
+        throw_kernel_error(long(ev.res));
+        return make_ready_future<size_t>(size_t(ev.res));
+    }));
+}
+
+kj::Promise<size_t>
+posix_file_impl::kj_read_dma(uint64_t pos, std::vector<iovec> iov) {
+    return make_kj_promise(engine().submit_io([this, pos, iov = std::move(iov)] (iocb& io) {
+        io_prep_preadv(&io, _fd, iov.data(), iov.size(), pos);
+    }).then([] (io_event ev) {
+        throw_kernel_error(long(ev.res));
+        return make_ready_future<size_t>(size_t(ev.res));
+    }));
+}
+
+kj::Promise<file>
+reactor::kj_open_file_dma(sstring name, open_flags flags) {
+    return make_kj_promise(_thread_pool.submit<syscall_result<int>>([name, flags] {
+        return wrap_syscall<int>(::open(name.c_str(), O_DIRECT | O_CLOEXEC | static_cast<int>(flags), S_IRWXU));
+    }).then([] (syscall_result<int> sr) {
+        sr.throw_if_error();
+        return make_ready_future<file>(file(sr.result));
+    }));
+}
+
+
+kj::Promise<std::experimental::optional<directory_entry_type>>
+reactor::kj_file_type(sstring name) {
+    return make_kj_promise(_thread_pool.submit<syscall_result_extra<struct stat>>([name] {
+        struct stat st;
+        auto ret = stat(name.c_str(), &st);
+        return wrap_syscall(ret, st);
+    }).then([] (syscall_result_extra<struct stat> sr) {
+        if (long(sr.result) == -1) {
+            if (sr.result != ENOENT && sr.result != ENOTDIR) {
+                sr.throw_if_error();
+            }
+            return make_ready_future<std::experimental::optional<directory_entry_type> >
+                (std::experimental::optional<directory_entry_type>() );
+        }
+        return make_ready_future<std::experimental::optional<directory_entry_type> >
+            (std::experimental::optional<directory_entry_type>(stat_to_entry_type(sr.extra.st_mode)) );
+    }));
+}
+
+kj::Promise<file>
+reactor::kj_open_directory(sstring name) {
+    return make_kj_promise(_thread_pool.submit<syscall_result<int>>([name] {
+        return wrap_syscall<int>(::open(name.c_str(), O_DIRECTORY | O_CLOEXEC | O_RDONLY));
+    }).then([] (syscall_result<int> sr) {
+        sr.throw_if_error();
+        return make_ready_future<file>(file(sr.result));
+    }));
+}
+
+kj::Promise<void>
+posix_file_impl::kj_flush(void) {    
+	++engine()._fsyncs;
+    return make_kj_promise(engine()._thread_pool.submit<syscall_result<int>>([this] {
+        return wrap_syscall<int>(::fsync(_fd));
+    }).then([] (syscall_result<int> sr) {
+        sr.throw_if_error();
+        return make_ready_future<>();
+    }));
+}
+
+kj::Promise<struct stat>
+posix_file_impl::kj_stat(void) {
+    return make_kj_promise(engine()._thread_pool.submit<syscall_result_extra<struct stat>>([this] {
+        struct stat st;
+        auto ret = ::fstat(_fd, &st);
+        return wrap_syscall(ret, st);
+    }).then([] (syscall_result_extra<struct stat> ret) {
+        ret.throw_if_error();
+        return make_ready_future<struct stat>(ret.extra);
+    }));
+}
+
+kj::Promise<void>
+posix_file_impl::kj_truncate(uint64_t length) {
+    return make_kj_promise(engine()._thread_pool.submit<syscall_result<int>>([this, length] {
+        return wrap_syscall<int>(::ftruncate(_fd, length));
+    }).then([] (syscall_result<int> sr) {
+        sr.throw_if_error();
+        return make_ready_future<>();
+    }));
+}
+
+kj::Promise<void>
+blockdev_file_impl::kj_truncate(uint64_t length) {
+    return kj::READY_NOW;
+}
+
+kj::Promise<void>
+posix_file_impl::kj_discard(uint64_t offset, uint64_t length) {
+    return make_kj_promise(engine()._thread_pool.submit<syscall_result<int>>([this, offset, length] () mutable {
+        return wrap_syscall<int>(::fallocate(_fd, FALLOC_FL_PUNCH_HOLE|FALLOC_FL_KEEP_SIZE,
+            offset, length));
+    }).then([] (syscall_result<int> sr) {
+        sr.throw_if_error();
+        return make_ready_future<>();
+    }));
+}
+
+kj::Promise<void>
+blockdev_file_impl::kj_discard(uint64_t offset, uint64_t length) {
+    return make_kj_promise(engine()._thread_pool.submit<syscall_result<int>>([this, offset, length] () mutable {
+        uint64_t range[2] { offset, length };
+        return wrap_syscall<int>(::ioctl(_fd, BLKDISCARD, &range));
+    }).then([] (syscall_result<int> sr) {
+        sr.throw_if_error();
+        return make_ready_future<>();
+    }));
+}
+
+kj::Promise<size_t>
+posix_file_impl::kj_size(void) {
+    return posix_file_impl::kj_stat().then([] (struct stat&& st) {
+        return (size_t)(st.st_size);
+    });
+}
+
+kj::Promise<size_t>
+blockdev_file_impl::kj_size(void) {
+    return make_kj_promise(engine()._thread_pool.submit<syscall_result_extra<size_t>>([this] {
+        size_t size;
+        int ret = ::ioctl(_fd, BLKGETSIZE64, &size);
+        return wrap_syscall(ret, size);
+    }).then([] (syscall_result_extra<size_t> ret) {
+        ret.throw_if_error();
+        return make_ready_future<size_t>(ret.extra);
+    }));
+}
+
+#endif 
 
 subscription<directory_entry>
 posix_file_impl::list_directory(std::function<future<> (directory_entry de)> next) {
@@ -748,12 +1038,12 @@ void reactor::exit(int ret) {
 
 
 struct reactor::collectd_registrations {
-    std::vector<scollectd::registration> regs;
+    scollectd::registrations regs;
 };
 
 reactor::collectd_registrations
 reactor::register_collectd_metrics() {
-    std::vector<scollectd::registration> regs = {
+    return collectd_registrations{ {
             // queue_length     value:GAUGE:0:U
             // Absolute value of num tasks in queue.
             scollectd::add_polled_metric(scollectd::type_instance_id("reactor"
@@ -781,6 +1071,31 @@ reactor::register_collectd_metrics() {
                     , "queue_length", "idle")
                     , scollectd::make_typed(scollectd::data_type::GAUGE,
                             [this] () -> uint32_t { return _load * 100; })
+            ),
+            // total_operations value:DERIVE:0:U
+            scollectd::add_polled_metric(scollectd::type_instance_id("reactor"
+                    , scollectd::per_cpu_plugin_instance
+                    , "total_operations", "aio-reads")
+                    , scollectd::make_typed(scollectd::data_type::DERIVE, _aio_reads)
+            ),
+            // total_operations value:DERIVE:0:U
+            scollectd::add_polled_metric(scollectd::type_instance_id("reactor"
+                    , scollectd::per_cpu_plugin_instance
+                    , "total_operations", "aio-writes")
+                    , scollectd::make_typed(scollectd::data_type::DERIVE, _aio_writes)
+            ),
+            // total_operations value:DERIVE:0:U
+            scollectd::add_polled_metric(scollectd::type_instance_id("reactor"
+                    , scollectd::per_cpu_plugin_instance
+                    , "total_operations", "fsyncs")
+                    , scollectd::make_typed(scollectd::data_type::DERIVE, _fsyncs)
+            ),
+            // total_operations value:DERIVE:0:U
+            scollectd::add_polled_metric(scollectd::type_instance_id("reactor"
+                    , scollectd::per_cpu_plugin_instance
+                    , "total_operations", "io-threaded-fallbacks")
+                    , scollectd::make_typed(scollectd::data_type::DERIVE,
+                            std::bind(&thread_pool::operation_count, &_thread_pool))
             ),
             scollectd::add_polled_metric(
                 scollectd::type_instance_id("memory",
@@ -810,8 +1125,7 @@ reactor::register_collectd_metrics() {
                 scollectd::make_typed(scollectd::data_type::GAUGE,
                         [] { return memory::stats().live_objects(); })
             ),
-    };
-    return { regs };
+    } };
 }
 
 void reactor::run_tasks(circular_buffer<std::unique_ptr<task>>& tasks, size_t quota) {
@@ -826,7 +1140,7 @@ void reactor::run_tasks(circular_buffer<std::unique_ptr<task>>& tasks, size_t qu
     }
 }
 
-int reactor::run() {
+int reactor::run(uint maxTurnCount) {
     auto collectd_metrics = register_collectd_metrics();
 
 #ifndef HAVE_OSV
@@ -916,6 +1230,11 @@ int reactor::run() {
     bool idle = false;
 
     while (true) {
+        running = true;
+        // enterScope();
+        turn();        
+        setRunnable(head != nullptr);
+
         run_tasks(_pending_tasks, _task_quota);
         if (_stopped) {
             load_timer.cancel();
@@ -1048,7 +1367,9 @@ reactor::poller::~poller() {
 bool
 reactor_backend_epoll::wait_and_process() {
     std::array<epoll_event, 128> eevt;
+    // printf("Wait for event\n");          
     int nr = ::epoll_wait(_epollfd.get(), eevt.data(), eevt.size(), 0);
+    // printf("Got something\n");
     if (nr == -1 && errno == EINTR) {
         return false; // gdb can cause this
     }
@@ -1069,6 +1390,37 @@ reactor_backend_epoll::wait_and_process() {
     }
     return nr;
 }
+
+#ifdef __USE_KJ__
+bool
+reactor_backend_epoll::kj_wait_and_process() {    
+    std::array<epoll_event, 128> eevt;
+    // printf("Wait for event KJ\n");          
+    int nr = ::epoll_wait(_epollfd.get(), eevt.data(), eevt.size(), 0);  
+    // printf("Fired event already\n");          
+    if (nr == -1 && errno == EINTR) {
+        return false; // gdb can cause this
+    }
+    assert(nr != -1);
+    for (int i = 0; i < nr; ++i) {
+        auto& evt = eevt[i];
+        auto pfd = reinterpret_cast<pollable_fd_state*>(evt.data.ptr);
+        auto events = evt.events & (EPOLLIN | EPOLLOUT);
+        auto events_to_remove = events & ~pfd->events_requested;    
+        kj_complete_epoll_event(*pfd, pfd->kj_pollin, events, EPOLLIN);            
+        kj_complete_epoll_event(*pfd, pfd->kj_pollout, events, EPOLLOUT);        
+        if (events_to_remove) {
+            pfd->events_epoll &= ~events_to_remove;
+            evt.events = pfd->events_epoll;
+            auto op = evt.events ? EPOLL_CTL_MOD : EPOLL_CTL_DEL;
+            ::epoll_ctl(_epollfd.get(), op, pfd->fd.get(), &evt);
+        }
+    }
+    return nr;
+}
+
+#endif
+
 
 syscall_work_queue::syscall_work_queue()
     : _pending()
@@ -1187,7 +1539,7 @@ void smp_message_queue::start(unsigned cpuid) {
     _tx.init();
     char instance[10];
     std::snprintf(instance, sizeof(instance), "%u-%u", engine().cpu_id(), cpuid);
-    _collectd_regs = {
+    _collectd_regs = scollectd::registrations({
             // queue_length     value:GAUGE:0:U
             // Absolute value of num packets in last tx batch.
             scollectd::add_polled_metric(scollectd::type_instance_id("smp"
@@ -1228,7 +1580,7 @@ void smp_message_queue::start(unsigned cpuid) {
                     , "total_operations", "completed-messages")
             , scollectd::make_typed(scollectd::data_type::DERIVE, _compl)
             ),
-    };
+    });
 }
 
 /* not yet implemented for OSv. TODO: do the notification like we do class smp. */
@@ -1631,6 +1983,22 @@ reactor_backend_osv::wait_and_process() {
     return true;
 }
 
+#ifdef __USE_KJ__
+bool
+reactor_backend_osv::kj_wait_and_process() {
+    _poller.process();
+    // osv::poller::process runs pollable's callbacks, but does not currently
+    // have a timer expiration callback - instead if gives us an expired()
+    // function we need to check:
+    if (_poller.expired()) {
+        _timer_promise.set_value();
+        _timer_promise = promise<>();
+    }
+    return true;
+}
+
+#endif
+
 future<>
 reactor_backend_osv::notified(reactor_notifier *notifier) {
     // reactor_backend_osv::make_reactor_notifier() generates a
@@ -1655,6 +2023,36 @@ reactor_backend_osv::writeable(pollable_fd_state& fd) {
     std::cout << "reactor_backend_osv does not support file descriptors - writeable() shouldn't have been called!\n";
     abort();
 }
+#ifdef __USE_KJ__
+
+kj::Promise<void>
+reactor_backend_osv::kj_notified(reactor_notifier *notifier) {
+    // reactor_backend_osv::make_reactor_notifier() generates a
+    // reactor_notifier_osv, so we only can work on such notifiers.
+    reactor_notifier_osv *n = dynamic_cast<reactor_notifier_osv *>(notifier);
+    if (n->read()) {
+        return kj::READY_NOW;
+    }
+    n->enable(_poller);
+    return n->_pr.get_future().then([](){
+        return kj::READY_NOW;    
+    });
+}
+
+
+kj::Promise<void>
+reactor_backend_osv::kj_readable(pollable_fd_state& fd) {
+    std::cout << "reactor_backend_osv does not support file descriptors - readable() shouldn't have been called!\n";
+    abort();
+}
+
+kj::Promise<void>
+reactor_backend_osv::kj_writeable(pollable_fd_state& fd) {
+    std::cout << "reactor_backend_osv does not support file descriptors - writeable() shouldn't have been called!\n";
+    abort();
+}
+
+#endif
 
 void
 reactor_backend_osv::forget(pollable_fd_state& fd) {
@@ -1722,6 +2120,10 @@ future<file> open_directory(sstring name) {
     return engine().open_directory(std::move(name));
 }
 
+future<> make_directory(sstring name) {
+    return engine().make_directory(std::move(name));
+}
+
 future<> remove_file(sstring pathname) {
     return engine().remove_file(std::move(pathname));
 }
@@ -1737,3 +2139,9 @@ server_socket listen(socket_address sa, listen_options opts) {
 future<connected_socket> connect(socket_address sa) {
     return engine().connect(sa);
 }
+
+#ifdef __USE_KJ__
+kj::Promise<connected_socket> kj_connect(socket_address sa) {
+    return engine().kj_connect(sa);
+}
+#endif

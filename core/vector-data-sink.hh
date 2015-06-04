@@ -41,6 +41,19 @@ public:
         // TODO: close on local side
         return make_ready_future<>();
     }
+    #ifdef __USE_KJ__
+
+
+    virtual kj::Promise<void> kj_put(net::packet p) override {
+        _v.push_back(std::move(p));
+        return kj::READY_NOW;
+    }
+
+    virtual kj::Promise<void> kj_close() override {
+        // TODO: close on local side
+        return kj::READY_NOW;
+    }
+    #endif
 };
 
 #endif

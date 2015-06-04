@@ -24,34 +24,95 @@
 #include <malloc.h>
 #include <string.h>
 
+#ifdef __USE_KJ__
+#include "kj/debug.h"
+#include "kj/async.h"
+#include "kj/async-io.h"
+#endif 
 class file_data_source_impl : public data_source_impl {
     lw_shared_ptr<file> _file;
     uint64_t _pos;
+    std::experimental::optional<size_t> _fsize;
     size_t _buffer_size;
+private:
+    // Should be called only when _fsize is initialized
+    future<temporary_buffer<char>> do_get() {
+        using buf_type = temporary_buffer<char>;
+        size_t read_size = _buffer_size;
+        size_t fsize = _fsize.value();
+
+        if (_pos >= fsize) {
+            return make_ready_future<buf_type>(std::move(buf_type(0)));
+        } else if (_pos + _buffer_size > fsize) {
+            read_size = fsize - _pos;
+        }
+
+        return _file->dma_read_bulk<char>(_pos, read_size).then(
+                [this] (buf_type buf) {
+            _pos += buf.size();
+
+            return std::move(buf);
+        });
+    }
+
+#ifdef __USE_KJ__ 
+    
+
+    kj::Promise<temporary_buffer<char>> kj_do_get() {
+        using buf_type = temporary_buffer<char>;
+        size_t read_size = _buffer_size;
+        size_t fsize = _fsize.value();
+
+        if (_pos >= fsize) {
+            return kj::Promise<buf_type>(std::move(buf_type(0)));
+        } else if (_pos + _buffer_size > fsize) {
+            read_size = fsize - _pos;
+        }
+
+        return _file->kj_dma_read_bulk<char>(_pos, read_size).then(
+                [this] (buf_type buf) {
+            _pos += buf.size();
+
+            return std::move(buf);
+        });
+    }
+#endif    
 public:
     file_data_source_impl(lw_shared_ptr<file> f, uint64_t pos, size_t buffer_size)
             : _file(std::move(f)), _pos(pos), _buffer_size(buffer_size) {}
+
     virtual future<temporary_buffer<char>> get() override {
-        // must align allocation for dma
-        auto alignment = std::min<size_t>(_buffer_size, 4096);
-        auto buf = temporary_buffer<char>::aligned(alignment, _buffer_size);
-        auto q = buf.get_write(); // alive while "buf" is kept alive
-        auto old_pos = _pos;
-        // dma_read needs to be aligned. It doesn't have to be page-aligned,
-        // though, and we could get away with something much smaller. However, if
-        // we start reading in things outside page boundaries, we will end up with
-        // various pages around, some of them with overlapping ranges. Those would
-        // be very challenging to cache.
-        old_pos &= ~4095;
-        auto front = _pos - old_pos;
-        _pos += _buffer_size - front;
-        return _file->dma_read(old_pos, q, _buffer_size).then(
-                [buf = std::move(buf), front] (size_t size) mutable {
-            buf.trim(size);
-            buf.trim_front(front);
-            return make_ready_future<temporary_buffer<char>>(std::move(buf));
-        });
+        if (!_fsize){
+            return _file->size().then(
+                    [this] (size_t fsize) {
+                _fsize = fsize;
+
+                return do_get();
+            });
+        }
+
+        return do_get();
     }
+    
+#ifdef __USE_KJ__
+
+    virtual void setBuffer(temporary_buffer<char> && buf) override{
+        
+    }
+
+    virtual kj::Promise<temporary_buffer<char>> kj_get(size_t maxBytes = 8192) override{
+       if (!_fsize){
+            return _file->kj_size().then(
+                    [this] (size_t fsize) {
+                _fsize = fsize;
+
+                return kj_do_get();
+            });
+        }
+
+        return kj_do_get();
+    };
+#endif    
 };
 
 class file_data_source : public data_source {
@@ -106,6 +167,38 @@ public:
         });
     }
     future<> close() { return _file->flush(); }
+    #ifdef __USE_KJ__
+    kj::Promise<void> kj_put(net::packet data) { return kj::READY_NOW; }
+
+    virtual kj::Promise<void> kj_put(temporary_buffer<char> buf) override {
+        bool truncate = false;
+        auto pos = _pos;
+        _pos += buf.size();
+        auto p = static_cast<const char*>(buf.get());
+        size_t buf_size = buf.size();
+
+        if ((buf.size() & 511) != 0) {
+            // If buf size isn't aligned, copy its content into a new aligned buf.
+            // This should only happen when the user calls output_stream::flush().
+            auto tmp = allocate_buffer(align_up(buf.size(), 512UL));
+            ::memcpy(tmp.get_write(), buf.get(), buf.size());
+            buf = std::move(tmp);
+            p = buf.get();
+            buf_size = buf.size();
+            truncate = true;
+        }
+        return _file->kj_dma_write(pos, p, buf_size).then(
+            [this, buf = std::move(buf), truncate] (size_t size) -> kj::Promise<void> {
+            if (truncate) {
+                return _file->kj_truncate(_pos).then([this] {
+                    return _file->kj_flush();
+                });
+            }
+            return kj::READY_NOW;
+        });
+    }
+    kj::Promise<void> kj_close() { return _file->kj_flush(); }
+    #endif
 };
 
 class file_data_sink : public data_sink {

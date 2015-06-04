@@ -24,6 +24,11 @@
 
 #include "core/reactor.hh"
 
+#ifdef __USE_KJ__
+#include "kj/debug.h"
+#include "kj/async.h"
+#include "kj/async-io.h"
+#endif
 namespace net {
 
 template <typename Protocol>
@@ -41,6 +46,11 @@ class native_server_socket_impl : public server_socket_impl {
 public:
     native_server_socket_impl(Protocol& proto, uint16_t port, listen_options opt);
     virtual future<connected_socket, socket_address> accept() override;
+
+#ifdef __USE_KJ__
+    virtual kj::Promise<std::pair<connected_socket, socket_address>> kj_accept() override;
+#endif    
+
 };
 
 template <typename Protocol>
@@ -57,6 +67,18 @@ native_server_socket_impl<Protocol>::accept() {
                 socket_address()); // FIXME: don't fake it
     });
 }
+
+#ifdef __USE_KJ__
+template <typename Protocol>
+kj::Promise<std::pair<connected_socket, socket_address>>
+native_server_socket_impl<Protocol>::kj_accept() {
+    return _listener.kj_accept().then([this] (typename Protocol::connection conn) {
+        return kj::Promise< std::pair<connected_socket, socket_address> >(
+                std::make_pair(connected_socket(std::make_unique<native_connected_socket_impl<Protocol>>(std::move(conn))), socket_address() ) ); // FIXME: don't fake it
+    });
+}
+
+#endif//*/
 
 // native_connected_socket_impl
 template <typename Protocol>
@@ -98,6 +120,30 @@ public:
             return get();
         });
     }
+#ifdef __USE_KJ__
+
+      virtual void setBuffer(temporary_buffer<char> && buf) override{
+        
+    }
+
+    virtual kj::Promise<temporary_buffer<char>> kj_get(size_t maxBytes = 8192) override{
+        if (_eof) {
+            return kj::Promise<temporary_buffer<char>>(temporary_buffer<char>(0));
+        }
+        if (_cur_frag != _buf.nr_frags()) {
+            auto& f = _buf.fragments()[_cur_frag++];
+            return 
+                    kj::Promise<temporary_buffer<char>>(temporary_buffer<char>(f.base, f.size,
+                            make_deleter(deleter(), [p = _buf.share()] () mutable {})));
+        }
+        return _conn.kj_wait_for_data().then([this] {
+            _buf = _conn.read();
+            _cur_frag = 0;
+            _eof = !_buf.len();
+            return kj_get();
+        });    
+    };
+#endif
 };
 
 template <typename Protocol>
@@ -114,6 +160,15 @@ public:
         _conn.close_write();
         return make_ready_future<>();
     }
+    #ifdef __USE_KJ__
+    virtual kj::Promise<void> kj_put(packet p) override {
+        return _conn.kj_send(std::move(p));
+    }
+    virtual kj::Promise<void> kj_close() override {
+        _conn.close_write();
+        return kj::READY_NOW;
+    }
+    #endif
 };
 
 template <typename Protocol>

@@ -25,6 +25,11 @@
 #include "core/reactor.hh"
 #include <boost/program_options.hpp>
 
+#ifdef __USE_KJ__
+#include "kj/debug.h"
+#include "kj/async.h"
+#include "kj/async-io.h"
+#endif
 namespace net {
 
 data_source posix_data_source(pollable_fd& fd);
@@ -38,6 +43,12 @@ public:
     explicit posix_data_source_impl(pollable_fd& fd, size_t buf_size = 8192)
         : _fd(fd), _buf(buf_size), _buf_size(buf_size) {}
     virtual future<temporary_buffer<char>> get() override;
+#ifdef __USE_KJ__
+    virtual void setBuffer(temporary_buffer<char> && buf) override{
+        _buf = std::move(buf);
+    }
+    virtual kj::Promise<temporary_buffer<char>> kj_get(size_t maxBytes = 8192) override;
+#endif
 };
 
 class posix_data_sink_impl : public data_sink_impl {
@@ -51,6 +62,16 @@ public:
         _fd.close();
         return make_ready_future<>();
     }
+#ifdef __USE_KJ__
+
+    kj::Promise<void> kj_put(packet p) override;
+    kj::Promise<void> kj_put(temporary_buffer<char> buf) override;
+    kj::Promise<void> kj_close() override {
+        _fd.close();
+        return kj::READY_NOW;
+    }
+
+#endif
 };
 
 class posix_ap_server_socket_impl : public server_socket_impl {
@@ -65,6 +86,9 @@ class posix_ap_server_socket_impl : public server_socket_impl {
 public:
     explicit posix_ap_server_socket_impl(socket_address sa) : _sa(sa) {}
     virtual future<connected_socket, socket_address> accept();
+#ifdef __USE_KJ__
+    virtual kj::Promise<std::pair<connected_socket, socket_address> > kj_accept();
+#endif    
     static void move_connected_socket(socket_address sa, pollable_fd fd, socket_address addr);
 };
 
@@ -74,6 +98,9 @@ class posix_server_socket_impl : public server_socket_impl {
 public:
     explicit posix_server_socket_impl(socket_address sa, pollable_fd lfd) : _sa(sa), _lfd(std::move(lfd)) {}
     virtual future<connected_socket, socket_address> accept();
+#ifdef __USE_KJ__
+    virtual kj::Promise<std::pair<connected_socket, socket_address>> kj_accept();
+#endif    
 };
 
 class posix_reuseport_server_socket_impl : public server_socket_impl {
@@ -82,6 +109,9 @@ class posix_reuseport_server_socket_impl : public server_socket_impl {
 public:
     explicit posix_reuseport_server_socket_impl(socket_address sa, pollable_fd lfd) : _sa(sa), _lfd(std::move(lfd)) {}
     virtual future<connected_socket, socket_address> accept();
+#ifdef __USE_KJ__
+    virtual kj::Promise< std::pair<connected_socket, socket_address> > kj_accept();
+#endif        
 };
 
 class posix_network_stack : public network_stack {
@@ -90,12 +120,15 @@ private:
 public:
     explicit posix_network_stack(boost::program_options::variables_map opts) : _reuseport(engine().posix_reuseport_available()) {}
     virtual server_socket listen(socket_address sa, listen_options opts) override;
-    virtual future<connected_socket> connect(socket_address sa) override;
+    virtual future<connected_socket> connect(socket_address sa, socket_address local) override;
     virtual net::udp_channel make_udp_channel(ipv4_addr addr) override;
     static future<std::unique_ptr<network_stack>> create(boost::program_options::variables_map opts) {
         return make_ready_future<std::unique_ptr<network_stack>>(std::unique_ptr<network_stack>(new posix_network_stack(opts)));
     }
     virtual bool has_per_core_namespace() override { return _reuseport; };
+#ifdef __USE_KJ__
+    virtual kj::Promise<connected_socket> kj_connect(socket_address sa, socket_address local = socket_address(::sockaddr_in{AF_INET, INADDR_ANY, 0}))  override;
+#endif    
 };
 
 class posix_ap_network_stack : public posix_network_stack {
@@ -104,10 +137,13 @@ private:
 public:
     posix_ap_network_stack(boost::program_options::variables_map opts) : posix_network_stack(std::move(opts)), _reuseport(engine().posix_reuseport_available()) {}
     virtual server_socket listen(socket_address sa, listen_options opts) override;
-    virtual future<connected_socket> connect(socket_address sa) override;
+    virtual future<connected_socket> connect(socket_address sa, socket_address local) override;
     static future<std::unique_ptr<network_stack>> create(boost::program_options::variables_map opts) {
         return make_ready_future<std::unique_ptr<network_stack>>(std::unique_ptr<network_stack>(new posix_ap_network_stack(opts)));
     }
+#ifdef __USE_KJ__
+    virtual kj::Promise<connected_socket> kj_connect(socket_address sa, socket_address local = socket_address(::sockaddr_in{AF_INET, INADDR_ANY, 0}))  override;
+#endif        
 };
 
 }
