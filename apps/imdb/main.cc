@@ -88,19 +88,19 @@ public:
     kj::Promise<void> add(AddContext context) override {
         auto params = context.getParams();
         context.getResults().setValue(params.getLeft() + params.getRight());
-        printf("Hello from server %d    +   %d\n",params.getLeft(), params.getRight());
+        printf("Hello from server %d    +   %d\n", params.getLeft(), params.getRight());
         return kj::READY_NOW;
     }
 };
 
 class HashProtocolImpl final: public HashProtocol::Server {
 
-    std::map<int,int> mymap;
+    std::map<int, int> mymap;
 
     // Implementation of the Hash Cap'n Proto interface.
     kj::Promise<void> get(GetContext context) override {
         auto request = context.getParams();
-        int key = request.getKey();     
+        int key = request.getKey();
         // std::cout<<"Server received Client's request key "<< key << endl;
 
         auto response = context.getResults();
@@ -111,7 +111,7 @@ class HashProtocolImpl final: public HashProtocol::Server {
 
     kj::Promise<void> set(SetContext context) override {
         auto request = context.getParams();
-        int key = request.getKey();     
+        int key = request.getKey();
         // std::cout<<"Client set key "<<key<<endl;
 
         int value = request.getValue();
@@ -124,78 +124,96 @@ class HashProtocolImpl final: public HashProtocol::Server {
 
 
 
-class tcp_server {
-    kj::WaitScope waitScope;
-    std::vector<server_socket> _listeners;
-    std::vector<kj::Own<capnp::VmtsRpcServer> > servers;
+class tcp_server : private kj::TaskSet::ErrorHandler {
+    kj::WaitScope waitScope;    
     bool done;
     capnp::Capability::Client serverImpl;
+    capnp::SeastarServer server;
+    kj::TaskSet tasks;
 public:
-    tcp_server(): waitScope(engine()), done(false), serverImpl(kj::heap<HashProtocolImpl>()) {};
-    future<> listen(ipv4_addr addr) {
-        listen_options lo;
-        lo.reuse_address = true;
-        _listeners.push_back(engine().listen(make_ipv4_address(addr), lo));
-        // do_accepts(_listeners.size() - 1);
-        KJ_DETACH(kj_keep_doing([this, which = _listeners.size() - 1]() {
-            return do_accepts(which);
-        }));
-        return make_ready_future<>();
+    tcp_server(): waitScope(engine()), done(false), serverImpl(kj::heap<HashProtocolImpl>()), server(serverImpl), tasks(*this) {};
+    ~tcp_server(){
+        printf("Tcp Server destroyed\n");
     }
 
+    void taskFailed(kj::Exception&& exception) {
+        KJ_LOG(ERROR, exception);
+    }
+
+    void acceptLoop(ipv4_addr addr){        
+        tasks.add(
+            server.listen(addr).then([this,addr](){
+                acceptLoop(addr);
+            })
+        );    
+    }
+
+    // future<> listen(ipv4_addr addr) {
+        
+    //     // listen_options lo;
+    //     // lo.reuse_address = true;
+    //     // _listeners.push_back(engine().listen(make_ipv4_address(addr), lo));
+    //     // // do_accepts(_listeners.size() - 1);
+    //     // KJ_DETACH(kj_keep_doing([this, which = _listeners.size() - 1]() {
+    //     //     return do_accepts(which);
+    //     // }));
+    //     return make_ready_future<>();
+    //     // return kj::READY_NOW;
+    // }
 
 
-    kj::Promise<void> do_accepts(int which) {
-        auto pm = _listeners[which].kj_accept().then([this, which] (auto val) mutable {
-            connected_socket fd = std::move(val.first);
-            socket_address addr = std::move(val.second);
-            // std::cout<<"Thread "<<which<<" : "<<std::endl;
-            auto conn =  make_lw_shared<kj::connection>(std::move(fd), addr);
-            // std::cout<<"Connection created "<<std::endl;
-            // printf("Conn stream = %zu\n",(size_t)&(conn->_read_buf)  );
-            servers.emplace_back( kj::heap<capnp::VmtsRpcServer>(serverImpl, conn, this->waitScope)  );
 
-            // auto pm = conn->kj_process().then([this, conn] () {
-            //     delete conn;
-            //     try {
-            //      // printf("Connection accepted\n");
-            //     } catch (std::exception& ex) {
-            //         std::cout << "request error " << ex.what() << "\n";
-            //     }
-            // },[conn](kj::Exception&& ex){
-            //     if (conn) delete conn;
-            //     std::cout<<"Connection error "<<ex.getDescription().cStr()<<std::endl;
-            // });
+//     kj::Promise<void> do_accepts(int which) {
+//         auto pm = _listeners[which].kj_accept().then([this, which] (auto val) mutable {
+//             connected_socket fd = std::move(val.first);
+//             socket_address addr = std::move(val.second);
+//             // std::cout<<"Thread "<<which<<" : "<<std::endl;
+//             auto conn =  make_lw_shared<kj::connection>(std::move(fd), addr);
+//             // std::cout<<"Connection created "<<std::endl;
+//             // printf("Conn stream = %zu\n",(size_t)&(conn->_read_buf)  );
+//             servers.emplace_back( kj::heap<capnp::VmtsRpcServer>(serverImpl, conn, this->waitScope)  );
 
-            // printf("Detach accept connect\n");
-            // KJ_DETACH(pm);
-            // pm.wait(waitScope);
+//             // auto pm = conn->kj_process().then([this, conn] () {
+//             //     delete conn;
+//             //     try {
+//             //      // printf("Connection accepted\n");
+//             //     } catch (std::exception& ex) {
+//             //         std::cout << "request error " << ex.what() << "\n";
+//             //     }
+//             // },[conn](kj::Exception&& ex){
+//             //     if (conn) delete conn;
+//             //     std::cout<<"Connection error "<<ex.getDescription().cStr()<<std::endl;
+//             // });
 
-            // return pm;//*/
-            /*auto conn = new connection(*this, std::move(fd), addr);
-            conn->process().then_wrapped([this, conn] (auto&& f) {
-                delete conn;
-                try {
-                    f.get();
-                } catch (std::exception& ex) {
-                    std::cout << "request error " << ex.what() << "\n";
-                }
-            });
-            do_accepts(which);//*/
-        },[](kj::Exception&& e){
-            printf("Exception : %s\n",e.getDescription().cStr());
+//             // printf("Detach accept connect\n");
+//             // KJ_DETACH(pm);
+//             // pm.wait(waitScope);
 
-        });
-        // KJ_DETACH(pm);
-        return pm;
-// .then_wrapped([] (auto&& f) {
-//             try {
-//                 f.get();
-//             } catch (std::exception& ex) {
-//                 std::cout << "accept failed: " << ex.what() << "\n";
-//             }
+//             // return pm;//*/
+//             /*auto conn = new connection(*this, std::move(fd), addr);
+//             conn->process().then_wrapped([this, conn] (auto&& f) {
+//                 delete conn;
+//                 try {
+//                     f.get();
+//                 } catch (std::exception& ex) {
+//                     std::cout << "request error " << ex.what() << "\n";
+//                 }
+//             });
+//             do_accepts(which);//*/
+//         }, [](kj::Exception && e) {
+//             printf("Exception : %s\n", e.getDescription().cStr());
+
 //         });
-    }
+//         // KJ_DETACH(pm);
+//         return pm;
+// // .then_wrapped([] (auto&& f) {
+// //             try {
+// //                 f.get();
+// //             } catch (std::exception& ex) {
+// //                 std::cout << "accept failed: " << ex.what() << "\n";
+// //             }
+// //         });
+//     }
     /*class connection {
         connected_socket _fd;
         input_stream<char> _read_buf;
@@ -380,22 +398,11 @@ public:
     }//*/
 };
 
-template <typename K, typename V>
-struct Item{
-    K key;
-    V value;
-
-    Item(K&& k, V&& v){
-        key = k;
-        value = v;
-    };
-};
 
 
 
 int main(int ac, char** av)
-{
-    printf("Hello world\n");
+{ 
 
     app_template app;
     app.add_options()("port", bpo::value<uint16_t>()->default_value(10000),
@@ -407,7 +414,7 @@ int main(int ac, char** av)
         auto server = new distributed<tcp_server>;
         // auto kj_promise =
         server->start().then([server = std::move(server), port] () mutable {
-            server->invoke_on_all(&tcp_server::listen, ipv4_addr{port});
+            server->invoke_on_all(&tcp_server::acceptLoop, ipv4_addr{port});
         }).then([port] {
             std::cout << "Seastar TCP server listening on port " << port << " ...\n";
         });

@@ -355,22 +355,23 @@ future<> reactor_backend_epoll::notified(reactor_notifier *n) {
 pollable_fd
 reactor::posix_listen(socket_address sa, listen_options opts) {
     file_desc fd = file_desc::socket(sa.u.sa.sa_family, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0);
-    printf(".... Socket created\n");    
+    // printf(".... Socket created\n");    
     if (opts.reuse_address) {
         fd.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1);
     }
 
-    printf(".... Set SO_REUSEADDR\n");    
-
+    // printf(".... Set SO_REUSEADDR\n");    
+#ifdef SO_REUSEPORT
     if (_reuseport)
         fd.setsockopt(SOL_SOCKET, SO_REUSEPORT, 1);
+#endif    
 
-    printf(".... Set SO_REUSEPORT\n");    
+    // printf(".... Set SO_REUSEPORT\n");    
 
     fd.bind(sa.u.sa, sizeof(sa.u.sas));
-    printf(".... Binding\n");        
+    // printf(".... Binding\n");        
     fd.listen(100);    
-    printf(".... Listening\n");        
+    // printf(".... Listening\n");        
     return pollable_fd(std::move(fd));
 }
 
@@ -378,7 +379,9 @@ bool
 reactor::posix_reuseport_detect() {
     try {
         file_desc fd = file_desc::socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0);
+#ifdef SO_REUSEPORT        
         fd.setsockopt(SOL_SOCKET, SO_REUSEPORT, 1);
+#endif        
         return true;
     } catch(std::system_error& e) {
         return false;

@@ -28,8 +28,18 @@
 #include <kj/async-io.h>
 #include <kj/debug.h>
 #include <kj/threadlocal.h>
-#include "capnp/serialize-async.h"
+#include "capnp/rpc.h"
+#include "capnp/message.h"
+#include <kj/vector.h>
+#include <kj/async.h>
+#include <kj/one-of.h>
+#include <kj/function.h>
+#include <unordered_map>
 #include <map>
+#include <queue>
+#include <capnp/rpc.capnp.h>
+#include <kj/common.h>
+#include "capnp/serialize-async.h"
 #include "core/future.hh"
 #include "core/reactor.hh"
 // #include "event_port.hh"
@@ -38,208 +48,22 @@ using namespace kj;
 
 namespace capnp {
 
-KJ_THREADLOCAL_PTR(VmtsRpcContext) threadVmtsContext = nullptr;
-
-class VmtsRpcContext: public kj::Refcounted {
-public:
-
-  VmtsRpcContext() : ioContext( kj::newAsyncIoProvider(llaiop)) {    
-    threadVmtsContext = this;
-  };
-
-  VmtsRpcContext(lw_shared_ptr<kj::connection>& _conn,kj::WaitScope& _waitScope): llaiop(_conn), ioContext( kj::newAsyncIoProvider(llaiop) ),waitScope(&_waitScope) {    
-    threadVmtsContext = this;
-  }
-
-  ~VmtsRpcContext() noexcept(false) {
-    KJ_REQUIRE(threadVmtsContext == this,
-               "VmtsRpcContext destroyed from different thread than it was created.") {
-      return;
-    }
-    threadVmtsContext = nullptr;
-  }
-
-  kj::WaitScope& getWaitScope() {
-    return *waitScope;
-  }
-
-  kj::AsyncIoProvider& getIoProvider() {
-    return *ioContext;
-  }
-
-  kj::LowLevelAsyncIoProvider& getLowLevelIoProvider() {
-    return llaiop;
-  }
-
-
-  static kj::Own<VmtsRpcContext> getThreadLocal() {
-    VmtsRpcContext* existing = threadVmtsContext;
-    if (existing != nullptr) {
-      return kj::addRef(*existing);
-    } else {
-      return kj::refcounted<VmtsRpcContext>();
-    }
-  }
-
-
-  static kj::Own<VmtsRpcContext> getThreadLocal(lw_shared_ptr<kj::connection>& _conn,kj::WaitScope& _waitScope) {
-    VmtsRpcContext* existing = threadVmtsContext;
-    if (existing != nullptr) {
-      printf("Alo\n");
-      return kj::addRef(*existing);
-    } else {
-      printf("123\n");
-      try{
-        auto a = kj::refcounted<VmtsRpcContext>(_conn,_waitScope);
-        return a;
-      } catch( kj::Exception& ex ){
-        std::cout<<"Exception "<<ex.getDescription().cStr()<<std::endl;
-      }
-      return kj::refcounted<VmtsRpcContext>(_conn,_waitScope);
-    }
-  }
-
-private:
-  kj::UvLowLevelAsyncIoProvider llaiop;
-  kj::Own<kj::AsyncIoProvider> ioContext;
-  kj::WaitScope * waitScope;
-};
-
-// =======================================================================================
-
-kj::Promise<kj::Own<kj::AsyncIoStream>> connectAttach(kj::Own<kj::NetworkAddress>&& addr) {
-  return addr->connect().attach(kj::mv(addr));
-}
-
-struct VmtsRpcClient::Impl {
-  kj::Own<VmtsRpcContext> context;
-
-  struct ClientContext {
-    kj::Own<kj::AsyncIoStream> stream;
-    TwoPartyVatNetwork network;
-    RpcSystem<rpc::twoparty::VatId> rpcSystem;
-
-    ClientContext(kj::Own<kj::AsyncIoStream>&& stream, ReaderOptions readerOpts)
-      : stream(kj::mv(stream)),
-        network(*this->stream, rpc::twoparty::Side::CLIENT, readerOpts),
-        rpcSystem(makeRpcClient(network)) {}
-
-    Capability::Client getMain() {
-      word scratch[4];
-      memset(scratch, 0, sizeof(scratch));
-      MallocMessageBuilder message(scratch);
-      auto hostId = message.getRoot<rpc::twoparty::VatId>();
-      hostId.setSide(rpc::twoparty::Side::SERVER);
-      return rpcSystem.bootstrap(hostId);
-    }
-
-    Capability::Client restore(kj::StringPtr name) {
-      word scratch[64];
-      memset(scratch, 0, sizeof(scratch));
-      MallocMessageBuilder message(scratch);
-
-      auto hostIdOrphan = message.getOrphanage().newOrphan<rpc::twoparty::VatId>();
-      auto hostId = hostIdOrphan.get();
-      hostId.setSide(rpc::twoparty::Side::SERVER);
-
-      auto objectId = message.getRoot<AnyPointer>();
-      objectId.setAs<Text>(name);
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-      return rpcSystem.restore(hostId, objectId);
-#pragma GCC diagnostic pop
-    }
-  };
-
-  kj::ForkedPromise<void> setupPromise;
-
-  kj::Maybe<kj::Own<ClientContext>> clientContext;
-  // Filled in before `setupPromise` resolves.
-
-  Impl(kj::StringPtr serverAddress, uint defaultPort,
-       ReaderOptions readerOpts)
-    : context(VmtsRpcContext::getThreadLocal()),
-      setupPromise(context->getIoProvider().getNetwork()
-                   .parseAddress(serverAddress, defaultPort)
-                   .then([readerOpts](kj::Own<kj::NetworkAddress> && addr) {
-    return connectAttach(kj::mv(addr));
-  }).then([this, readerOpts](kj::Own<kj::AsyncIoStream>&& stream) {
-    clientContext = kj::heap<ClientContext>(kj::mv(stream),
-                                            readerOpts);
-  }).fork()) {}
-
-  Impl(const struct sockaddr* serverAddress, uint addrSize,
-       ReaderOptions readerOpts)
-    : context(VmtsRpcContext::getThreadLocal()),
-      setupPromise(
-        connectAttach(context->getIoProvider().getNetwork()
-                      .getSockaddr(serverAddress, addrSize))
-        .then([this, readerOpts](kj::Own<kj::AsyncIoStream> && stream) {
-    clientContext = kj::heap<ClientContext>(kj::mv(stream),
-                                            readerOpts);
-  }).fork()) {}
-
-  Impl(int socketFd, ReaderOptions readerOpts)
-    : context(VmtsRpcContext::getThreadLocal()),
-      setupPromise(kj::Promise<void>(kj::READY_NOW).fork()),
-      clientContext(kj::heap<ClientContext>(
-                      context->getLowLevelIoProvider().wrapSocketFd(socketFd),
-                      readerOpts)) {}
-};
-
-VmtsRpcClient::VmtsRpcClient(kj::StringPtr serverAddress, uint defaultPort, ReaderOptions readerOpts)
-  : impl(kj::heap<Impl>(serverAddress, defaultPort, readerOpts)) {}
-
-VmtsRpcClient::VmtsRpcClient(const struct sockaddr* serverAddress, uint addrSize, ReaderOptions readerOpts)
-  : impl(kj::heap<Impl>(serverAddress, addrSize, readerOpts)) {}
-
-VmtsRpcClient::VmtsRpcClient(int socketFd, ReaderOptions readerOpts)
-  : impl(kj::heap<Impl>(socketFd, readerOpts)) {}
-
-VmtsRpcClient::~VmtsRpcClient() noexcept(false) {}
-
-Capability::Client VmtsRpcClient::getMain() {
-  KJ_IF_MAYBE(client, impl->clientContext) {
-    return client->get()->getMain();
-  } else {
-    return impl->setupPromise.addBranch().then([this]() {
-      return KJ_ASSERT_NONNULL(impl->clientContext)->getMain();
-    });
-  }
-}
-
-Capability::Client VmtsRpcClient::importCap(kj::StringPtr name) {
-  KJ_IF_MAYBE(client, impl->clientContext) {
-    return client->get()->restore(name);
-  } else {
-    return impl->setupPromise.addBranch().then(kj::mvCapture(kj::heapString(name),
-    [this](kj::String && name) {
-      return KJ_ASSERT_NONNULL(impl->clientContext)->restore(name);
-    }));
-  }
-}
-
-kj::WaitScope& VmtsRpcClient::getWaitScope() {
-  return impl->context->getWaitScope();
-}
-
-kj::AsyncIoProvider& VmtsRpcClient::getIoProvider() {
-  return impl->context->getIoProvider();
-}
-
-kj::LowLevelAsyncIoProvider& VmtsRpcClient::getLowLevelIoProvider() {
-  return impl->context->getLowLevelIoProvider();
-}
-
 
 /****************************************************************************************/
-
-SeastarNetwork::SeastarNetwork(kj::AsyncIoStream& stream, rpc::twoparty::Side side,
+SeastarNetwork::SeastarNetwork(kj::UvIoStream& stream, rpc::twoparty::Side side,
                                        ReaderOptions receiveOptions)
-    : stream(stream), side(side), receiveOptions(receiveOptions), previousWrite(kj::READY_NOW) {
+  : stream(stream), side(side), peerVatId(4), receiveOptions(receiveOptions), previousWrite(kj::READY_NOW) {
+
+  peerVatId.initRoot<rpc::twoparty::VatId>().setSide(
+    side == rpc::twoparty::Side::CLIENT ? rpc::twoparty::Side::SERVER
+    : rpc::twoparty::Side::CLIENT);
   auto paf = kj::newPromiseAndFulfiller<void>();
   disconnectPromise = paf.promise.fork();
   disconnectFulfiller.fulfiller = kj::mv(paf.fulfiller);
+}
+
+rpc::twoparty::VatId::Reader SeastarNetwork::getPeerVatId() {
+  return peerVatId.getRoot<rpc::twoparty::VatId>();
 }
 
 void SeastarNetwork::FulfillerDisposer::disposeImpl(void* pointer) const {
@@ -275,6 +99,179 @@ kj::Promise<kj::Own<TwoPartyVatNetworkBase::Connection>> SeastarNetwork::accept(
 }
 
 
+class SeastarAsyncMessageReader: public MessageReader {
+public:
+  inline SeastarAsyncMessageReader(kj::UvIoStream& _inputStream, ReaderOptions options): MessageReader(options), inputStream(_inputStream), totalWords(-1) {
+    memset(firstWord, 0, sizeof(firstWord));
+  }
+  ~SeastarAsyncMessageReader() noexcept(false) {}
+
+  kj::Promise<bool> read();
+
+  // implements MessageReader ----------------------------------------
+
+  kj::ArrayPtr<const word> getSegment(uint id) override {
+    if (id >= segmentCount()) {
+      return nullptr;
+    } else {
+      uint32_t size = id == 0 ? segment0Size() : moreSizes[id - 1].get();
+      return kj::arrayPtr(segmentStarts[id], size);
+    }
+  }
+
+private:
+  kj::UvIoStream& inputStream;
+  size_t totalWords;
+  _::WireValue<uint32_t> firstWord[2];
+  kj::Array<_::WireValue<uint32_t>> moreSizes;
+  kj::Array<const word*> segmentStarts;
+
+  kj::Array<word> ownedSpace;
+  // Only if scratchSpace wasn't big enough.
+
+  inline uint segmentCount() { return firstWord[0].get() + 1; }
+  inline uint segment0Size() { return firstWord[1].get(); }
+
+  kj::Promise<void> readAfterFirstWord();
+  kj::Promise<void> readSegments();
+};
+
+kj::Promise<bool> SeastarAsyncMessageReader::read() {
+  size_t consumable = inputStream.buffer.consumable();
+  if (consumable >= sizeof(firstWord)) { //If already read
+    inputStream.buffer.copy(firstWord, sizeof(firstWord));
+    inputStream.buffer.consumed(sizeof(firstWord));
+    return readAfterFirstWord().then([]() { return true; });
+  }
+
+  if (inputStream.buffer.available() < sizeof(firstWord) ) {
+    inputStream.buffer.reset();
+  }
+
+
+  return inputStream.read().then([this](size_t n) mutable -> kj::Promise<bool> {
+    if (n == 0) {
+      return false;
+    } else if (n < sizeof(firstWord)) {
+      // EOF in first word.
+      KJ_FAIL_REQUIRE("Premature EOF.") {
+        return false;
+      }
+    }
+
+    inputStream.buffer.copy(firstWord, sizeof(firstWord));
+    inputStream.buffer.consumed(sizeof(firstWord));
+
+    // printf("Read : %zu bytes. Segment count =   %d, segment 0 size   %d\n",segmentCount(),segment0Size());
+
+    return readAfterFirstWord().then([]() { return true; });
+  });
+}
+
+kj::Promise<void> SeastarAsyncMessageReader::readAfterFirstWord() {
+  if (segmentCount() == 0) {
+    firstWord[1].set(0);
+  }
+
+  // Reject messages with too many segments for security reasons.
+  KJ_REQUIRE(segmentCount() < 512, "Message has too many segments.") {
+    return kj::READY_NOW;  // exception will be propagated
+  }
+
+  // printf("scratchSpace size = %zu\n",scratchSpace.size());
+
+  if (segmentCount() > 1) {
+    // Read sizes for all segments except the first.  Include padding if necessary.
+    moreSizes = kj::heapArray<_::WireValue<uint32_t>>(segmentCount() & ~1);
+
+    size_t size = moreSizes.size() * sizeof(moreSizes[0]);
+    size_t consumable = inputStream.buffer.consumable();
+    if (consumable >= size) { //If already read
+      inputStream.buffer.copy(moreSizes.begin(), size);
+      inputStream.buffer.consumed(size);
+      return readSegments();
+    }
+
+    if (inputStream.buffer.available() < size ) {
+      inputStream.buffer.reset();
+    }
+
+    return inputStream.read().then([this, size](size_t n) mutable -> kj::Promise<void> {
+      if (n == 0) {
+        return kj::READY_NOW;
+      } else if (n < size) {
+        // EOF in first word.
+        KJ_FAIL_REQUIRE("Premature EOF.") {
+          return kj::READY_NOW;
+        }
+      }
+
+      inputStream.buffer.copy(moreSizes.begin(), size);
+      inputStream.buffer.consumed(size);
+
+      return readSegments();
+    });
+  } else {
+    return readSegments();
+  }
+}
+
+kj::Promise<void> SeastarAsyncMessageReader::readSegments() {
+  if (totalWords < 0) {
+    totalWords = segment0Size();
+
+    if (segmentCount() > 1) {
+      for (uint i = 0; i < segmentCount() - 1; i++) {
+        totalWords += moreSizes[i].get();
+      }
+    }
+
+    // Don't accept a message which the receiver couldn't possibly traverse without hitting the
+    // traversal limit.  Without this check, a malicious client could transmit a very large segment
+    // size to make the receiver allocate excessive space and possibly crash.
+    KJ_REQUIRE(totalWords <= getOptions().traversalLimitInWords,
+               "Message is too large.  To increase the limit on the receiving end, see "
+               "capnp::ReaderOptions.") {
+      return kj::READY_NOW;  // exception will be propagated
+    }
+
+    if (inputStream.buffer.size() < totalWords) {
+      // TODO(perf):  Consider allocating each segment as a separate chunk to reduce memory
+      //   fragmentation.
+      // printf("Allocate more space\n");
+      inputStream.buffer.reserve(totalWords);
+    } else if (inputStream.buffer.available() < totalWords) {
+      inputStream.buffer.reset();
+    }
+
+    segmentStarts = kj::heapArray<const word*>(segmentCount());
+    kj::ArrayPtr<capnp::word> scratchSpace(inputStream.buffer.consuming(totalWords));
+    segmentStarts[0] = scratchSpace.begin();
+
+    if (segmentCount() > 1) {
+      size_t offset = segment0Size();
+
+      for (uint i = 1; i < segmentCount(); i++) {
+        segmentStarts[i] = scratchSpace.begin() + offset;
+        offset += moreSizes[i - 1].get();
+      }
+    }
+  }
+
+  size_t consumable = inputStream.buffer.consumable();
+  if (consumable >= totalWords) { //If already read
+    // printf("Now read everything %zu     %zu\n",(size_t)scratchSpace.begin(),totalWords * sizeof(word));
+    inputStream.buffer.consumed(totalWords);
+    return kj::READY_NOW;
+  }
+
+
+  // printf("Now read everything %zu     %zu\n",(size_t)scratchSpace.begin(),totalWords * sizeof(word));
+  return inputStream.read().then([this](auto n) -> kj::Promise<void> {
+    return this->readSegments();
+
+  });
+}
 class SeastarNetwork::OutgoingMessageImpl final
     : public OutgoingRpcMessage, public kj::Refcounted {
 public:
@@ -306,7 +303,7 @@ public:
 
 private:
   SeastarNetwork& network;
-  FlatMessageBuilder message;
+  MallocMessageBuilder message;
 };
 
 class SeastarNetwork::IncomingMessageImpl final: public IncomingRpcMessage {
@@ -327,6 +324,19 @@ private:
 
 kj::Own<OutgoingRpcMessage> SeastarNetwork::newOutgoingMessage(uint firstSegmentWordSize) {
   return kj::refcounted<OutgoingMessageImpl>(*this, firstSegmentWordSize);
+}
+kj::Promise<kj::Maybe<kj::Own<MessageReader>>> tryReadMessage(
+  kj::UvIoStream& input, ReaderOptions options, kj::ArrayPtr<word> scratchSpace) {
+  auto reader = kj::heap<SeastarAsyncMessageReader>(input, options);
+  auto promise = reader->read();
+  return promise.then(kj::mvCapture(reader,
+  [](kj::Own<MessageReader> && reader, bool success) -> kj::Maybe<kj::Own<MessageReader>> {
+    if (success) {
+      return kj::mv(reader);
+    } else {
+      return nullptr;
+    }
+  }));
 }
 
 kj::Promise<kj::Maybe<kj::Own<IncomingRpcMessage>>> SeastarNetwork::receiveIncomingMessage() {
@@ -351,202 +361,80 @@ kj::Promise<void> SeastarNetwork::shutdown() {
   return kj::mv(result);
 }
 
+SeastarServer::SeastarServer(kj::Maybe<Capability::Client> bootstrapInterface)
+  : bootstrapInterface(bootstrapInterface), tasks(*this) {}
+
+struct SeastarServer::AcceptedConnection {
+  kj::UvIoStream connection;
+  SeastarNetwork network;
+  RpcSystem<rpc::twoparty::VatId> rpcSystem;
+
+
+  explicit AcceptedConnection(kj::Maybe<Capability::Client> bootstrapInterface,
+                              kj::UvIoStream&& connectionParam)
+    : connection(kj::mv(connectionParam)),
+      network(connection, rpc::twoparty::Side::SERVER),
+      rpcSystem(makeRpcServer(network, *(::kj::_::readMaybe(bootstrapInterface)) )) {}
+};
+
+kj::Promise<void> SeastarServer::listen(ipv4_addr addr) {
+  // uint32_t ip = addr.ip;
+  // uint16_t port = addr.port;
+  listen_options lo;
+  lo.reuse_address = true;
+
+  
+  server = kj::heap<server_socket>(engine().listen(make_ipv4_address(addr), lo));
+
+  return server->kj_accept()
+  .then([this](auto val) mutable -> kj::Promise<void> { 
+    connected_socket fd = std::move(val.first);
+    socket_address addr = std::move(val.second);    
+    // std::cout<<"Thread "<<which<<" : "<<std::endl;
+    kj::connection conn(std::move(fd), addr);    
+    kj::UvIoStream stream(kj::mv(conn));    
+
+    auto connectionState = kj::heap<AcceptedConnection>(this->bootstrapInterface, kj::mv(stream));
+    
+    // Run the connection until disconnect.
+    auto promise = connectionState->network.onDisconnect().then([](){
+        printf("Client disconnected!\n");
+    });  
+    tasks.add(promise.attach(kj::mv(connectionState)));//attach so that connectionstate remains valid until the promise's fulfilled
+
+    return kj::READY_NOW;
+  }, [](kj::Exception && e) {
+    printf("Exception : %s\n", e.getDescription().cStr());
+
+  });
+  // .then([this,ip,port](){
+  //   return listen(ipv4_addr(ip,port));
+  // });
+}
+
+void SeastarServer::taskFailed(kj::Exception&& exception) {
+  KJ_LOG(ERROR, exception);
+}
+
+/*class TwoPartyClient {
+  // Convenience class which implements a simple client.
+
+public:
+  explicit TwoPartyClient(kj::AsyncIoStream& connection);
+  TwoPartyClient(kj::AsyncIoStream& connection, Capability::Client bootstrapInterface);
+
+  Capability::Client bootstrap();
+  // Get the server's bootstrap interface.
+
+  inline kj::Promise<void> onDisconnect() { return network.onDisconnect(); }
+
+private:
+  TwoPartyVatNetwork network;
+  RpcSystem<rpc::twoparty::VatId> rpcSystem;
+};//*/
 
 
 // =======================================================================================
 
-struct VmtsRpcServer::Impl final: public SturdyRefRestorer<AnyPointer>,
-  public kj::TaskSet::ErrorHandler {
-  Capability::Client mainInterface;
-  kj::Own<VmtsRpcContext> context;
-
-  struct ExportedCap {
-    kj::String name;
-    Capability::Client cap = nullptr;
-
-    ExportedCap(kj::StringPtr name, Capability::Client cap)
-      : name(kj::heapString(name)), cap(cap) {}
-
-    ExportedCap() = default;
-    ExportedCap(const ExportedCap&) = delete;
-    ExportedCap(ExportedCap&&) = default;
-    ExportedCap& operator=(const ExportedCap&) = delete;
-    ExportedCap& operator=(ExportedCap&&) = default;
-    // Make std::map happy...
-  };
-
-  std::map<kj::StringPtr, ExportedCap> exportMap;
-
-  kj::ForkedPromise<uint> portPromise;
-
-  kj::TaskSet tasks;  
-
-  struct ServerContext {
-    kj::Own<kj::AsyncIoStream> stream;
-    SeastarNetwork network;
-    RpcSystem<rpc::twoparty::VatId> rpcSystem;
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-    ServerContext(kj::Own<kj::AsyncIoStream>&& stream, SturdyRefRestorer<AnyPointer>& restorer,
-                  ReaderOptions readerOpts)
-      : stream(kj::mv(stream)),
-        network(*this->stream, rpc::twoparty::Side::SERVER, readerOpts),
-        rpcSystem(makeRpcServer(network, restorer)) { }
-#pragma GCC diagnostic pop
-        ~ServerContext(){
-          printf("ServerContext destroyed\n");
-        }
-  };
-
-  kj::Own<ServerContext> server;
-
-  void handleLoop(lw_shared_ptr<kj::connection>& conn, ReaderOptions readerOpts){    
-    try{      
-      kj::Own<kj::AsyncIoStream> stream(kj::heap<UvIoStream>(conn));    
-      server = kj::heap<ServerContext>(kj::mv(stream), *this, readerOpts);                
-      tasks.add(server->network.onDisconnect().then([](){
-        printf("Client disconnected!\n");
-      }));      
-    } catch(kj::Exception& e){
-      printf("Exception : %s\n",e.getDescription().cStr());
-    }
-    // handleLoop(conn,readerOpts);
-  }
-
-  ~Impl(){
-    printf("Impl destroyed\n");  
-  }
-
-
-  Impl(Capability::Client mainInterface, lw_shared_ptr<kj::connection>& _conn, kj::WaitScope& ws, ReaderOptions readerOpts):
-    mainInterface(kj::mv(mainInterface)), context( kj::heap<VmtsRpcContext>(_conn, ws)),  portPromise(nullptr), tasks(*this) {
-      // acceptLoop(context->getLowLevelIoProvider().wrapListenSocketFd(0), readerOpts);            
-      handleLoop(_conn,readerOpts);
-  }
-
-  Impl(Capability::Client mainInterface, kj::StringPtr bindAddress, uint defaultPort,
-       ReaderOptions readerOpts)
-    : mainInterface(kj::mv(mainInterface)),
-      context(VmtsRpcContext::getThreadLocal()), portPromise(nullptr), tasks(*this) {
-    auto paf = kj::newPromiseAndFulfiller<uint>();
-    portPromise = paf.promise.fork();
-
-    tasks.add(context->getIoProvider().getNetwork().parseAddress(bindAddress, defaultPort)
-              .then(kj::mvCapture(paf.fulfiller,
-                                  [this, readerOpts](kj::Own<kj::PromiseFulfiller<uint>> && portFulfiller,
-    kj::Own<kj::NetworkAddress> && addr) {
-      auto listener = addr->listen();
-      portFulfiller->fulfill(listener->getPort());
-      acceptLoop(kj::mv(listener), readerOpts);
-    })));
-  }
-
-  Impl(Capability::Client mainInterface, struct sockaddr* bindAddress, uint addrSize,
-       ReaderOptions readerOpts)
-    : mainInterface(kj::mv(mainInterface)),
-      context(VmtsRpcContext::getThreadLocal()), portPromise(nullptr), tasks(*this) {
-    auto listener = context->getIoProvider().getNetwork()
-                    .getSockaddr(bindAddress, addrSize)->listen();
-    portPromise = kj::Promise<uint>(listener->getPort()).fork();
-    acceptLoop(kj::mv(listener), readerOpts);
-  }
-
-  Impl(Capability::Client mainInterface, int socketFd, uint port, ReaderOptions readerOpts)
-    : mainInterface(kj::mv(mainInterface)),
-      context(VmtsRpcContext::getThreadLocal()),
-      portPromise(kj::Promise<uint>(port).fork()),
-      tasks(*this) {
-    acceptLoop(context->getLowLevelIoProvider().wrapListenSocketFd(socketFd), readerOpts);
-  }
-  
-  void acceptLoop(kj::Own<kj::ConnectionReceiver>&& listener, ReaderOptions readerOpts) {
-    auto ptr = listener.get();
-    tasks.add(ptr->accept().then(kj::mvCapture(kj::mv(listener),
-                                 [this, readerOpts](kj::Own<kj::ConnectionReceiver> && listener,
-    kj::Own<kj::AsyncIoStream> && connection) {
-      acceptLoop(kj::mv(listener), readerOpts);
-
-      auto server = kj::heap<ServerContext>(kj::mv(connection), *this, readerOpts);
-
-      // Arrange to destroy the server context when all references are gone, or when the
-      // VmtsRpcServer is destroyed (which will destroy the TaskSet).
-      tasks.add(server->network.onDisconnect().attach(kj::mv(server)));
-    }
-                                              ))
-             );
-  }
-
-  Capability::Client restore(AnyPointer::Reader objectId) override {
-    if (objectId.isNull()) {
-      return mainInterface;
-    } else {
-      auto name = objectId.getAs<Text>();
-      auto iter = exportMap.find(name);
-      if (iter == exportMap.end()) {
-        KJ_FAIL_REQUIRE("Server exports no such capability.", name) { break; }
-        return nullptr;
-      } else {
-        return iter->second.cap;
-      }
-    }
-  }
-
-  void taskFailed(kj::Exception&& exception) override {
-    kj::throwFatalException(kj::mv(exception));
-  }
-};
-
-VmtsRpcServer::VmtsRpcServer(Capability::Client mainInterface, lw_shared_ptr<kj::connection>& _conn, kj::WaitScope& ws, ReaderOptions readerOpts)
-  : impl(kj::heap<Impl>(kj::mv(mainInterface),  _conn, ws, readerOpts)) {}
-
-
-VmtsRpcServer::VmtsRpcServer(Capability::Client mainInterface, kj::StringPtr bindAddress,
-                             uint defaultPort, ReaderOptions readerOpts)
-  : impl(kj::heap<Impl>(kj::mv(mainInterface), bindAddress, defaultPort, readerOpts)) {}
-
-VmtsRpcServer::VmtsRpcServer(Capability::Client mainInterface, struct sockaddr* bindAddress,
-                             uint addrSize, ReaderOptions readerOpts)
-  : impl(kj::heap<Impl>(kj::mv(mainInterface), bindAddress, addrSize, readerOpts)) {}
-
-VmtsRpcServer::VmtsRpcServer(Capability::Client mainInterface, int socketFd, uint port,
-                             ReaderOptions readerOpts)
-  : impl(kj::heap<Impl>(kj::mv(mainInterface), socketFd, port, readerOpts)) {}
-
-VmtsRpcServer::VmtsRpcServer(kj::StringPtr bindAddress, uint defaultPort,
-                             ReaderOptions readerOpts)
-  : VmtsRpcServer(nullptr, bindAddress, defaultPort, readerOpts) {}
-
-VmtsRpcServer::VmtsRpcServer(struct sockaddr* bindAddress, uint addrSize,
-                             ReaderOptions readerOpts)
-  : VmtsRpcServer(nullptr, bindAddress, addrSize, readerOpts) {}
-
-VmtsRpcServer::VmtsRpcServer(int socketFd, uint port, ReaderOptions readerOpts)
-  : VmtsRpcServer(nullptr, socketFd, port, readerOpts) {}
-
-VmtsRpcServer::~VmtsRpcServer() noexcept(false) {
-  printf("VmtsRpcServer destroyed\n");
-}
-
-void VmtsRpcServer::exportCap(kj::StringPtr name, Capability::Client cap) {
-  Impl::ExportedCap entry(kj::heapString(name), cap);
-  impl->exportMap[entry.name] = kj::mv(entry);
-}
-
-kj::Promise<uint> VmtsRpcServer::getPort() {
-  return impl->portPromise.addBranch();
-}
-
-kj::WaitScope& VmtsRpcServer::getWaitScope() {
-  return  impl->context->getWaitScope();
-}
-
-kj::AsyncIoProvider& VmtsRpcServer::getIoProvider() {
-  return impl->context->getIoProvider();
-}
-
-kj::LowLevelAsyncIoProvider& VmtsRpcServer::getLowLevelIoProvider() {
-  return impl->context->getLowLevelIoProvider();
-}
 
 }  // namespace capnp

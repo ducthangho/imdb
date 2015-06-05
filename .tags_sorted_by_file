@@ -118,32 +118,77 @@ totalSize	apps/imdb/adder.capnp.hh	/^  inline ::capnp::MessageSize totalSize() c
 totalSize	apps/imdb/adder.capnp.hh	/^  inline ::capnp::MessageSize totalSize() const { return asReader().totalSize(); }$/;"	f	class:Adder::AddResults::Builder
 totalSize	apps/imdb/adder.capnp.hh	/^  inline ::capnp::MessageSize totalSize() const {$/;"	f	class:Adder::AddParams::Reader
 totalSize	apps/imdb/adder.capnp.hh	/^  inline ::capnp::MessageSize totalSize() const {$/;"	f	class:Adder::AddResults::Reader
-SeastarNetworkAddressImpl	apps/imdb/event_port.hh	/^  SeastarNetworkAddressImpl(UvLowLevelAsyncIoProvider& _lowLevel): lowLevel(_lowLevel) {};$/;"	f	class:kj::final
+DEFAUlT_RELOCATE_THREADSHOLD	apps/imdb/event_port.hh	329;"	d
+DEFAUlT_SCRACH_SPACE_SIZE	apps/imdb/event_port.hh	328;"	d
+FulfillerDisposer	apps/imdb/event_port.hh	/^  class FulfillerDisposer: public kj::Disposer {$/;"	c	class:capnp::final
+SeastarServer	apps/imdb/event_port.hh	/^class SeastarServer: private kj::TaskSet::ErrorHandler {$/;"	c	namespace:capnp
 UV_CALL	apps/imdb/event_port.hh	79;"	d
 UvConnectionReceiver	apps/imdb/event_port.hh	/^  UvConnectionReceiver(lw_shared_ptr<connection>& _conn): conn(_conn), port(0) {};$/;"	f	class:kj::final
-UvIoStream	apps/imdb/event_port.hh	/^  UvIoStream(lw_shared_ptr<kj::connection>& _conn ): conn(_conn) {    $/;"	f	class:kj::UvIoStream
+UvIoStream	apps/imdb/event_port.hh	/^  UvIoStream(lw_shared_ptr<kj::connection>& _conn, size_t buffer_size = DEFAUlT_SCRACH_SPACE_SIZE ): conn(_conn), buffer(buffer_size) {$/;"	f	class:kj::UvIoStream
 UvIoStream	apps/imdb/event_port.hh	/^class UvIoStream: public kj::AsyncIoStream {$/;"	c	namespace:kj
 UvLowLevelAsyncIoProvider	apps/imdb/event_port.hh	/^  UvLowLevelAsyncIoProvider(){    $/;"	f	class:kj::final
 UvLowLevelAsyncIoProvider	apps/imdb/event_port.hh	/^  UvLowLevelAsyncIoProvider(lw_shared_ptr<connection>& _conn): conn(_conn) {    $/;"	f	class:kj::final
+ZeroCopyScratchspace	apps/imdb/event_port.hh	/^  ZeroCopyScratchspace(size_t sz = DEFAUlT_SCRACH_SPACE_SIZE) : scratchSpace(kj::heapArray<char>(sz)) {};$/;"	f	struct:kj::ZeroCopyScratchspace
+ZeroCopyScratchspace	apps/imdb/event_port.hh	/^struct ZeroCopyScratchspace {$/;"	s	namespace:kj
 _GLIBCXX_HAVE_GETS	apps/imdb/event_port.hh	25;"	d
 _fd	apps/imdb/event_port.hh	/^  connected_socket _fd;$/;"	m	struct:kj::connection
 _read_buf	apps/imdb/event_port.hh	/^  input_stream<char> _read_buf;$/;"	m	struct:kj::connection
 _write_buf	apps/imdb/event_port.hh	/^  output_stream<char> _write_buf;$/;"	m	struct:kj::connection
+acceptFulfiller	apps/imdb/event_port.hh	/^  kj::Own<kj::PromiseFulfiller<kj::Own<TwoPartyVatNetworkBase::Connection>>> acceptFulfiller;$/;"	m	class:capnp::final
+accepted	apps/imdb/event_port.hh	/^  bool accepted = false;$/;"	m	class:capnp::final
+available	apps/imdb/event_port.hh	/^  inline size_t available() {$/;"	f	struct:kj::ZeroCopyScratchspace
+bootstrapInterface	apps/imdb/event_port.hh	/^  Capability::Client bootstrapInterface;$/;"	m	class:capnp::SeastarServer
+buffer	apps/imdb/event_port.hh	/^  ZeroCopyScratchspace buffer;$/;"	m	class:kj::UvIoStream
 byte	apps/imdb/event_port.hh	/^typedef unsigned char byte;$/;"	t	namespace:kj
-clone	apps/imdb/event_port.hh	/^  kj::Own<kj::NetworkAddress> clone(){$/;"	f	class:kj::final
+capnp	apps/imdb/event_port.hh	/^namespace capnp{$/;"	n
 conn	apps/imdb/event_port.hh	/^  lw_shared_ptr<connection> conn;    $/;"	m	class:kj::final
 conn	apps/imdb/event_port.hh	/^  lw_shared_ptr<connection> conn;$/;"	m	class:kj::UvIoStream
 conn	apps/imdb/event_port.hh	/^  lw_shared_ptr<connection> conn;$/;"	m	class:kj::final
 connection	apps/imdb/event_port.hh	/^  connection(connected_socket&& fd, socket_address addr)$/;"	f	struct:kj::connection
 connection	apps/imdb/event_port.hh	/^struct connection {$/;"	s	namespace:kj
-final	apps/imdb/event_port.hh	/^class SeastarNetworkAddressImpl final: public kj::NetworkAddress{$/;"	c	namespace:kj
+consumable	apps/imdb/event_port.hh	/^  inline size_t consumable() {$/;"	f	struct:kj::ZeroCopyScratchspace
+consumed	apps/imdb/event_port.hh	/^  inline void consumed(size_t cnt) {$/;"	f	struct:kj::ZeroCopyScratchspace
+consuming	apps/imdb/event_port.hh	/^  inline kj::ArrayPtr<capnp::word> consuming(size_t cnt) {$/;"	f	struct:kj::ZeroCopyScratchspace
+copy	apps/imdb/event_port.hh	/^  inline void copy(void* buffer, size_t len) {$/;"	f	struct:kj::ZeroCopyScratchspace
+disconnectFulfiller	apps/imdb/event_port.hh	/^  FulfillerDisposer disconnectFulfiller;$/;"	m	class:capnp::final
+disconnectPromise	apps/imdb/event_port.hh	/^  kj::ForkedPromise<void> disconnectPromise = nullptr;$/;"	m	class:capnp::final
+final	apps/imdb/event_port.hh	/^class SeastarNetwork final : public TwoPartyVatNetworkBase,$/;"	c	namespace:capnp
 final	apps/imdb/event_port.hh	/^class UvConnectionReceiver final: public kj::ConnectionReceiver {$/;"	c	namespace:kj
 final	apps/imdb/event_port.hh	/^class UvLowLevelAsyncIoProvider final: public kj::LowLevelAsyncIoProvider {$/;"	c	namespace:kj
+fulfiller	apps/imdb/event_port.hh	/^    mutable kj::Own<kj::PromiseFulfiller<void>> fulfiller;$/;"	m	class:capnp::final::FulfillerDisposer
 kj	apps/imdb/event_port.hh	/^namespace kj { \/\/ so we get warnings if anything declared in this file is left undefined...$/;"	n
-lowLevel	apps/imdb/event_port.hh	/^  UvLowLevelAsyncIoProvider& lowLevel;  $/;"	m	class:kj::final
+maxReadable	apps/imdb/event_port.hh	/^  inline size_t maxReadable() {$/;"	f	struct:kj::ZeroCopyScratchspace
 noexcept	apps/imdb/event_port.hh	/^  virtual ~UvIoStream() noexcept(false) {}$/;"	f	class:kj::UvIoStream
+onDisconnect	apps/imdb/event_port.hh	/^kj::Promise<void> onDisconnect() { return disconnectPromise.addBranch(); }$/;"	f	class:capnp::final
+override	apps/imdb/event_port.hh	/^      rpc::twoparty::VatId::Reader ref) override;$/;"	m	class:capnp::final
+override	apps/imdb/event_port.hh	/^    void disposeImpl(void* pointer) const override;$/;"	m	class:capnp::final::FulfillerDisposer
+override	apps/imdb/event_port.hh	/^  kj::Own<OutgoingRpcMessage> newOutgoingMessage(uint firstSegmentWordSize) override;$/;"	m	class:capnp::final
+override	apps/imdb/event_port.hh	/^  kj::Promise<kj::Maybe<kj::Own<IncomingRpcMessage>>> receiveIncomingMessage() override;$/;"	m	class:capnp::final
+override	apps/imdb/event_port.hh	/^  kj::Promise<kj::Own<TwoPartyVatNetworkBase::Connection>> accept() override;$/;"	m	class:capnp::final
+override	apps/imdb/event_port.hh	/^  kj::Promise<void> shutdown() override;$/;"	m	class:capnp::final
+override	apps/imdb/event_port.hh	/^  rpc::twoparty::VatId::Reader getPeerVatId() override;$/;"	m	class:capnp::final
+override	apps/imdb/event_port.hh	/^  void taskFailed(kj::Exception&& exception) override;$/;"	m	class:capnp::SeastarServer
+peerVatId	apps/imdb/event_port.hh	/^  MallocMessageBuilder peerVatId;$/;"	m	class:capnp::final
 port	apps/imdb/event_port.hh	/^  uint port;$/;"	m	class:kj::final
+previousWrite	apps/imdb/event_port.hh	/^  kj::Maybe<kj::Promise<void>> previousWrite;$/;"	m	class:capnp::final
+read	apps/imdb/event_port.hh	/^  Promise<void> read(void* buffer, size_t bytes) {$/;"	f	class:kj::UvIoStream
+read	apps/imdb/event_port.hh	/^  inline void read(size_t cnt) {$/;"	f	struct:kj::ZeroCopyScratchspace
+read	apps/imdb/event_port.hh	/^  kj::Promise<size_t> read() {$/;"	f	class:kj::UvIoStream
+readCouter	apps/imdb/event_port.hh	/^  size_t readCouter = 0;$/;"	m	struct:kj::ZeroCopyScratchspace
+receiveOptions	apps/imdb/event_port.hh	/^  ReaderOptions receiveOptions;$/;"	m	class:capnp::final
+refcount	apps/imdb/event_port.hh	/^    mutable uint refcount = 0;$/;"	m	class:capnp::final::FulfillerDisposer
+reserve	apps/imdb/event_port.hh	/^  inline void reserve(size_t sz) {$/;"	f	struct:kj::ZeroCopyScratchspace
+reset	apps/imdb/event_port.hh	/^  inline void reset() {$/;"	f	struct:kj::ZeroCopyScratchspace
+scratchSpace	apps/imdb/event_port.hh	/^  kj::ArrayPtr<char> scratchSpace;$/;"	m	struct:kj::ZeroCopyScratchspace
+server	apps/imdb/event_port.hh	/^  kj::Own<server_socket> server;$/;"	m	class:capnp::SeastarServer
+shrink_to_fit	apps/imdb/event_port.hh	/^  inline shrink_to_fit(size_t sz = DEFAUlT_SCRACH_SPACE_SIZE) {$/;"	f	struct:kj::ZeroCopyScratchspace
+side	apps/imdb/event_port.hh	/^  rpc::twoparty::Side side;$/;"	m	class:capnp::final
+size	apps/imdb/event_port.hh	/^  inline size_t size() {$/;"	f	struct:kj::ZeroCopyScratchspace
+startRead	apps/imdb/event_port.hh	/^  inline char* startRead() {$/;"	f	struct:kj::ZeroCopyScratchspace
+stream	apps/imdb/event_port.hh	/^  kj::AsyncIoStream& stream;$/;"	m	class:capnp::final
+tasks	apps/imdb/event_port.hh	/^  kj::TaskSet tasks;$/;"	m	class:capnp::SeastarServer
 uint	apps/imdb/event_port.hh	/^typedef unsigned int uint;$/;"	t	namespace:kj
+writerCounter	apps/imdb/event_port.hh	/^  size_t writerCounter = 0;$/;"	m	struct:kj::ZeroCopyScratchspace
 main	apps/imdb/hash-client.c++	/^int main(int argc, const char* argv[]) {$/;"	f
 final	apps/imdb/hash-server.c++	/^class HashProtocolImpl final: public HashProtocol::Server {$/;"	c	file:
 main	apps/imdb/hash-server.c++	/^int main(int argc, const char* argv[]) {$/;"	f
@@ -320,7 +365,6 @@ setKey	apps/imdb/hashprotocol.capnp.hh	/^inline void HashProtocol::SetParams::Bu
 setValue	apps/imdb/hashprotocol.capnp.hh	/^inline void HashProtocol::GetResults::Builder::setValue( ::int32_t value) {$/;"	f	class:HashProtocol::GetResults::Builder
 setValue	apps/imdb/hashprotocol.capnp.hh	/^inline void HashProtocol::SetParams::Builder::setValue( ::int32_t value) {$/;"	f	class:HashProtocol::SetParams::Builder
 setValue	apps/imdb/hashprotocol.capnp.hh	/^inline void HashProtocol::SetResults::Builder::setValue( ::capnp::Void value) {$/;"	f	class:HashProtocol::SetResults::Builder
-thisCap	apps/imdb/hashprotocol.capnp.hh	/^  inline  ::HashProtocol::Client thisCap() {$/;"	f	class:HashProtocol::Server
 toString	apps/imdb/hashprotocol.capnp.hh	/^  inline ::kj::StringTree toString() const { return asReader().toString(); }$/;"	f	class:HashProtocol::GetParams::Builder
 toString	apps/imdb/hashprotocol.capnp.hh	/^  inline ::kj::StringTree toString() const { return asReader().toString(); }$/;"	f	class:HashProtocol::GetResults::Builder
 toString	apps/imdb/hashprotocol.capnp.hh	/^  inline ::kj::StringTree toString() const { return asReader().toString(); }$/;"	f	class:HashProtocol::SetParams::Builder
@@ -444,18 +488,25 @@ x	apps/imdb/kj_iostream.hh	/^    kj_data_source(kj_data_source&& x) = default;$/
 ~kj_data_sink_impl	apps/imdb/kj_iostream.hh	/^    virtual ~kj_data_sink_impl() {}$/;"	f	class:kj_data_sink_impl
 ~kj_data_source_impl	apps/imdb/kj_iostream.hh	/^    virtual ~kj_data_source_impl() {}$/;"	f	class:kj_data_source_impl
 _listeners	apps/imdb/main.cc	/^    std::vector<server_socket> _listeners;$/;"	m	class:tcp_server	file:
+acceptLoop	apps/imdb/main.cc	/^    void acceptLoop(ipv4_addr addr){$/;"	f	class:tcp_server
 do_accepts	apps/imdb/main.cc	/^    kj::Promise<void> do_accepts(int which) {$/;"	f	class:tcp_server
 done	apps/imdb/main.cc	/^    bool done;$/;"	m	class:tcp_server	file:
 final	apps/imdb/main.cc	/^class AdderImpl final: public Adder::Server {$/;"	c	file:
 final	apps/imdb/main.cc	/^class HashProtocolImpl final: public HashProtocol::Server {$/;"	c	file:
 listen	apps/imdb/main.cc	/^    future<> listen(ipv4_addr addr) {$/;"	f	class:tcp_server
 main	apps/imdb/main.cc	/^int main(int ac, char** av)$/;"	f
-mymap	apps/imdb/main.cc	/^    std::map<int,int> mymap;$/;"	m	class:final	file:
+mymap	apps/imdb/main.cc	/^    std::map<int, int> mymap;$/;"	m	class:final	file:
+server	apps/imdb/main.cc	/^    capnp::SeastarServer server;$/;"	m	class:tcp_server	file:
 serverImpl	apps/imdb/main.cc	/^    capnp::Capability::Client serverImpl;$/;"	m	class:tcp_server	file:
 servers	apps/imdb/main.cc	/^    std::vector<kj::Own<capnp::VmtsRpcServer> > servers;$/;"	m	class:tcp_server	file:
-tcp_server	apps/imdb/main.cc	/^    tcp_server(): waitScope(engine()), done(false), serverImpl(kj::heap<HashProtocolImpl>()) {};$/;"	f	class:tcp_server
-tcp_server	apps/imdb/main.cc	/^class tcp_server {$/;"	c	file:
+taskFailed	apps/imdb/main.cc	/^    void taskFailed(kj::Exception&& exception) {$/;"	f	class:tcp_server
+tasks	apps/imdb/main.cc	/^    kj::TaskSet tasks;$/;"	m	class:tcp_server	file:
+tcp_server	apps/imdb/main.cc	/^    tcp_server(): waitScope(engine()), done(false), serverImpl(kj::heap<HashProtocolImpl>()), server(serverImpl), tasks(*this) {};$/;"	f	class:tcp_server
+tcp_server	apps/imdb/main.cc	/^class tcp_server : private kj::TaskSet::ErrorHandler {$/;"	c	file:
 waitScope	apps/imdb/main.cc	/^    kj::WaitScope waitScope;$/;"	m	class:tcp_server	file:
+~tcp_server	apps/imdb/main.cc	/^    ~tcp_server(){$/;"	f	class:tcp_server
+AcceptedConnection	apps/imdb/vmts-rpc.cc	/^  explicit AcceptedConnection(Capability::Client bootstrapInterface,$/;"	f	struct:capnp::SeastarServer::AcceptedConnection
+AcceptedConnection	apps/imdb/vmts-rpc.cc	/^struct SeastarServer::AcceptedConnection {$/;"	s	class:capnp::SeastarServer	file:
 ClientContext	apps/imdb/vmts-rpc.cc	/^    ClientContext(kj::Own<kj::AsyncIoStream>&& stream, ReaderOptions readerOpts)$/;"	f	struct:capnp::VmtsRpcClient::Impl::ClientContext
 ClientContext	apps/imdb/vmts-rpc.cc	/^  struct ClientContext {$/;"	s	struct:capnp::VmtsRpcClient::Impl	file:
 ExportedCap	apps/imdb/vmts-rpc.cc	/^    ExportedCap(kj::StringPtr name, Capability::Client cap)$/;"	f	struct:capnp::final::ExportedCap
@@ -468,7 +519,13 @@ Impl	apps/imdb/vmts-rpc.cc	/^  Impl(const struct sockaddr* serverAddress, uint a
 Impl	apps/imdb/vmts-rpc.cc	/^  Impl(int socketFd, ReaderOptions readerOpts)$/;"	f	struct:capnp::VmtsRpcClient::Impl
 Impl	apps/imdb/vmts-rpc.cc	/^  Impl(kj::StringPtr serverAddress, uint defaultPort,$/;"	f	struct:capnp::VmtsRpcClient::Impl
 Impl	apps/imdb/vmts-rpc.cc	/^struct VmtsRpcClient::Impl {$/;"	s	class:capnp::VmtsRpcClient	file:
-ServerContext	apps/imdb/vmts-rpc.cc	/^    ServerContext(kj::Own<kj::AsyncIoStream>&& stream, SturdyRefRestorer<AnyPointer>& restorer,$/;"	f	struct:capnp::final::ServerContext
+IncomingMessageImpl	apps/imdb/vmts-rpc.cc	/^  IncomingMessageImpl(kj::Own<MessageReader> message): message(kj::mv(message)) {}$/;"	f	class:capnp::final
+OutgoingMessageImpl	apps/imdb/vmts-rpc.cc	/^  OutgoingMessageImpl(SeastarNetwork& network, uint firstSegmentWordSize)$/;"	f	class:capnp::final
+SeastarAsyncMessageReader	apps/imdb/vmts-rpc.cc	/^  inline SeastarAsyncMessageReader(kj::UvIoStream& _inputStream, ReaderOptions options): MessageReader(options), inputStream(_inputStream), totalWords(-1) {$/;"	f	class:capnp::SeastarAsyncMessageReader
+SeastarAsyncMessageReader	apps/imdb/vmts-rpc.cc	/^class SeastarAsyncMessageReader: public MessageReader {$/;"	c	namespace:capnp	file:
+SeastarNetwork	apps/imdb/vmts-rpc.cc	/^SeastarNetwork::SeastarNetwork(kj::UvIoStream& stream, rpc::twoparty::Side side,$/;"	f	class:capnp::SeastarNetwork
+SeastarServer	apps/imdb/vmts-rpc.cc	/^SeastarServer::SeastarServer(Capability::Client bootstrapInterface)$/;"	f	class:capnp::SeastarServer
+ServerContext	apps/imdb/vmts-rpc.cc	/^    ServerContext(kj::Own<kj::UvIoStream>&& stream, SturdyRefRestorer<AnyPointer>& restorer,$/;"	f	struct:capnp::final::ServerContext
 ServerContext	apps/imdb/vmts-rpc.cc	/^  struct ServerContext {$/;"	s	struct:capnp::final	file:
 VmtsRpcClient	apps/imdb/vmts-rpc.cc	/^VmtsRpcClient::VmtsRpcClient(const struct sockaddr* serverAddress, uint addrSize, ReaderOptions readerOpts)$/;"	f	class:capnp::VmtsRpcClient
 VmtsRpcClient	apps/imdb/vmts-rpc.cc	/^VmtsRpcClient::VmtsRpcClient(int socketFd, ReaderOptions readerOpts)$/;"	f	class:capnp::VmtsRpcClient
@@ -483,16 +540,24 @@ VmtsRpcServer	apps/imdb/vmts-rpc.cc	/^VmtsRpcServer::VmtsRpcServer(Capability::C
 VmtsRpcServer	apps/imdb/vmts-rpc.cc	/^VmtsRpcServer::VmtsRpcServer(int socketFd, uint port, ReaderOptions readerOpts)$/;"	f	class:capnp::VmtsRpcServer
 VmtsRpcServer	apps/imdb/vmts-rpc.cc	/^VmtsRpcServer::VmtsRpcServer(kj::StringPtr bindAddress, uint defaultPort,$/;"	f	class:capnp::VmtsRpcServer
 VmtsRpcServer	apps/imdb/vmts-rpc.cc	/^VmtsRpcServer::VmtsRpcServer(struct sockaddr* bindAddress, uint addrSize,$/;"	f	class:capnp::VmtsRpcServer
+accept	apps/imdb/vmts-rpc.cc	/^kj::Promise<kj::Own<TwoPartyVatNetworkBase::Connection>> SeastarNetwork::accept() {$/;"	f	class:capnp::SeastarNetwork
 acceptLoop	apps/imdb/vmts-rpc.cc	/^  void acceptLoop(kj::Own<kj::ConnectionReceiver>&& listener, ReaderOptions readerOpts) {$/;"	f	struct:capnp::final
+asConnection	apps/imdb/vmts-rpc.cc	/^kj::Own<TwoPartyVatNetworkBase::Connection> SeastarNetwork::asConnection() {$/;"	f	class:capnp::SeastarNetwork
 cap	apps/imdb/vmts-rpc.cc	/^    Capability::Client cap = nullptr;$/;"	m	struct:capnp::final::ExportedCap	file:
 capnp	apps/imdb/vmts-rpc.cc	/^namespace capnp {$/;"	n	file:
 clientContext	apps/imdb/vmts-rpc.cc	/^  kj::Maybe<kj::Own<ClientContext>> clientContext;$/;"	m	struct:capnp::VmtsRpcClient::Impl	file:
+connect	apps/imdb/vmts-rpc.cc	/^kj::Maybe<kj::Own<TwoPartyVatNetworkBase::Connection>> SeastarNetwork::connect($/;"	f	class:capnp::SeastarNetwork
 connectAttach	apps/imdb/vmts-rpc.cc	/^kj::Promise<kj::Own<kj::AsyncIoStream>> connectAttach(kj::Own<kj::NetworkAddress>&& addr) {$/;"	f	namespace:capnp
+connection	apps/imdb/vmts-rpc.cc	/^  kj::Own<kj::UvIoStream> connection;$/;"	m	struct:capnp::SeastarServer::AcceptedConnection	file:
 context	apps/imdb/vmts-rpc.cc	/^  kj::Own<VmtsRpcContext> context;$/;"	m	struct:capnp::VmtsRpcClient::Impl	file:
 context	apps/imdb/vmts-rpc.cc	/^  kj::Own<VmtsRpcContext> context;$/;"	m	struct:capnp::final	file:
+disposeImpl	apps/imdb/vmts-rpc.cc	/^void SeastarNetwork::FulfillerDisposer::disposeImpl(void* pointer) const {$/;"	f	class:capnp::SeastarNetwork::FulfillerDisposer
 exportCap	apps/imdb/vmts-rpc.cc	/^void VmtsRpcServer::exportCap(kj::StringPtr name, Capability::Client cap) {$/;"	f	class:capnp::VmtsRpcServer
 exportMap	apps/imdb/vmts-rpc.cc	/^  std::map<kj::StringPtr, ExportedCap> exportMap;$/;"	m	struct:capnp::final	file:
+final	apps/imdb/vmts-rpc.cc	/^class SeastarNetwork::IncomingMessageImpl final: public IncomingRpcMessage {$/;"	c	namespace:capnp	file:
+final	apps/imdb/vmts-rpc.cc	/^class SeastarNetwork::OutgoingMessageImpl final$/;"	c	namespace:capnp	file:
 final	apps/imdb/vmts-rpc.cc	/^struct VmtsRpcServer::Impl final: public SturdyRefRestorer<AnyPointer>,$/;"	s	namespace:capnp	file:
+firstWord	apps/imdb/vmts-rpc.cc	/^  _::WireValue<uint32_t> firstWord[2];$/;"	m	class:capnp::SeastarAsyncMessageReader	file:
 getIoProvider	apps/imdb/vmts-rpc.cc	/^  kj::AsyncIoProvider& getIoProvider() {$/;"	f	class:capnp::VmtsRpcContext
 getIoProvider	apps/imdb/vmts-rpc.cc	/^kj::AsyncIoProvider& VmtsRpcClient::getIoProvider() {$/;"	f	class:capnp::VmtsRpcClient
 getIoProvider	apps/imdb/vmts-rpc.cc	/^kj::AsyncIoProvider& VmtsRpcServer::getIoProvider() {$/;"	f	class:capnp::VmtsRpcServer
@@ -501,6 +566,7 @@ getLowLevelIoProvider	apps/imdb/vmts-rpc.cc	/^kj::LowLevelAsyncIoProvider& VmtsR
 getLowLevelIoProvider	apps/imdb/vmts-rpc.cc	/^kj::LowLevelAsyncIoProvider& VmtsRpcServer::getLowLevelIoProvider() {$/;"	f	class:capnp::VmtsRpcServer
 getMain	apps/imdb/vmts-rpc.cc	/^    Capability::Client getMain() {$/;"	f	struct:capnp::VmtsRpcClient::Impl::ClientContext
 getMain	apps/imdb/vmts-rpc.cc	/^Capability::Client VmtsRpcClient::getMain() {$/;"	f	class:capnp::VmtsRpcClient
+getPeerVatId	apps/imdb/vmts-rpc.cc	/^rpc::twoparty::VatId::Reader SeastarNetwork::getPeerVatId() {$/;"	f	class:capnp::SeastarNetwork
 getPort	apps/imdb/vmts-rpc.cc	/^kj::Promise<uint> VmtsRpcServer::getPort() {$/;"	f	class:capnp::VmtsRpcServer
 getThreadLocal	apps/imdb/vmts-rpc.cc	/^  static kj::Own<VmtsRpcContext> getThreadLocal() {$/;"	f	class:capnp::VmtsRpcContext
 getThreadLocal	apps/imdb/vmts-rpc.cc	/^  static kj::Own<VmtsRpcContext> getThreadLocal(lw_shared_ptr<kj::connection>& _conn,kj::WaitScope& _waitScope) {$/;"	f	class:capnp::VmtsRpcContext
@@ -509,25 +575,47 @@ getWaitScope	apps/imdb/vmts-rpc.cc	/^kj::WaitScope& VmtsRpcClient::getWaitScope(
 getWaitScope	apps/imdb/vmts-rpc.cc	/^kj::WaitScope& VmtsRpcServer::getWaitScope() {$/;"	f	class:capnp::VmtsRpcServer
 handleLoop	apps/imdb/vmts-rpc.cc	/^  void handleLoop(lw_shared_ptr<kj::connection>& conn, ReaderOptions readerOpts){    $/;"	f	struct:capnp::final
 importCap	apps/imdb/vmts-rpc.cc	/^Capability::Client VmtsRpcClient::importCap(kj::StringPtr name) {$/;"	f	class:capnp::VmtsRpcClient
+inputStream	apps/imdb/vmts-rpc.cc	/^  kj::UvIoStream& inputStream;$/;"	m	class:capnp::SeastarAsyncMessageReader	file:
 ioContext	apps/imdb/vmts-rpc.cc	/^  kj::Own<kj::AsyncIoProvider> ioContext;$/;"	m	class:capnp::VmtsRpcContext	file:
+listen	apps/imdb/vmts-rpc.cc	/^kj::Promise<void> SeastarServer::listen(ipv4_addr addr) {$/;"	f	class:capnp::SeastarServer
 llaiop	apps/imdb/vmts-rpc.cc	/^  kj::UvLowLevelAsyncIoProvider llaiop;$/;"	m	class:capnp::VmtsRpcContext	file:
 mainInterface	apps/imdb/vmts-rpc.cc	/^  Capability::Client mainInterface;$/;"	m	struct:capnp::final	file:
+message	apps/imdb/vmts-rpc.cc	/^  MallocMessageBuilder message;$/;"	m	class:capnp::final	file:
+message	apps/imdb/vmts-rpc.cc	/^  kj::Own<MessageReader> message;$/;"	m	class:capnp::final	file:
+moreSizes	apps/imdb/vmts-rpc.cc	/^  kj::Array<_::WireValue<uint32_t>> moreSizes;$/;"	m	class:capnp::SeastarAsyncMessageReader	file:
 name	apps/imdb/vmts-rpc.cc	/^    kj::String name;$/;"	m	struct:capnp::final::ExportedCap	file:
+network	apps/imdb/vmts-rpc.cc	/^    SeastarNetwork network;$/;"	m	struct:capnp::final::ServerContext	file:
 network	apps/imdb/vmts-rpc.cc	/^    TwoPartyVatNetwork network;$/;"	m	struct:capnp::VmtsRpcClient::Impl::ClientContext	file:
-network	apps/imdb/vmts-rpc.cc	/^    TwoPartyVatNetwork network;$/;"	m	struct:capnp::final::ServerContext	file:
+network	apps/imdb/vmts-rpc.cc	/^  SeastarNetwork network;$/;"	m	struct:capnp::SeastarServer::AcceptedConnection	file:
+network	apps/imdb/vmts-rpc.cc	/^  SeastarNetwork& network;$/;"	m	class:capnp::final	file:
+newOutgoingMessage	apps/imdb/vmts-rpc.cc	/^kj::Own<OutgoingRpcMessage> SeastarNetwork::newOutgoingMessage(uint firstSegmentWordSize) {$/;"	f	class:capnp::SeastarNetwork
+noexcept	apps/imdb/vmts-rpc.cc	/^  ~SeastarAsyncMessageReader() noexcept(false) {}$/;"	f	class:capnp::SeastarAsyncMessageReader
 noexcept	apps/imdb/vmts-rpc.cc	/^  ~VmtsRpcContext() noexcept(false) {$/;"	f	class:capnp::VmtsRpcContext
 noexcept	apps/imdb/vmts-rpc.cc	/^VmtsRpcClient::~VmtsRpcClient() noexcept(false) {}$/;"	f	namespace:capnp
 noexcept	apps/imdb/vmts-rpc.cc	/^VmtsRpcServer::~VmtsRpcServer() noexcept(false) {$/;"	f	namespace:capnp
+ownedSpace	apps/imdb/vmts-rpc.cc	/^  kj::Array<word> ownedSpace;$/;"	m	class:capnp::SeastarAsyncMessageReader	file:
 portPromise	apps/imdb/vmts-rpc.cc	/^  kj::ForkedPromise<uint> portPromise;$/;"	m	struct:capnp::final	file:
+read	apps/imdb/vmts-rpc.cc	/^kj::Promise<bool> SeastarAsyncMessageReader::read() {$/;"	f	class:capnp::SeastarAsyncMessageReader
+readAfterFirstWord	apps/imdb/vmts-rpc.cc	/^kj::Promise<void> SeastarAsyncMessageReader::readAfterFirstWord() {$/;"	f	class:capnp::SeastarAsyncMessageReader
+readSegments	apps/imdb/vmts-rpc.cc	/^kj::Promise<void> SeastarAsyncMessageReader::readSegments() {$/;"	f	class:capnp::SeastarAsyncMessageReader
+receiveIncomingMessage	apps/imdb/vmts-rpc.cc	/^kj::Promise<kj::Maybe<kj::Own<IncomingRpcMessage>>> SeastarNetwork::receiveIncomingMessage() {$/;"	f	class:capnp::SeastarNetwork
 restore	apps/imdb/vmts-rpc.cc	/^    Capability::Client restore(kj::StringPtr name) {$/;"	f	struct:capnp::VmtsRpcClient::Impl::ClientContext
 rpcSystem	apps/imdb/vmts-rpc.cc	/^    RpcSystem<rpc::twoparty::VatId> rpcSystem;$/;"	m	struct:capnp::VmtsRpcClient::Impl::ClientContext	file:
 rpcSystem	apps/imdb/vmts-rpc.cc	/^    RpcSystem<rpc::twoparty::VatId> rpcSystem;$/;"	m	struct:capnp::final::ServerContext	file:
+rpcSystem	apps/imdb/vmts-rpc.cc	/^  RpcSystem<rpc::twoparty::VatId> rpcSystem;$/;"	m	struct:capnp::SeastarServer::AcceptedConnection	file:
+segment0Size	apps/imdb/vmts-rpc.cc	/^  inline uint segment0Size() { return firstWord[1].get(); }$/;"	f	class:capnp::SeastarAsyncMessageReader	file:
+segmentCount	apps/imdb/vmts-rpc.cc	/^  inline uint segmentCount() { return firstWord[0].get() + 1; }$/;"	f	class:capnp::SeastarAsyncMessageReader	file:
+segmentStarts	apps/imdb/vmts-rpc.cc	/^  kj::Array<const word*> segmentStarts;$/;"	m	class:capnp::SeastarAsyncMessageReader	file:
 server	apps/imdb/vmts-rpc.cc	/^  kj::Own<ServerContext> server;$/;"	m	struct:capnp::final	file:
 setupPromise	apps/imdb/vmts-rpc.cc	/^  kj::ForkedPromise<void> setupPromise;$/;"	m	struct:capnp::VmtsRpcClient::Impl	file:
+shutdown	apps/imdb/vmts-rpc.cc	/^kj::Promise<void> SeastarNetwork::shutdown() {$/;"	f	class:capnp::SeastarNetwork
 stream	apps/imdb/vmts-rpc.cc	/^    kj::Own<kj::AsyncIoStream> stream;$/;"	m	struct:capnp::VmtsRpcClient::Impl::ClientContext	file:
-stream	apps/imdb/vmts-rpc.cc	/^    kj::Own<kj::AsyncIoStream> stream;$/;"	m	struct:capnp::final::ServerContext	file:
+stream	apps/imdb/vmts-rpc.cc	/^    kj::Own<kj::UvIoStream> stream;$/;"	m	struct:capnp::final::ServerContext	file:
+taskFailed	apps/imdb/vmts-rpc.cc	/^void SeastarServer::taskFailed(kj::Exception&& exception) {$/;"	f	class:capnp::SeastarServer
 tasks	apps/imdb/vmts-rpc.cc	/^  kj::TaskSet tasks;  $/;"	m	struct:capnp::final	file:
 threadVmtsContext	apps/imdb/vmts-rpc.cc	/^KJ_THREADLOCAL_PTR(VmtsRpcContext) threadVmtsContext = nullptr;$/;"	m	namespace:capnp	file:
+totalWords	apps/imdb/vmts-rpc.cc	/^  size_t totalWords;$/;"	m	class:capnp::SeastarAsyncMessageReader	file:
+tryReadMessage	apps/imdb/vmts-rpc.cc	/^kj::Promise<kj::Maybe<kj::Own<MessageReader>>> tryReadMessage($/;"	f	namespace:capnp
 waitScope	apps/imdb/vmts-rpc.cc	/^  kj::WaitScope * waitScope;$/;"	m	class:capnp::VmtsRpcContext	file:
 ~Impl	apps/imdb/vmts-rpc.cc	/^  ~Impl(){$/;"	f	struct:capnp::final
 ~ServerContext	apps/imdb/vmts-rpc.cc	/^        ~ServerContext(){$/;"	f	struct:capnp::final::ServerContext
@@ -1173,7 +1261,6 @@ file_data_source_impl	core/fstream.cc	/^    file_data_source_impl(lw_shared_ptr<
 file_data_source_impl	core/fstream.cc	/^class file_data_source_impl : public data_source_impl {$/;"	c	file:
 kj_close	core/fstream.cc	/^    kj::Promise<void> kj_close() { return _file->kj_flush(); }$/;"	f	class:file_data_sink_impl
 kj_do_get	core/fstream.cc	/^    kj::Promise<temporary_buffer<char>> kj_do_get() {$/;"	f	class:file_data_source_impl	file:
-kj_get	core/fstream.cc	/^    virtual kj::Promise<temporary_buffer<char>> kj_get(){$/;"	f	class:file_data_source_impl
 kj_put	core/fstream.cc	/^    kj::Promise<void> kj_put(net::packet data) { return kj::READY_NOW; }$/;"	f	class:file_data_sink_impl
 make_file_input_stream	core/fstream.cc	/^input_stream<char> make_file_input_stream($/;"	f
 make_file_output_stream	core/fstream.cc	/^output_stream<char> make_file_output_stream(lw_shared_ptr<file> f, size_t buffer_size) {$/;"	f
@@ -1367,7 +1454,7 @@ impl	core/iostream.hh	/^    data_source_impl* impl() const { return _dsi.get(); 
 input_stream	core/iostream.hh	/^    explicit input_stream(data_source fd) : _fd(std::move(fd)), _buf(0) {}$/;"	f	class:final
 kj_close	core/iostream.hh	/^    kj::Promise<void> kj_close() { return _dsi->kj_close(); }$/;"	f	class:data_sink
 kj_close	core/iostream.hh	/^    kj::Promise<void> kj_close() { return kj_flush().then([this] { return _fd.kj_close(); }); }$/;"	f	class:final
-kj_get	core/iostream.hh	/^    kj::Promise<temporary_buffer<char>> kj_get() {$/;"	f	class:data_source
+kj_get	core/iostream.hh	/^    kj::Promise<temporary_buffer<char>> kj_get(size_t maxBytes = 8192) {$/;"	f	class:data_source
 kj_put	core/iostream.hh	/^    kj::Promise<void> kj_put(net::packet p) {$/;"	f	class:data_sink
 kj_put	core/iostream.hh	/^    kj::Promise<void> kj_put(std::vector<temporary_buffer<char>> data) {$/;"	f	class:data_sink
 kj_put	core/iostream.hh	/^    kj::Promise<void> kj_put(temporary_buffer<char> data) {$/;"	f	class:data_sink
@@ -1382,6 +1469,7 @@ put	core/iostream.hh	/^    future<> put(temporary_buffer<char> data) {$/;"	f	cla
 put	core/iostream.hh	/^    virtual future<> put(std::vector<temporary_buffer<char>> data) {$/;"	f	class:data_sink_impl
 put	core/iostream.hh	/^    virtual future<> put(temporary_buffer<char> buf) {$/;"	f	class:data_sink_impl
 reset	core/iostream.hh	/^    void reset() { _buf = {}; }$/;"	f	class:final
+setBuffer	core/iostream.hh	/^    void setBuffer(temporary_buffer<char> && buf){$/;"	f	class:data_source
 tryReadInternal	core/iostream.hh	/^    kj::Promise<size_t> tryReadInternal(void* buffer, size_t minBytes, size_t maxBytes,$/;"	f	class:final
 writeInternal	core/iostream.hh	/^    kj::Promise<void> writeInternal(kj::ArrayPtr<const kj::byte> firstPiece,$/;"	f	class:final
 x	core/iostream.hh	/^    data_sink& operator=(data_sink&& x) = default;$/;"	m	class:data_sink
@@ -2453,10 +2541,10 @@ wrap	core/scollectd.hh	/^    struct wrap {$/;"	s	class:scollectd::value
 ~registration	core/scollectd.hh	/^    ~registration() {$/;"	f	struct:scollectd::registration
 ~value_list	core/scollectd.hh	/^    virtual ~value_list() {}$/;"	f	class:scollectd::value_list
 CORE_SCOLLECTD_API_HH_	core/scollectd_api.hh	6;"	d
-_d	core/scollectd_api.hh	/^        double _d;$/;"	m	union:scollectd::collectd_value::__anon14
-_i	core/scollectd_api.hh	/^        int64_t _i;$/;"	m	union:scollectd::collectd_value::__anon14
+_d	core/scollectd_api.hh	/^        double _d;$/;"	m	union:scollectd::collectd_value::__anon1
+_i	core/scollectd_api.hh	/^        int64_t _i;$/;"	m	union:scollectd::collectd_value::__anon1
 _type	core/scollectd_api.hh	/^    scollectd::data_type _type;$/;"	m	struct:scollectd::collectd_value
-_ui	core/scollectd_api.hh	/^        uint64_t _ui;$/;"	m	union:scollectd::collectd_value::__anon14
+_ui	core/scollectd_api.hh	/^        uint64_t _ui;$/;"	m	union:scollectd::collectd_value::__anon1
 c	core/scollectd_api.hh	/^    collectd_value& operator=(const collectd_value& c) = default;$/;"	m	struct:scollectd::collectd_value
 collectd_value	core/scollectd_api.hh	/^    collectd_value()$/;"	f	struct:scollectd::collectd_value
 collectd_value	core/scollectd_api.hh	/^    collectd_value(data_type t, uint64_t i)$/;"	f	struct:scollectd::collectd_value
@@ -2464,7 +2552,7 @@ collectd_value	core/scollectd_api.hh	/^struct collectd_value {$/;"	s	namespace:s
 operator +	core/scollectd_api.hh	/^    collectd_value operator+(const collectd_value& c) {$/;"	f	struct:scollectd::collectd_value
 operator +=	core/scollectd_api.hh	/^    collectd_value& operator+=(const collectd_value& c) {$/;"	f	struct:scollectd::collectd_value
 scollectd	core/scollectd_api.hh	/^namespace scollectd {$/;"	n
-u	core/scollectd_api.hh	/^    } u;$/;"	m	struct:scollectd::collectd_value	typeref:union:scollectd::collectd_value::__anon14
+u	core/scollectd_api.hh	/^    } u;$/;"	m	struct:scollectd::collectd_value	typeref:union:scollectd::collectd_value::__anon1
 CORE_SEMAPHORE_HH_	core/semaphore.hh	23;"	d
 _count	core/semaphore.hh	/^    size_t _count;$/;"	m	class:semaphore
 _wait_list	core/semaphore.hh	/^    circular_buffer<std::pair<promise<>, size_t>> _wait_list;$/;"	m	class:semaphore
@@ -2773,7 +2861,7 @@ temporary_buffer	core/temporary_buffer.hh	/^    temporary_buffer(CharType* buf, 
 temporary_buffer	core/temporary_buffer.hh	/^    temporary_buffer(temporary_buffer&& x) : _buffer(x._buffer), _size(x._size), _deleter(std::move(x._deleter)) {$/;"	f	class:temporary_buffer
 temporary_buffer	core/temporary_buffer.hh	/^class temporary_buffer {$/;"	c
 trim	core/temporary_buffer.hh	/^    void trim(size_t pos) {$/;"	f	class:temporary_buffer
-trim_front	core/temporary_buffer.hh	/^    void trim_front(size_t pos) {$/;"	f	class:temporary_buffer
+trim_front	core/temporary_buffer.hh	/^    void trim_front(size_t pos) {        $/;"	f	class:temporary_buffer
 g_current_context	core/thread.cc	/^thread_local jmp_buf* g_current_context;$/;"	m	namespace:seastar	file:
 g_current_thread	core/thread.cc	/^thread_local thread_context* g_current_thread;$/;"	m	namespace:seastar	file:
 g_unthreaded_context	core/thread.cc	/^thread_local jmp_buf g_unthreaded_context;$/;"	m	namespace:seastar	file:
@@ -3588,7 +3676,7 @@ get_data	net/api.hh	/^    packet& get_data() { return _impl->get_data(); }$/;"	f
 get_dst	net/api.hh	/^    ipv4_addr get_dst() { return _impl->get_dst(); }$/;"	f	class:net::final
 get_dst_port	net/api.hh	/^    uint16_t get_dst_port() { return _impl->get_dst_port(); }$/;"	f	class:net::final
 get_src	net/api.hh	/^    ipv4_addr get_src() { return _impl->get_src(); }$/;"	f	class:net::final
-in	net/api.hh	/^        ::sockaddr_in in;$/;"	m	union:socket_address::__anon1
+in	net/api.hh	/^        ::sockaddr_in in;$/;"	m	union:socket_address::__anon8
 ip	net/api.hh	/^    uint32_t ip;$/;"	m	struct:ipv4_addr
 ipv4_addr	net/api.hh	/^    ipv4_addr() : ip(0), port(0) {}$/;"	f	struct:ipv4_addr
 ipv4_addr	net/api.hh	/^    ipv4_addr(const socket_address &sa) {$/;"	f	struct:ipv4_addr
@@ -3609,13 +3697,13 @@ operator <<	net/api.hh	/^std::ostream& operator<<(std::ostream &os, ipv4_addr ad
 port	net/api.hh	/^    uint16_t port;$/;"	m	struct:ipv4_addr
 receive	net/api.hh	/^    future<udp_datagram> receive() { return _impl->receive(); }$/;"	f	class:net::udp_channel
 reuse_address	net/api.hh	/^    bool reuse_address = false;$/;"	m	struct:listen_options
-sa	net/api.hh	/^        ::sockaddr sa;$/;"	m	union:socket_address::__anon1
-sas	net/api.hh	/^        ::sockaddr_storage sas;$/;"	m	union:socket_address::__anon1
+sa	net/api.hh	/^        ::sockaddr sa;$/;"	m	union:socket_address::__anon8
+sas	net/api.hh	/^        ::sockaddr_storage sas;$/;"	m	union:socket_address::__anon8
 send	net/api.hh	/^    future<> send(ipv4_addr dst, const char* msg) { return _impl->send(std::move(dst), msg); }$/;"	f	class:net::udp_channel
 send	net/api.hh	/^    future<> send(ipv4_addr dst, packet p) { return _impl->send(std::move(dst), std::move(p)); }$/;"	f	class:net::udp_channel
 socket_address	net/api.hh	/^    socket_address(sockaddr_in sa) {$/;"	f	class:socket_address
 socket_address	net/api.hh	/^class socket_address {$/;"	c
-u	net/api.hh	/^    } u;$/;"	m	class:socket_address	typeref:union:socket_address::__anon1
+u	net/api.hh	/^    } u;$/;"	m	class:socket_address	typeref:union:socket_address::__anon8
 udp_channel	net/api.hh	/^    udp_channel() {}$/;"	f	class:net::udp_channel
 udp_channel	net/api.hh	/^    udp_channel(std::unique_ptr<udp_channel_impl> impl) : _impl(std::move(impl)) {}$/;"	f	class:net::udp_channel
 udp_channel	net/api.hh	/^class udp_channel {$/;"	c	namespace:net
@@ -3921,13 +4009,13 @@ _tx_gc_poller	net/dpdk.cc	/^    reactor::poller _tx_gc_poller;$/;"	m	class:dpdk:
 _use_lro	net/dpdk.cc	/^    bool _use_lro;$/;"	m	class:dpdk::dpdk_device	file:
 _xmem	net/dpdk.cc	/^        std::unique_ptr<void, free_deleter> _xmem;$/;"	m	class:dpdk::dpdk_qp::tx_buf_factory	file:
 alloc_mempool_xmem	net/dpdk.cc	/^void* dpdk_qp<HugetlbfsMemBackend>::alloc_mempool_xmem($/;"	f	class:dpdk::dpdk_qp
-bad	net/dpdk.cc	/^        } bad;$/;"	m	struct:dpdk::port_stats::__anon5	typeref:struct:dpdk::port_stats::__anon5::__anon7	file:
-bad	net/dpdk.cc	/^        } bad;$/;"	m	struct:dpdk::port_stats::__anon8	typeref:struct:dpdk::port_stats::__anon8::__anon10	file:
+bad	net/dpdk.cc	/^        } bad;$/;"	m	struct:dpdk::port_stats::__anon12	typeref:struct:dpdk::port_stats::__anon12::__anon14	file:
+bad	net/dpdk.cc	/^        } bad;$/;"	m	struct:dpdk::port_stats::__anon9	typeref:struct:dpdk::port_stats::__anon9::__anon11	file:
 check_frag0	net/dpdk.cc	/^        static bool check_frag0(packet& p)$/;"	f	class:dpdk::dpdk_qp::tx_buf	file:
 check_port_link_status	net/dpdk.cc	/^void dpdk_device::check_port_link_status()$/;"	f	class:dpdk::dpdk_device
 copy_one_data_buf	net/dpdk.cc	/^        static size_t copy_one_data_buf($/;"	f	class:dpdk::dpdk_qp::tx_buf	file:
 copy_one_frag	net/dpdk.cc	/^        static bool copy_one_frag(dpdk_qp& qp, fragment& frag,$/;"	f	class:dpdk::dpdk_qp::tx_buf	file:
-crc	net/dpdk.cc	/^            uint64_t crc;          \/\/ packets with CRC error$/;"	m	struct:dpdk::port_stats::__anon5::__anon7	file:
+crc	net/dpdk.cc	/^            uint64_t crc;          \/\/ packets with CRC error$/;"	m	struct:dpdk::port_stats::__anon9::__anon11	file:
 create_dpdk_net_device	net/dpdk.cc	/^std::unique_ptr<net::device> create_dpdk_net_device($/;"	f
 def_rx_conf	net/dpdk.cc	/^    const rte_eth_rxconf* def_rx_conf() const {$/;"	f	class:dpdk::dpdk_device
 def_tx_conf	net/dpdk.cc	/^    const rte_eth_txconf* def_tx_conf() const {$/;"	f	class:dpdk::dpdk_device
@@ -3942,7 +4030,7 @@ dpdk_device	net/dpdk.cc	/^    dpdk_device(uint8_t port_idx, uint16_t num_queues,
 dpdk_device	net/dpdk.cc	/^class dpdk_device : public device {$/;"	c	namespace:dpdk	file:
 dpdk_qp	net/dpdk.cc	/^class dpdk_qp : public net::qp {$/;"	c	namespace:dpdk	file:
 dpdk_qp	net/dpdk.cc	/^dpdk_qp<HugetlbfsMemBackend>::dpdk_qp(dpdk_device* dev, uint8_t qid,$/;"	f	class:dpdk::dpdk_qp
-dropped	net/dpdk.cc	/^            uint64_t dropped;      \/\/ missed packets (e.g. full FIFO)$/;"	m	struct:dpdk::port_stats::__anon5::__anon7	file:
+dropped	net/dpdk.cc	/^            uint64_t dropped;      \/\/ missed packets (e.g. full FIFO)$/;"	m	struct:dpdk::port_stats::__anon9::__anon11	file:
 from_mbuf	net/dpdk.cc	/^dpdk_qp<false>::from_mbuf(rte_mbuf* m)$/;"	f	class:dpdk::dpdk_qp
 from_mbuf	net/dpdk.cc	/^inline std::experimental::optional<packet> dpdk_qp<true>::from_mbuf(rte_mbuf* m)$/;"	f	class:dpdk::dpdk_qp
 from_mbuf_lro	net/dpdk.cc	/^dpdk_qp<false>::from_mbuf_lro(rte_mbuf* m)$/;"	f	class:dpdk::dpdk_qp
@@ -3957,8 +4045,8 @@ get_dpdk_net_options_description	net/dpdk.cc	/^get_dpdk_net_options_description(
 get_one_completed	net/dpdk.cc	/^        tx_buf* get_one_completed() {$/;"	f	class:dpdk::dpdk_qp::tx_buf_factory	file:
 get_rss_table	net/dpdk.cc	/^void dpdk_device::get_rss_table()$/;"	f	class:dpdk::dpdk_device
 get_tx_buf	net/dpdk.cc	/^    tx_buf* get_tx_buf() { return _tx_buf_factory.get(); }$/;"	f	class:dpdk::dpdk_qp
-good	net/dpdk.cc	/^        } good;$/;"	m	struct:dpdk::port_stats::__anon5	typeref:struct:dpdk::port_stats::__anon5::__anon6	file:
-good	net/dpdk.cc	/^        } good;$/;"	m	struct:dpdk::port_stats::__anon8	typeref:struct:dpdk::port_stats::__anon8::__anon9	file:
+good	net/dpdk.cc	/^        } good;$/;"	m	struct:dpdk::port_stats::__anon12	typeref:struct:dpdk::port_stats::__anon12::__anon13	file:
+good	net/dpdk.cc	/^        } good;$/;"	m	struct:dpdk::port_stats::__anon9	typeref:struct:dpdk::port_stats::__anon9::__anon10	file:
 hw_features_ref	net/dpdk.cc	/^    net::hw_features& hw_features_ref() { return _hw_features; }$/;"	f	class:dpdk::dpdk_device
 init_factory	net/dpdk.cc	/^        void init_factory() {$/;"	f	class:dpdk::dpdk_qp::tx_buf_factory	file:
 init_local_queue	net/dpdk.cc	/^std::unique_ptr<qp> dpdk_device::init_local_queue(boost::program_options::variables_map opts, uint16_t qid) {$/;"	f	class:dpdk::dpdk_device
@@ -3968,7 +4056,7 @@ init_port_start	net/dpdk.cc	/^int dpdk_device::init_port_start()$/;"	f	class:dpd
 init_rx_mbuf_pool	net/dpdk.cc	/^bool dpdk_qp<HugetlbfsMemBackend>::init_rx_mbuf_pool()$/;"	f	class:dpdk::dpdk_qp
 inline_mbuf_data_size	net/dpdk.cc	/^static constexpr size_t   inline_mbuf_data_size  = 2048;$/;"	m	namespace:dpdk	file:
 inline_mbuf_size	net/dpdk.cc	/^static constexpr uint16_t inline_mbuf_size       =$/;"	m	namespace:dpdk	file:
-len	net/dpdk.cc	/^            uint64_t len;          \/\/ packets with a bad length$/;"	m	struct:dpdk::port_stats::__anon5::__anon7	file:
+len	net/dpdk.cc	/^            uint64_t len;          \/\/ packets with a bad length$/;"	m	struct:dpdk::port_stats::__anon9::__anon11	file:
 link_ready	net/dpdk.cc	/^    virtual future<> link_ready() { return _link_ready_promise.get_future(); }$/;"	f	class:dpdk::dpdk_device
 max_frags	net/dpdk.cc	/^static constexpr uint8_t  max_frags              = 32 + 1;$/;"	m	namespace:dpdk	file:
 mbuf_cache_size	net/dpdk.cc	/^static constexpr uint16_t mbuf_cache_size        = 512;$/;"	m	namespace:dpdk	file:
@@ -3976,16 +4064,16 @@ mbuf_data_size	net/dpdk.cc	/^static constexpr size_t   mbuf_data_size         = 
 mbuf_overhead	net/dpdk.cc	/^static constexpr uint16_t mbuf_overhead          =$/;"	m	namespace:dpdk	file:
 mbufs_per_queue_rx	net/dpdk.cc	/^static constexpr uint16_t mbufs_per_queue_rx     = 2 * default_ring_size;$/;"	m	namespace:dpdk	file:
 mbufs_per_queue_tx	net/dpdk.cc	/^static constexpr uint16_t mbufs_per_queue_tx     = 2 * default_ring_size;$/;"	m	namespace:dpdk	file:
-mcast	net/dpdk.cc	/^            uint64_t mcast;        \/\/ number of received multicast packets$/;"	m	struct:dpdk::port_stats::__anon5::__anon6	file:
+mcast	net/dpdk.cc	/^            uint64_t mcast;        \/\/ number of received multicast packets$/;"	m	struct:dpdk::port_stats::__anon9::__anon10	file:
 me	net/dpdk.cc	/^        static tx_buf* me(rte_mbuf* mbuf) {$/;"	f	class:dpdk::dpdk_qp::tx_buf
 override	net/dpdk.cc	/^    virtual std::unique_ptr<qp> init_local_queue(boost::program_options::variables_map opts, uint16_t qid) override;$/;"	m	class:dpdk::dpdk_device	file:
 override	net/dpdk.cc	/^    virtual void rx_start() override;$/;"	m	class:dpdk::dpdk_qp	file:
 packet_read_size	net/dpdk.cc	/^static constexpr uint8_t packet_read_size        = 32;$/;"	m	namespace:dpdk	file:
 page_mask	net/dpdk.cc	/^    static constexpr phys_addr_t page_mask = ~(memory::page_size - 1);$/;"	m	class:dpdk::dpdk_qp	file:
-pause_xoff	net/dpdk.cc	/^            uint64_t pause_xoff;   \/\/ number of received PAUSE XOFF frames$/;"	m	struct:dpdk::port_stats::__anon5::__anon6	file:
-pause_xoff	net/dpdk.cc	/^            uint64_t pause_xoff;  \/\/ number of sent PAUSE XOFF frames$/;"	m	struct:dpdk::port_stats::__anon8::__anon9	file:
-pause_xon	net/dpdk.cc	/^            uint64_t pause_xon;    \/\/ number of received PAUSE XON frames$/;"	m	struct:dpdk::port_stats::__anon5::__anon6	file:
-pause_xon	net/dpdk.cc	/^            uint64_t pause_xon;   \/\/ number of sent PAUSE XON frames$/;"	m	struct:dpdk::port_stats::__anon8::__anon9	file:
+pause_xoff	net/dpdk.cc	/^            uint64_t pause_xoff;   \/\/ number of received PAUSE XOFF frames$/;"	m	struct:dpdk::port_stats::__anon9::__anon10	file:
+pause_xoff	net/dpdk.cc	/^            uint64_t pause_xoff;  \/\/ number of sent PAUSE XOFF frames$/;"	m	struct:dpdk::port_stats::__anon12::__anon13	file:
+pause_xon	net/dpdk.cc	/^            uint64_t pause_xon;    \/\/ number of received PAUSE XON frames$/;"	m	struct:dpdk::port_stats::__anon9::__anon10	file:
+pause_xon	net/dpdk.cc	/^            uint64_t pause_xon;   \/\/ number of sent PAUSE XON frames$/;"	m	struct:dpdk::port_stats::__anon12::__anon13	file:
 pktmbuf_pool_name	net/dpdk.cc	/^static constexpr const char* pktmbuf_pool_name   = "dpdk_net_pktmbuf_pool";$/;"	m	namespace:dpdk	file:
 poll_rx_once	net/dpdk.cc	/^bool dpdk_qp<HugetlbfsMemBackend>::poll_rx_once()$/;"	f	class:dpdk::dpdk_qp
 port	net/dpdk.cc	/^    dpdk_device& port() const { return *_dev; }$/;"	f	class:dpdk::dpdk_qp
@@ -4002,7 +4090,7 @@ refill_one_cluster	net/dpdk.cc	/^inline bool dpdk_qp<HugetlbfsMemBackend>::refil
 refill_rx_mbuf	net/dpdk.cc	/^    static bool refill_rx_mbuf(rte_mbuf* m, size_t size = mbuf_data_size) {$/;"	f	class:dpdk::dpdk_qp	file:
 reset_zc	net/dpdk.cc	/^        void reset_zc() {$/;"	f	class:dpdk::dpdk_qp::tx_buf
 rte_mbuf_p	net/dpdk.cc	/^        rte_mbuf* rte_mbuf_p() { return &_mbuf; }$/;"	f	class:dpdk::dpdk_qp::tx_buf
-rx	net/dpdk.cc	/^    } rx;$/;"	m	struct:dpdk::port_stats	typeref:struct:dpdk::port_stats::__anon5	file:
+rx	net/dpdk.cc	/^    } rx;$/;"	m	struct:dpdk::port_stats	typeref:struct:dpdk::port_stats::__anon9	file:
 rx_gc	net/dpdk.cc	/^bool dpdk_qp<HugetlbfsMemBackend>::rx_gc()$/;"	f	class:dpdk::dpdk_qp
 rx_gc_thresh	net/dpdk.cc	/^static constexpr uint16_t rx_gc_thresh           = 64;$/;"	m	namespace:dpdk	file:
 rx_start	net/dpdk.cc	/^void dpdk_qp<HugetlbfsMemBackend>::rx_start() {$/;"	f	class:dpdk::dpdk_qp
@@ -4010,10 +4098,10 @@ set_hw_flow_control	net/dpdk.cc	/^void dpdk_device::set_hw_flow_control()$/;"	f	
 set_one_data_buf	net/dpdk.cc	/^        static size_t set_one_data_buf($/;"	f	class:dpdk::dpdk_qp::tx_buf	file:
 set_packet	net/dpdk.cc	/^        void set_packet(packet&& p) {$/;"	f	class:dpdk::dpdk_qp::tx_buf
 set_zc_info	net/dpdk.cc	/^        void set_zc_info(void* va, phys_addr_t pa, size_t len) {$/;"	f	class:dpdk::dpdk_qp::tx_buf
-total	net/dpdk.cc	/^            uint64_t total;        \/\/ total number of erroneous received packets$/;"	m	struct:dpdk::port_stats::__anon5::__anon7	file:
-total	net/dpdk.cc	/^            uint64_t total;   \/\/ total number of failed transmitted packets$/;"	m	struct:dpdk::port_stats::__anon8::__anon10	file:
+total	net/dpdk.cc	/^            uint64_t total;        \/\/ total number of erroneous received packets$/;"	m	struct:dpdk::port_stats::__anon9::__anon11	file:
+total	net/dpdk.cc	/^            uint64_t total;   \/\/ total number of failed transmitted packets$/;"	m	struct:dpdk::port_stats::__anon12::__anon14	file:
 translate_one_frag	net/dpdk.cc	/^        static bool translate_one_frag(dpdk_qp& qp, fragment& frag,$/;"	f	class:dpdk::dpdk_qp::tx_buf	file:
-tx	net/dpdk.cc	/^    } tx;$/;"	m	struct:dpdk::port_stats	typeref:struct:dpdk::port_stats::__anon8	file:
+tx	net/dpdk.cc	/^    } tx;$/;"	m	struct:dpdk::port_stats	typeref:struct:dpdk::port_stats::__anon12	file:
 tx_buf	net/dpdk.cc	/^        tx_buf(tx_buf_factory& fc) : _fc(fc) {$/;"	f	class:dpdk::dpdk_qp::tx_buf
 tx_buf	net/dpdk.cc	/^    class tx_buf {$/;"	c	class:dpdk::dpdk_qp	file:
 tx_buf_factory	net/dpdk.cc	/^        tx_buf_factory(uint8_t qid) {$/;"	f	class:dpdk::dpdk_qp::tx_buf_factory
@@ -4330,11 +4418,11 @@ _stats_plugin_name	net/net.hh	/^    const std::string _stats_plugin_name;$/;"	m	
 _sw_reta	net/net.hh	/^    std::experimental::optional<std::array<uint8_t, 128>> _sw_reta;$/;"	m	class:net::qp
 _tx_packetq	net/net.hh	/^    circular_buffer<packet> _tx_packetq;$/;"	m	class:net::qp
 _tx_poller	net/net.hh	/^    reactor::poller _tx_poller;$/;"	m	class:net::qp
-bad	net/net.hh	/^        } bad;$/;"	m	struct:net::qp_stats::__anon2	typeref:struct:net::qp_stats::__anon2::__anon3
+bad	net/net.hh	/^        } bad;$/;"	m	struct:net::qp_stats::__anon5	typeref:struct:net::qp_stats::__anon5::__anon6
 bytes	net/net.hh	/^    uint64_t bytes;      \/\/ total number of bytes$/;"	m	struct:net::qp_stats_good
 copy_bytes	net/net.hh	/^    uint64_t copy_bytes; \/\/ bytes that were copied on L2 level$/;"	m	struct:net::qp_stats_good
 copy_frags	net/net.hh	/^    uint64_t copy_frags; \/\/ fragments that were copied on L2 level$/;"	m	struct:net::qp_stats_good
-csum	net/net.hh	/^            uint64_t csum;         \/\/ packets with bad checksum$/;"	m	struct:net::qp_stats::__anon2::__anon3
+csum	net/net.hh	/^            uint64_t csum;         \/\/ packets with bad checksum$/;"	m	struct:net::qp_stats::__anon5::__anon6
 data	net/net.hh	/^    uint8_t data[64];$/;"	m	class:net::forward_hash
 device	net/net.hh	/^    device() {$/;"	f	class:net::device
 device	net/net.hh	/^class device {$/;"	c	namespace:net
@@ -4342,16 +4430,16 @@ end_idx	net/net.hh	/^    size_t end_idx = 0;$/;"	m	class:net::forward_hash
 forward	net/net.hh	/^        std::function<bool (forward_hash&, packet&, size_t)> forward;$/;"	m	struct:net::interface::l3_rx_stream
 forward_dst	net/net.hh	/^    unsigned forward_dst(unsigned src_cpuid, Func&& hashfn) {$/;"	f	class:net::device
 forward_hash	net/net.hh	/^class forward_hash {$/;"	c	namespace:net
-good	net/net.hh	/^        struct qp_stats_good good;$/;"	m	struct:net::qp_stats::__anon2	typeref:struct:net::qp_stats::__anon2::qp_stats_good
-good	net/net.hh	/^        struct qp_stats_good good;$/;"	m	struct:net::qp_stats::__anon4	typeref:struct:net::qp_stats::__anon4::qp_stats_good
+good	net/net.hh	/^        struct qp_stats_good good;$/;"	m	struct:net::qp_stats::__anon5	typeref:struct:net::qp_stats::__anon5::qp_stats_good
+good	net/net.hh	/^        struct qp_stats_good good;$/;"	m	struct:net::qp_stats::__anon7	typeref:struct:net::qp_stats::__anon7::qp_stats_good
 hash2cpu	net/net.hh	/^    virtual unsigned hash2cpu(uint32_t hash) {$/;"	f	class:net::device
 hash2qid	net/net.hh	/^    virtual unsigned hash2qid(uint32_t hash) {$/;"	f	class:net::device
 hw_address	net/net.hh	/^    ethernet_address hw_address() { return _hw_address; }$/;"	f	class:net::interface
 hw_features	net/net.hh	/^    const net::hw_features& hw_features() const { return _hw_features; }$/;"	f	class:net::interface
 hw_features	net/net.hh	/^struct hw_features {$/;"	s	namespace:net
 hw_queues_count	net/net.hh	/^    virtual uint16_t hw_queues_count() { return 1; }$/;"	f	class:net::device
-inc_csum_err	net/net.hh	/^            void inc_csum_err() {$/;"	f	struct:net::qp_stats::__anon2::__anon3
-inc_no_mem	net/net.hh	/^            void inc_no_mem() {$/;"	f	struct:net::qp_stats::__anon2::__anon3
+inc_csum_err	net/net.hh	/^            void inc_csum_err() {$/;"	f	struct:net::qp_stats::__anon5::__anon6
+inc_no_mem	net/net.hh	/^            void inc_no_mem() {$/;"	f	struct:net::qp_stats::__anon5::__anon6
 interface	net/net.hh	/^class interface {$/;"	c	namespace:net
 l2receive	net/net.hh	/^    void l2receive(packet p) { _queues[engine().cpu_id()]->_rx_stream.produce(std::move(p)); }$/;"	f	class:net::device
 l3_protocol	net/net.hh	/^class l3_protocol {$/;"	c	namespace:net
@@ -4364,7 +4452,7 @@ local_queue	net/net.hh	/^    qp& local_queue() { return queue_for_cpu(engine().c
 max_packet_len	net/net.hh	/^    uint16_t max_packet_len = net::ip_packet_len_max - net::eth_hdr_len;$/;"	m	struct:net::hw_features
 mtu	net/net.hh	/^    uint16_t mtu = 1500;$/;"	m	struct:net::hw_features
 net	net/net.hh	/^namespace net {$/;"	n
-no_mem	net/net.hh	/^            uint64_t no_mem;       \/\/ Packets dropped due to allocation failure$/;"	m	struct:net::qp_stats::__anon2::__anon3
+no_mem	net/net.hh	/^            uint64_t no_mem;       \/\/ Packets dropped due to allocation failure$/;"	m	struct:net::qp_stats::__anon5::__anon6
 nr_frags	net/net.hh	/^    uint64_t nr_frags;   \/\/ total number of fragments$/;"	m	struct:net::qp_stats_good
 operator []	net/net.hh	/^    const uint8_t& operator[](size_t idx) const {$/;"	f	class:net::forward_hash
 p	net/net.hh	/^        packet p;$/;"	m	struct:net::l3_protocol::l3packet
@@ -4383,15 +4471,15 @@ queue_for_cpu	net/net.hh	/^    qp& queue_for_cpu(unsigned cpu) { return *_queues
 ready	net/net.hh	/^        future<> ready;$/;"	m	struct:net::interface::l3_rx_stream
 register_packet_provider	net/net.hh	/^    void register_packet_provider(l3_protocol::packet_provider_type func) {$/;"	f	class:net::interface
 register_packet_provider	net/net.hh	/^    void register_packet_provider(packet_provider_type func) {$/;"	f	class:net::qp
-rx	net/net.hh	/^    } rx;$/;"	m	struct:net::qp_stats	typeref:struct:net::qp_stats::__anon2
+rx	net/net.hh	/^    } rx;$/;"	m	struct:net::qp_stats	typeref:struct:net::qp_stats::__anon5
 rx_csum_offload	net/net.hh	/^    bool rx_csum_offload = false;$/;"	m	struct:net::hw_features
 rx_lro	net/net.hh	/^    bool rx_lro = false;$/;"	m	struct:net::hw_features
 rx_start	net/net.hh	/^    virtual void rx_start() {};$/;"	f	class:net::qp
 send	net/net.hh	/^    virtual uint32_t send(circular_buffer<packet>& p) {$/;"	f	class:net::qp
 size	net/net.hh	/^    size_t size() const {$/;"	f	class:net::forward_hash
 to	net/net.hh	/^        ethernet_address to;$/;"	m	struct:net::l3_protocol::l3packet
-total	net/net.hh	/^            uint64_t total;        \/\/ total number of erroneous packets$/;"	m	struct:net::qp_stats::__anon2::__anon3
-tx	net/net.hh	/^    } tx;$/;"	m	struct:net::qp_stats	typeref:struct:net::qp_stats::__anon4
+total	net/net.hh	/^            uint64_t total;        \/\/ total number of erroneous packets$/;"	m	struct:net::qp_stats::__anon5::__anon6
+tx	net/net.hh	/^    } tx;$/;"	m	struct:net::qp_stats	typeref:struct:net::qp_stats::__anon7
 tx_csum_ip_offload	net/net.hh	/^    bool tx_csum_ip_offload = false;$/;"	m	struct:net::hw_features
 tx_csum_l4_offload	net/net.hh	/^    bool tx_csum_l4_offload = false;$/;"	m	struct:net::hw_features
 tx_tso	net/net.hh	/^    bool tx_tso = false;$/;"	m	struct:net::hw_features
@@ -4405,7 +4493,7 @@ _cur_frag	net/packet-data-source.hh	/^    size_t _cur_frag = 0;$/;"	m	class:net:
 _p	net/packet-data-source.hh	/^    packet _p;$/;"	m	class:net::final
 as_input_stream	net/packet-data-source.hh	/^input_stream<char> as_input_stream(packet&& p) {$/;"	f	namespace:net
 final	net/packet-data-source.hh	/^class packet_data_source final : public data_source_impl {$/;"	c	namespace:net
-kj_get	net/packet-data-source.hh	/^    virtual kj::Promise<temporary_buffer<char>> kj_get(){$/;"	f	class:net::final
+kj_get	net/packet-data-source.hh	/^    virtual kj::Promise<temporary_buffer<char>> kj_get(size_t maxBytes = 8192){$/;"	f	class:net::final
 net	net/packet-data-source.hh	/^namespace net {$/;"	n
 packet_data_source	net/packet-data-source.hh	/^    explicit packet_data_source(net::packet&& p)$/;"	f	class:net::final
 PACKET_UTIL_HH_	net/packet-util.hh	23;"	d
@@ -4548,7 +4636,7 @@ kj_accept	net/posix-stack.cc	/^posix_reuseport_server_socket_impl::kj_accept() {
 kj_accept	net/posix-stack.cc	/^posix_server_socket_impl::kj_accept() {    $/;"	f	class:net::posix_server_socket_impl
 kj_connect	net/posix-stack.cc	/^posix_ap_network_stack::kj_connect(socket_address sa, socket_address local) {$/;"	f	class:net::posix_ap_network_stack
 kj_connect	net/posix-stack.cc	/^posix_network_stack::kj_connect(socket_address sa, socket_address local) {$/;"	f	class:net::posix_network_stack
-kj_get	net/posix-stack.cc	/^posix_data_source_impl::kj_get() {        $/;"	f	class:net::posix_data_source_impl
+kj_get	net/posix-stack.cc	/^posix_data_source_impl::kj_get(size_t maxBytes) {        $/;"	f	class:net::posix_data_source_impl
 kj_put	net/posix-stack.cc	/^posix_data_sink_impl::kj_put(packet p) {$/;"	f	class:net::posix_data_sink_impl
 kj_put	net/posix-stack.cc	/^posix_data_sink_impl::kj_put(temporary_buffer<char> buf) {$/;"	f	class:net::posix_data_sink_impl
 kj_receive	net/posix-stack.cc	/^posix_udp_channel::kj_receive() {$/;"	f	class:net::posix_udp_channel
@@ -4617,7 +4705,7 @@ override	net/posix-stack.hh	/^    virtual future<connected_socket> connect(socke
 override	net/posix-stack.hh	/^    virtual future<temporary_buffer<char>> get() override;$/;"	m	class:net::final
 override	net/posix-stack.hh	/^    virtual kj::Promise<connected_socket> kj_connect(socket_address sa, socket_address local = socket_address(::sockaddr_in{AF_INET, INADDR_ANY, 0}))  override;$/;"	m	class:net::posix_ap_network_stack
 override	net/posix-stack.hh	/^    virtual kj::Promise<connected_socket> kj_connect(socket_address sa, socket_address local = socket_address(::sockaddr_in{AF_INET, INADDR_ANY, 0}))  override;$/;"	m	class:net::posix_network_stack
-override	net/posix-stack.hh	/^    virtual kj::Promise<temporary_buffer<char>> kj_get() override;$/;"	m	class:net::final
+override	net/posix-stack.hh	/^    virtual kj::Promise<temporary_buffer<char>> kj_get(size_t maxBytes = 8192) override;$/;"	m	class:net::final
 override	net/posix-stack.hh	/^    virtual net::udp_channel make_udp_channel(ipv4_addr addr) override;$/;"	m	class:net::posix_network_stack
 override	net/posix-stack.hh	/^    virtual server_socket listen(socket_address sa, listen_options opts) override;$/;"	m	class:net::posix_ap_network_stack
 override	net/posix-stack.hh	/^    virtual server_socket listen(socket_address sa, listen_options opts) override;$/;"	m	class:net::posix_network_stack
@@ -5077,13 +5165,13 @@ get_virtio_net_options_description	net/virtio.cc	/^get_virtio_net_options_descri
 getconfig	net/virtio.cc	/^        const ring_config& getconfig() {$/;"	f	class:virtio::qp::rxq
 getconfig	net/virtio.cc	/^        const ring_config& getconfig() {$/;"	f	class:virtio::qp::txq
 getconfig	net/virtio.cc	/^    const ring_config& getconfig() {$/;"	f	class:virtio::vring
-gso_ecn	net/virtio.cc	/^        enum { gso_none = 0, gso_tcpv4 = 1, gso_udp = 3, gso_tcpv6 = 4, gso_ecn = 0x80 };$/;"	e	enum:virtio::qp::net_hdr::__anon12	file:
-gso_none	net/virtio.cc	/^        enum { gso_none = 0, gso_tcpv4 = 1, gso_udp = 3, gso_tcpv6 = 4, gso_ecn = 0x80 };$/;"	e	enum:virtio::qp::net_hdr::__anon12	file:
+gso_ecn	net/virtio.cc	/^        enum { gso_none = 0, gso_tcpv4 = 1, gso_udp = 3, gso_tcpv6 = 4, gso_ecn = 0x80 };$/;"	e	enum:virtio::qp::net_hdr::__anon3	file:
+gso_none	net/virtio.cc	/^        enum { gso_none = 0, gso_tcpv4 = 1, gso_udp = 3, gso_tcpv6 = 4, gso_ecn = 0x80 };$/;"	e	enum:virtio::qp::net_hdr::__anon3	file:
 gso_size	net/virtio.cc	/^        uint16_t gso_size;$/;"	m	struct:virtio::qp::net_hdr	file:
-gso_tcpv4	net/virtio.cc	/^        enum { gso_none = 0, gso_tcpv4 = 1, gso_udp = 3, gso_tcpv6 = 4, gso_ecn = 0x80 };$/;"	e	enum:virtio::qp::net_hdr::__anon12	file:
-gso_tcpv6	net/virtio.cc	/^        enum { gso_none = 0, gso_tcpv4 = 1, gso_udp = 3, gso_tcpv6 = 4, gso_ecn = 0x80 };$/;"	e	enum:virtio::qp::net_hdr::__anon12	file:
+gso_tcpv4	net/virtio.cc	/^        enum { gso_none = 0, gso_tcpv4 = 1, gso_udp = 3, gso_tcpv6 = 4, gso_ecn = 0x80 };$/;"	e	enum:virtio::qp::net_hdr::__anon3	file:
+gso_tcpv6	net/virtio.cc	/^        enum { gso_none = 0, gso_tcpv4 = 1, gso_udp = 3, gso_tcpv6 = 4, gso_ecn = 0x80 };$/;"	e	enum:virtio::qp::net_hdr::__anon3	file:
 gso_type	net/virtio.cc	/^        uint8_t gso_type;$/;"	m	struct:virtio::qp::net_hdr	file:
-gso_udp	net/virtio.cc	/^        enum { gso_none = 0, gso_tcpv4 = 1, gso_udp = 3, gso_tcpv6 = 4, gso_ecn = 0x80 };$/;"	e	enum:virtio::qp::net_hdr::__anon12	file:
+gso_udp	net/virtio.cc	/^        enum { gso_none = 0, gso_tcpv4 = 1, gso_udp = 3, gso_tcpv6 = 4, gso_ecn = 0x80 };$/;"	e	enum:virtio::qp::net_hdr::__anon3	file:
 has_next	net/virtio.cc	/^            uint16_t has_next : 1;$/;"	m	struct:virtio::vring::desc::flags	file:
 hdr_len	net/virtio.cc	/^        uint16_t hdr_len;$/;"	m	struct:virtio::qp::net_hdr	file:
 hw_features	net/virtio.cc	/^    net::hw_features hw_features() {$/;"	f	class:virtio::device
@@ -5100,7 +5188,7 @@ net_hdr	net/virtio.cc	/^    struct net_hdr {$/;"	s	class:virtio::qp	file:
 net_hdr_mrg	net/virtio.cc	/^    struct net_hdr_mrg : net_hdr {$/;"	s	class:virtio::qp	file:
 next_idx	net/virtio.cc	/^        uint16_t next_idx() { return _next; }$/;"	f	class:virtio::vring::desc
 no_interrupts	net/virtio.cc	/^            uint16_t no_interrupts : 1;$/;"	m	struct:virtio::vring::avail_layout::flags	file:
-no_notify	net/virtio.cc	/^            no_notify = 1$/;"	e	enum:virtio::vring::used_layout::__anon11	file:
+no_notify	net/virtio.cc	/^            no_notify = 1$/;"	e	enum:virtio::vring::used_layout::__anon2	file:
 notifications_disabled	net/virtio.cc	/^    bool notifications_disabled() {$/;"	f	class:virtio::vring	file:
 notifier	net/virtio.cc	/^class notifier {$/;"	c	namespace:virtio	file:
 notifier_osv	net/virtio.cc	/^    notifier_osv(osv::assigned_virtio &virtio, uint16_t q_index)$/;"	f	class:virtio::notifier_osv
@@ -5220,8 +5308,8 @@ _next_idx	net/xenfront.hh	/^        std::atomic<uint32_t> _next_idx = { 0 };$/;"
 _ring	net/xenfront.hh	/^        front_ring<T> *_ring;$/;"	m	class:xen::front_ring::entries
 _ring	net/xenfront.hh	/^    T _ring[1];$/;"	m	class:xen::sring
 _sring	net/xenfront.hh	/^    sring<T> *_sring;$/;"	m	class:xen::front_ring
-csum_blank	net/xenfront.hh	/^        uint16_t csum_blank : 1;$/;"	m	struct:xen::netif_tx_request::__anon13
-data_validated	net/xenfront.hh	/^        uint16_t data_validated : 1;$/;"	m	struct:xen::netif_tx_request::__anon13
+csum_blank	net/xenfront.hh	/^        uint16_t csum_blank : 1;$/;"	m	struct:xen::netif_tx_request::__anon4
+data_validated	net/xenfront.hh	/^        uint16_t data_validated : 1;$/;"	m	struct:xen::netif_tx_request::__anon4
 dump	net/xenfront.hh	/^    void dump() {$/;"	f	class:xen::front_ring
 dump	net/xenfront.hh	/^    void dump() {$/;"	f	class:xen::sring
 dump	net/xenfront.hh	/^    void dump(const char *str, netif_rx_response &r) {$/;"	f	class:xen::front_ring
@@ -5229,9 +5317,9 @@ dump	net/xenfront.hh	/^    void dump(const char *str, netif_tx_response &r) {$/;
 entries	net/xenfront.hh	/^        entries(front_ring<T> *ring) : _ring(ring) {}$/;"	f	class:xen::front_ring::entries
 entries	net/xenfront.hh	/^    class entries {$/;"	c	class:xen::front_ring
 entries	net/xenfront.hh	/^    entries entries;$/;"	m	class:xen::front_ring
-extra_info	net/xenfront.hh	/^        uint16_t extra_info : 1;$/;"	m	struct:xen::netif_tx_request::__anon13
+extra_info	net/xenfront.hh	/^        uint16_t extra_info : 1;$/;"	m	struct:xen::netif_tx_request::__anon4
 flags	net/xenfront.hh	/^    uint16_t flags;        \/* NETRXF_* *\/$/;"	m	struct:xen::netif_rx_response
-flags	net/xenfront.hh	/^    } flags;$/;"	m	struct:xen::netif_tx_request	typeref:struct:xen::netif_tx_request::__anon13
+flags	net/xenfront.hh	/^    } flags;$/;"	m	struct:xen::netif_tx_request	typeref:struct:xen::netif_tx_request::__anon4
 front_ring	net/xenfront.hh	/^    front_ring(gntref r, xenfront_qp& dev)$/;"	f	class:xen::front_ring
 front_ring	net/xenfront.hh	/^class front_ring {$/;"	c	namespace:xen
 gref	net/xenfront.hh	/^    uint32_t gref;$/;"	m	struct:xen::netif_rx_request
@@ -5241,7 +5329,7 @@ id	net/xenfront.hh	/^    uint16_t id;$/;"	m	struct:xen::netif_rx_response
 id	net/xenfront.hh	/^    uint16_t id;$/;"	m	struct:xen::netif_tx_request
 id	net/xenfront.hh	/^    uint16_t id;$/;"	m	struct:xen::netif_tx_response
 idx	net/xenfront.hh	/^    static uint32_t idx(int i) { return i & (nr_ents - 1); }$/;"	f	class:xen::front_ring
-more_data	net/xenfront.hh	/^        uint16_t more_data : 1;$/;"	m	struct:xen::netif_tx_request::__anon13
+more_data	net/xenfront.hh	/^        uint16_t more_data : 1;$/;"	m	struct:xen::netif_tx_request::__anon4
 netif_rx_request	net/xenfront.hh	/^struct netif_rx_request {$/;"	s	namespace:xen
 netif_rx_response	net/xenfront.hh	/^struct netif_rx_response {$/;"	s	namespace:xen
 netif_tx_request	net/xenfront.hh	/^struct netif_tx_request {$/;"	s	namespace:xen
@@ -5251,7 +5339,7 @@ offset	net/xenfront.hh	/^    uint16_t offset;       \/* Offset in page of start 
 offset	net/xenfront.hh	/^    uint16_t offset;$/;"	m	struct:xen::netif_tx_request
 operator []	net/xenfront.hh	/^        gntref& operator[](std::size_t i) { return _entries[_ring->idx(i)]; }$/;"	f	class:xen::front_ring::entries
 operator []	net/xenfront.hh	/^    T& operator[](std::size_t i) { return _sring->_ring[idx(i)]; }$/;"	f	class:xen::front_ring
-pad	net/xenfront.hh	/^        uint16_t pad : 12;$/;"	m	struct:xen::netif_tx_request::__anon13
+pad	net/xenfront.hh	/^        uint16_t pad : 12;$/;"	m	struct:xen::netif_tx_request::__anon4
 pad	net/xenfront.hh	/^    uint8_t  pad[48] = { 0 };$/;"	m	class:xen::sring
 ref	net/xenfront.hh	/^    int32_t  ref = -1;$/;"	m	class:xen::front_ring
 req	net/xenfront.hh	/^    struct netif_rx_request  req;$/;"	m	union:xen::rx	typeref:struct:xen::rx::netif_rx_request

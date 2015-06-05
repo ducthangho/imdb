@@ -28,243 +28,302 @@
 #pragma GCC system_header
 #endif
 
-#include "uv.h"
 #include "capnp/rpc.h"
-#include "capnp/message.h"
-#include "core/shared_ptr.hh"
+#include <capnp/dynamic.h>
+#include <capnp/schema-parser.h>
+#include <kj/debug.h>
+#include <kj/async.h>
+#include <kj/async-io.h>
+#include <kj/vector.h>
+#include <errno.h>
+#include <unistd.h>
+#include <capnp/rpc-twoparty.h>
+#include <capnp/rpc.capnp.h>
+#include <capnp/serialize.h>
+#include <unordered_map>
+#include <inttypes.h>
+#include <set>
+#include <stdlib.h>
+#include <sys/uio.h>
+#include <kj/threadlocal.h>
 #include "core/reactor.hh"
-#include "event_port.hh"
+#include "core/shared_ptr.hh"
+#include "core/stream.hh"
+#include "core/memory.hh"
+#include "core/units.hh"
+#include "core/distributed.hh"
+#include "core/vector-data-sink.hh"
+#include "core/bitops.hh"
+#include "core/slab.hh"
+#include "core/align.hh"
+#include "net/api.hh"
+#include "net/packet-data-source.hh"
+#include "core/do_with.hh"
+#include <capnp/rpc-twoparty.h>
 
-struct sockaddr;
+#include <typeinfo>
+#include <typeindex>
+#include <cxxabi.h>
 
-namespace kj { class AsyncIoProvider; class LowLevelAsyncIoProvider;}
 
-namespace capnp {
-
-class VmtsRpcContext;
-
-class VmtsRpcClient {
-  // Super-simple interface for setting up a Cap'n Proto RPC client.  Example:
-  //
-  //     # Cap'n Proto schema
-  //     interface Adder {
-  //       add @0 (left :Int32, right :Int32) -> (value :Int32);
-  //     }
-  //
-  //     // C++ client
-  //     int main() {
-  //       capnp::VmtsRpcClient client("localhost:3456");
-  //       Adder::Client adder = client.getMain<Adder>();
-  //       auto request = adder.addRequest();
-  //       request.setLeft(12);
-  //       request.setRight(34);
-  //       auto response = request.send().wait(client.getWaitScope());
-  //       assert(response.getValue() == 46);
-  //       return 0;
-  //     }
-  //
-  //     // C++ server
-  //     class AdderImpl final: public Adder::Server {
-  //     public:
-  //       kj::Promise<void> add(AddContext context) override {
-  //         auto params = context.getParams();
-  //         context.getResults().setValue(params.getLeft() + params.getRight());
-  //         return kj::READY_NOW;
-  //       }
-  //     };
-  //
-  //     int main() {
-  //       capnp::VmtsRpcServer server("*:3456");
-  //       server.exportCap("adder", kj::heap<AdderImpl>());
-  //       kj::NEVER_DONE.wait(server.getWaitScope());
-  //     }
-  //
-  // This interface is easy, but it hides a lot of useful features available from the lower-level
-  // classes:
-  // - The server can only export a small set of public, singleton capabilities under well-known
-  //   string names.  This is fine for transient services where no state needs to be kept between
-  //   connections, but hides the power of Cap'n Proto when it comes to long-lived resources.
-  // - VmtsRpcClient/VmtsRpcServer automatically set up a `kj::EventLoop` and make it current for the
-  //   thread.  Only one `kj::EventLoop` can exist per thread, so you cannot use these interfaces
-  //   if you wish to set up your own event loop.  (However, you can safely create multiple
-  //   VmtsRpcClient / VmtsRpcServer objects in a single thread; they will make sure to make no more
-  //   than one EventLoop.)
-  // - These classes only support simple two-party connections, not multilateral VatNetworks.
-  // - These classes only support communication over a raw, unencrypted socket.  If you want to
-  //   build on an abstract stream (perhaps one which supports encryption), you must use the
-  //   lower-level interfaces.
-  //
-  // Some of these restrictions will probably be lifted in future versions, but some things will
-  // always require using the low-level interfaces directly.  If you are interested in working
-  // at a lower level, start by looking at these interfaces:
-  // - `kj::startAsyncIo()` in `kj/async-io.h`.
-  // - `RpcSystem` in `capnp/rpc.h`.
-  // - `TwoPartyVatNetwork` in `capnp/rpc-twoparty.h`.
-
-public:
-  explicit VmtsRpcClient(kj::StringPtr serverAddress, uint defaultPort = 0,
-                       ReaderOptions readerOpts = ReaderOptions());
-  // Construct a new VmtsRpcClient and connect to the given address.  The connection is formed in
-  // the background -- if it fails, calls to capabilities returned by importCap() will fail with an
-  // appropriate exception.
-  //
-  // `defaultPort` is the IP port number to use if `serverAddress` does not include it explicitly.
-  // If unspecified, the port is required in `serverAddress`.
-  //
-  // The address is parsed by `kj::Network` in `kj/async-io.h`.  See that interface for more info
-  // on the address format, but basically it's what you'd expect.
-  //
-  // `readerOpts` is the ReaderOptions structure used to read each incoming message on the
-  // connection. Setting this may be necessary if you need to receive very large individual
-  // messages or messages. However, it is recommended that you instead think about how to change
-  // your protocol to send large data blobs in multiple small chunks -- this is much better for
-  // both security and performance. See `ReaderOptions` in `message.h` for more details.
-
-  VmtsRpcClient(const struct sockaddr* serverAddress, uint addrSize,
-              ReaderOptions readerOpts = ReaderOptions());
-  // Like the above constructor, but connects to an already-resolved socket address.  Any address
-  // format supported by `kj::Network` in `kj/async-io.h` is accepted.
-
-  explicit VmtsRpcClient(int socketFd, ReaderOptions readerOpts = ReaderOptions());
-  // Create a client on top of an already-connected socket.
-  // `readerOpts` acts as in the first constructor.
-
-  ~VmtsRpcClient() noexcept(false);
-
-  template <typename Type>
-  typename Type::Client getMain();
-  Capability::Client getMain();
-  // Get the server's main (aka "bootstrap") interface.
-
-  template <typename Type>
-  typename Type::Client importCap(kj::StringPtr name)
-      KJ_DEPRECATED("Change your server to export a main interface, then use getMain() instead.");
-  Capability::Client importCap(kj::StringPtr name)
-      KJ_DEPRECATED("Change your server to export a main interface, then use getMain() instead.");
-  // ** DEPRECATED **
-  //
-  // Ask the sever for the capability with the given name.  You may specify a type to automatically
-  // down-cast to that type.  It is up to you to specify the correct expected type.
-  //
-  // Named interfaces are deprecated. The new preferred usage pattern is for the server to export
-  // a "main" interface which itself has methods for getting any other interfaces.
-
-  kj::WaitScope& getWaitScope();
-  // Get the `WaitScope` for the client's `EventLoop`, which allows you to synchronously wait on
-  // promises.
-
-  kj::AsyncIoProvider& getIoProvider();
-  // Get the underlying AsyncIoProvider set up by the RPC system.  This is useful if you want
-  // to do some non-RPC I/O in asynchronous fashion.
-
-  kj::LowLevelAsyncIoProvider& getLowLevelIoProvider();
-  // Get the underlying LowLevelAsyncIoProvider set up by the RPC system.  This is useful if you
-  // want to do some non-RPC I/O in asynchronous fashion.
-
-  //Return the associated libuv loop
-  uv_loop_t* getUvLoop();
-
-private:
-  struct Impl;
-  kj::Own<Impl> impl;
-};
-
-class VmtsRpcServer {
-  // The server counterpart to `VmtsRpcClient`.  See `VmtsRpcClient` for an example.
-
-public:
-
-  VmtsRpcServer(Capability::Client mainInterface,  
-      lw_shared_ptr<kj::connection>& _conn, kj::WaitScope& ws, ReaderOptions readerOpts = ReaderOptions());
-
-  explicit VmtsRpcServer(Capability::Client mainInterface, kj::StringPtr bindAddress,
-                       uint defaultPort = 0, ReaderOptions readerOpts = ReaderOptions());
-  // Construct a new `VmtsRpcServer` that binds to the given address.  An address of "*" means to
-  // bind to all local addresses.
-  //
-  // `defaultPort` is the IP port number to use if `serverAddress` does not include it explicitly.
-  // If unspecified, a port is chosen automatically, and you must call getPort() to find out what
-  // it is.
-  //
-  // The address is parsed by `kj::Network` in `kj/async-io.h`.  See that interface for more info
-  // on the address format, but basically it's what you'd expect.
-  //
-  // The server might not begin listening immediately, especially if `bindAddress` needs to be
-  // resolved.  If you need to wait until the server is definitely up, wait on the promise returned
-  // by `getPort()`.
-  //
-  // `readerOpts` is the ReaderOptions structure used to read each incoming message on the
-  // connection. Setting this may be necessary if you need to receive very large individual
-  // messages or messages. However, it is recommended that you instead think about how to change
-  // your protocol to send large data blobs in multiple small chunks -- this is much better for
-  // both security and performance. See `ReaderOptions` in `message.h` for more details.
-
-  VmtsRpcServer(Capability::Client mainInterface, struct sockaddr* bindAddress, uint addrSize,
-              ReaderOptions readerOpts = ReaderOptions());
-  // Like the above constructor, but binds to an already-resolved socket address.  Any address
-  // format supported by `kj::Network` in `kj/async-io.h` is accepted.
-
-  VmtsRpcServer(Capability::Client mainInterface, int socketFd, uint port,
-              ReaderOptions readerOpts = ReaderOptions());
-  // Create a server on top of an already-listening socket (i.e. one on which accept() may be
-  // called).  `port` is returned by `getPort()` -- it serves no other purpose.
-  // `readerOpts` acts as in the other two above constructors.
-
-  explicit VmtsRpcServer(kj::StringPtr bindAddress, uint defaultPort = 0,
-                       ReaderOptions readerOpts = ReaderOptions())
-      KJ_DEPRECATED("Please specify a main interface for your server.");
-  VmtsRpcServer(struct sockaddr* bindAddress, uint addrSize,
-              ReaderOptions readerOpts = ReaderOptions())
-      KJ_DEPRECATED("Please specify a main interface for your server.");
-  VmtsRpcServer(int socketFd, uint port, ReaderOptions readerOpts = ReaderOptions())
-      KJ_DEPRECATED("Please specify a main interface for your server.");
-
-  ~VmtsRpcServer() noexcept(false);
-
-  void exportCap(kj::StringPtr name, Capability::Client cap);
-  // Export a capability publicly under the given name, so that clients can import it.
-  //
-  // Keep in mind that you can implicitly convert `kj::Own<MyType::Server>&&` to
-  // `Capability::Client`, so it's typical to pass something like
-  // `kj::heap<MyImplementation>(<constructor params>)` as the second parameter.
-
-  kj::Promise<uint> getPort();
-  // Get the IP port number on which this server is listening.  This promise won't resolve until
-  // the server is actually listening.  If the address was not an IP address (e.g. it was a Unix
-  // domain socket) then getPort() resolves to zero.
-
-  kj::WaitScope& getWaitScope();
-  // Get the `WaitScope` for the client's `EventLoop`, which allows you to synchronously wait on
-  // promises.
-
-  kj::AsyncIoProvider& getIoProvider();
-  // Get the underlying AsyncIoProvider set up by the RPC system.  This is useful if you want
-  // to do some non-RPC I/O in asynchronous fashion.
-
-  kj::LowLevelAsyncIoProvider& getLowLevelIoProvider();
-  // Get the underlying LowLevelAsyncIoProvider set up by the RPC system.  This is useful if you
-  // want to do some non-RPC I/O in asynchronous fashion.
-
-  //Return the associated libuv loop
-  uv_loop_t* getUvLoop();
-
-private:
-  struct Impl;
-  kj::Own<Impl> impl;
-};
+namespace kj { 
+typedef unsigned char byte;
+typedef unsigned int uint;
 
 // =======================================================================================
-// inline implementation details
 
-template <typename Type>
-inline typename Type::Client VmtsRpcClient::getMain() {
-  return getMain().castAs<Type>();
-}
+struct connection {
+  connected_socket _fd;
+  input_stream<char> _read_buf;
+  output_stream<char> _write_buf;
 
-template <typename Type>
-inline typename Type::Client VmtsRpcClient::importCap(kj::StringPtr name) {
-  return importCap(name).castAs<Type>();
-}
+
+  connection(connected_socket&& fd, socket_address addr)
+    : _fd(std::move(fd))
+    , _read_buf(_fd.input())
+    , _write_buf(_fd.output())
+  {}
+
+  connection(connection&&) = default;
+  connection& operator=(connection&&) = default;
+};
+
+#define DEFAUlT_SCRACH_SPACE_SIZE 8192
+#define DEFAUlT_RELOCATE_THREADSHOLD 512
+
+struct ZeroCopyScratchspace {
+  kj::ArrayPtr<char> scratchSpace;
+  size_t readCouter = 0;
+  size_t writerCounter = 0;
+
+  ZeroCopyScratchspace(size_t sz = DEFAUlT_SCRACH_SPACE_SIZE) : scratchSpace(kj::heapArray<char>(sz)) {};
+
+  ZeroCopyScratchspace(ZeroCopyScratchspace&&) = default;
+  ZeroCopyScratchspace& operator=(ZeroCopyScratchspace&&) = default;
+
+  inline void read(size_t cnt) {
+    readCouter += cnt;
+  }
+
+  inline char* startRead() {
+    char* start = scratchSpace.begin();
+    return start + readCouter;
+  }
+
+  inline size_t maxReadable() {
+    return scratchSpace.size() - readCouter;
+  }
+
+  inline size_t size() {
+    return scratchSpace.size();
+  }
+
+  inline size_t available() {
+    return scratchSpace.size() - writerCounter;
+  }
+
+  inline size_t consumable() {
+    return readCouter - writerCounter;
+  }
+
+  inline kj::ArrayPtr<capnp::word> consuming(size_t cnt) {
+    char* start = scratchSpace.begin() + writerCounter;
+    return kj::ArrayPtr<capnp::word>(reinterpret_cast<capnp::word*>(start), reinterpret_cast<capnp::word*>(start + cnt));
+  }
+
+  inline void copy(void* buffer, size_t len) {
+    char* start = scratchSpace.begin() + writerCounter;
+    std::copy(start, start + len, reinterpret_cast<char*>(buffer)  );
+  }
+
+  inline void consumed(size_t cnt) {
+    writerCounter += cnt;
+    if (writerCounter == readCouter) {
+      readCouter = 0;
+      writerCounter = 0;
+    }
+  }
+
+
+  inline void reserve(size_t sz) {
+    if (scratchSpace.size() < sz) {
+      auto ownedSpace =  kj::heapArray<char>(sz);
+      if (readCouter > writerCounter) {
+        char* start = scratchSpace.begin();
+        std::copy(start + writerCounter, start + readCouter, ownedSpace.begin()  );
+      }
+      scratchSpace = ownedSpace;
+
+    }
+  }
+
+  inline shrink_to_fit(size_t sz = DEFAUlT_SCRACH_SPACE_SIZE) {
+    if (sz < scratchSpace.size()) {
+      sz = std::max(sz, readCouter - writerCounter);
+      auto ownedSpace =  kj::heapArray<char>(sz);
+      if (readCouter > writerCounter) {
+        char* start = scratchSpace.begin();
+        std::copy(start + writerCounter, start + readCouter, ownedSpace.begin()  );
+      }
+      scratchSpace = ownedSpace;
+    }
+  }
+
+  inline void reset() {
+    if (readCouter > writerCounter) {
+      char* start = scratchSpace.begin();
+      std::copy(start + writerCounter, start + readCouter, start  );
+    }
+
+    readCouter -= readCouter - writerCounter;
+    writerCounter = 0;
+  }
+
+};
+
+struct UvIoStream: public kj::AsyncIoStream {
+  // IoStream implementation on top of libuv. This is mostly a copy of the UnixEventPort-based
+  // implementation in kj/async-io.c++. We use uv_poll, which the libuv docs say is slow
+  // "especially on Windows". I'm guessing it's not so slow on Unix, since it matches the
+  // underlying APIs.
+  //
+  // TODO(cleanup): Allow better code sharing between the two.
+
+
+  UvIoStream(kj::connection&& _conn, size_t buffer_size = DEFAUlT_SCRACH_SPACE_SIZE ): conn(kj::mv(_conn) ), buffer(buffer_size) {};
+
+  ~UvIoStream() noexcept(false) {}
+
+  UvIoStream(UvIoStream&&) = default;
+  UvIoStream& operator=(UvIoStream&&) = default;
+
+
+  kj::Promise<size_t> read() {
+    size_t maxReadable = buffer.maxReadable();
+    size_t consumable = buffer.consumable();
+    return read(reinterpret_cast<void*>(buffer.startRead()), maxReadable, maxReadable).then([consumable, this](auto n) {
+      buffer.read(n);
+      return n + consumable;
+    });
+  }
+
+  kj::Promise<size_t> read(void* buffer, size_t minBytes, size_t maxBytes) override {
+    return conn._read_buf.read(buffer, minBytes, maxBytes);
+  }
+  Promise<void> read(void* buffer, size_t bytes) {
+    return read(buffer, bytes, bytes).then([](size_t) {});
+  }
+
+  kj::Promise<size_t> tryRead(void* buffer, size_t minBytes, size_t maxBytes) override {    
+    return conn._read_buf.tryRead(buffer, minBytes, maxBytes);
+  }
+
+  kj::Promise<void> write(const void* buffer, size_t size) override {
+    return conn._write_buf.write(buffer, size);
+  }
+
+  kj::Promise<void> write(kj::ArrayPtr<const kj::ArrayPtr<const byte>> pieces) override {
+    return conn._write_buf.write(pieces);
+  }
+
+  void shutdownWrite() override {
+    // There's no legitimate way to get an AsyncStreamFd that isn't a socket through the
+    // UnixAsyncIoProvider interface.
+    conn._write_buf.close();
+  }
+
+  kj::connection conn;
+  ZeroCopyScratchspace buffer;
+  
+};
+
+
+}//end of namespace kj
+
+namespace capnp {
+class SeastarNetwork final : public TwoPartyVatNetworkBase,
+                          private TwoPartyVatNetworkBase::Connection{
+
+public:
+  SeastarNetwork(kj::UvIoStream& stream, rpc::twoparty::Side side,
+                     ReaderOptions receiveOptions = ReaderOptions());
+
+kj::Promise<void> onDisconnect() { return disconnectPromise.addBranch(); }
+  // Returns a promise that resolves when the peer disconnects.
+
+  // implements VatNetwork -----------------------------------------------------
+
+  kj::Maybe<kj::Own<TwoPartyVatNetworkBase::Connection>> connect(
+      rpc::twoparty::VatId::Reader ref) override;
+  kj::Promise<kj::Own<TwoPartyVatNetworkBase::Connection>> accept() override;
+
+private:
+  class OutgoingMessageImpl;
+  class IncomingMessageImpl;
+
+  kj::AsyncIoStream& stream;
+  rpc::twoparty::Side side;
+  MallocMessageBuilder peerVatId;
+  ReaderOptions receiveOptions;
+  bool accepted = false;
+
+  kj::Maybe<kj::Promise<void>> previousWrite;
+  // Resolves when the previous write completes.  This effectively serves as the write queue.
+  // Becomes null when shutdown() is called.
+
+  kj::Own<kj::PromiseFulfiller<kj::Own<TwoPartyVatNetworkBase::Connection>>> acceptFulfiller;
+  // Fulfiller for the promise returned by acceptConnectionAsRefHost() on the client side, or the
+  // second call on the server side.  Never fulfilled, because there is only one connection.
+
+  kj::ForkedPromise<void> disconnectPromise = nullptr;
+
+  class FulfillerDisposer: public kj::Disposer {
+    // Hack:  TwoPartyVatNetwork is both a VatNetwork and a VatNetwork::Connection.  Whet the RPC
+    //   system detects (or initiates) a disconnection, it drops its reference to the Connection.
+    //   When all references have been dropped, then we want onDrained() to fire.  So we hand out
+    //   Own<Connection>s with this disposer attached, so that we can detect when they are dropped.
+
+  public:
+    mutable kj::Own<kj::PromiseFulfiller<void>> fulfiller;
+    mutable uint refcount = 0;
+
+    void disposeImpl(void* pointer) const override;
+  };
+  FulfillerDisposer disconnectFulfiller;
+
+  kj::Own<TwoPartyVatNetworkBase::Connection> asConnection();
+  // Returns a pointer to this with the disposer set to drainedFulfiller.
+
+  // implements Connection -----------------------------------------------------
+
+  rpc::twoparty::VatId::Reader getPeerVatId() override;
+  kj::Own<OutgoingRpcMessage> newOutgoingMessage(uint firstSegmentWordSize) override;
+  kj::Promise<kj::Maybe<kj::Own<IncomingRpcMessage>>> receiveIncomingMessage() override;
+  kj::Promise<void> shutdown() override;
+
+};//*/
+class SeastarServer: private kj::TaskSet::ErrorHandler {
+  // Convenience class which implements a simple server which accepts connections on a listener
+  // socket and serices them as two-party connections.
+
+public:
+  explicit SeastarServer(kj::Maybe<Capability::Client> bootstrapInterface);
+
+  kj::Promise<void> listen(ipv4_addr addr);
+  // Listens for connections on the given listener. The returned promise never resolves unless an
+  // exception is thrown while trying to accept. You may discard the returned promise to cancel
+  // listening.
+
+private:
+  kj::Own<server_socket> server;
+  kj::Maybe<Capability::Client> bootstrapInterface;
+  kj::TaskSet tasks;
+
+  struct AcceptedConnection;
+
+  void taskFailed(kj::Exception&& exception) override;
+};
+
 
 }  // namespace capnp
 
