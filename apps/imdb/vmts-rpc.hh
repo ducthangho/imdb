@@ -139,13 +139,16 @@ struct ZeroCopyScratchspace {
   inline void consumed(size_t cnt) {
     writerCounter += cnt;
     if (writerCounter == readCouter) {
+      // printf("reset consumed\n");
       readCouter = 0;
       writerCounter = 0;
     }
+    // KJ_DBG(readCouter,writerCounter);
   }
 
 
   inline void reserve(size_t sz) {
+    printf("reserve\n");
     if (scratchSpace.size() < sz) {
       auto ownedSpace =  kj::heapArray<char>(sz);
       if (readCouter > writerCounter) {
@@ -170,12 +173,13 @@ struct ZeroCopyScratchspace {
   }
 
   inline void reset() {
+    printf("reset\n");
     if (readCouter > writerCounter) {
       char* start = scratchSpace.begin();
       std::copy(start + writerCounter, start + readCouter, start  );
     }
 
-    readCouter -= readCouter - writerCounter;
+    readCouter = readCouter - writerCounter;
     writerCounter = 0;
   }
 
@@ -198,10 +202,10 @@ struct UvIoStream: public kj::AsyncIoStream {
   UvIoStream& operator=(UvIoStream&&) = default;
 
 
-  kj::Promise<size_t> read() {
+  kj::Promise<size_t> read(size_t minBytes) {
     size_t maxReadable = buffer.maxReadable();
     size_t consumable = buffer.consumable();
-    return read(reinterpret_cast<void*>(buffer.startRead()), maxReadable, maxReadable).then([consumable, this](auto n) {
+    return read(reinterpret_cast<void*>(buffer.startRead()), minBytes, maxReadable).then([consumable, this](auto n) {
       buffer.read(n);
       return n + consumable;
     });
@@ -261,7 +265,7 @@ private:
   class OutgoingMessageImpl;
   class IncomingMessageImpl;
 
-  kj::AsyncIoStream& stream;
+  kj::UvIoStream& stream;
   rpc::twoparty::Side side;
   MallocMessageBuilder peerVatId;
   ReaderOptions receiveOptions;

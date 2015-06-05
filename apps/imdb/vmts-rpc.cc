@@ -34,6 +34,7 @@
 #include <kj/async.h>
 #include <kj/one-of.h>
 #include <kj/function.h>
+#include <kj/common.h>
 #include <unordered_map>
 #include <map>
 #include <queue>
@@ -101,7 +102,7 @@ kj::Promise<kj::Own<TwoPartyVatNetworkBase::Connection>> SeastarNetwork::accept(
 
 class SeastarAsyncMessageReader: public MessageReader {
 public:
-  inline SeastarAsyncMessageReader(kj::UvIoStream& _inputStream, ReaderOptions options): MessageReader(options), inputStream(_inputStream), totalWords(-1) {
+  inline SeastarAsyncMessageReader(kj::UvIoStream& _inputStream, ReaderOptions options): MessageReader(options), inputStream(_inputStream), totalWords(0) {    
     memset(firstWord, 0, sizeof(firstWord));
   }
   ~SeastarAsyncMessageReader() noexcept(false) {}
@@ -138,18 +139,24 @@ private:
 
 kj::Promise<bool> SeastarAsyncMessageReader::read() {
   size_t consumable = inputStream.buffer.consumable();
+  
+  // KJ_DBG(consumable, sizeof(firstWord) );
+  
   if (consumable >= sizeof(firstWord)) { //If already read
-    inputStream.buffer.copy(firstWord, sizeof(firstWord));
+    inputStream.buffer.copy(firstWord, sizeof(firstWord) );
     inputStream.buffer.consumed(sizeof(firstWord));
+    // KJ_DBG(segmentCount() , segment0Size());
+    // KJ_DBG(this);
     return readAfterFirstWord().then([]() { return true; });
   }
 
   if (inputStream.buffer.available() < sizeof(firstWord) ) {
+    KJ_DBG("Reset");
     inputStream.buffer.reset();
   }
 
 
-  return inputStream.read().then([this](size_t n) mutable -> kj::Promise<bool> {
+  return inputStream.read(sizeof(firstWord)- consumable).then([this](size_t n) mutable -> kj::Promise<bool> {    
     if (n == 0) {
       return false;
     } else if (n < sizeof(firstWord)) {
@@ -160,7 +167,10 @@ kj::Promise<bool> SeastarAsyncMessageReader::read() {
     }
 
     inputStream.buffer.copy(firstWord, sizeof(firstWord));
+    // KJ_DBG(segmentCount() , segment0Size());
+    // KJ_DBG(inputStream.buffer.consumable());
     inputStream.buffer.consumed(sizeof(firstWord));
+    // KJ_DBG(inputStream.buffer.consumable());
 
     // printf("Read : %zu bytes. Segment count =   %d, segment 0 size   %d\n",segmentCount(),segment0Size());
 
@@ -184,19 +194,24 @@ kj::Promise<void> SeastarAsyncMessageReader::readAfterFirstWord() {
     // Read sizes for all segments except the first.  Include padding if necessary.
     moreSizes = kj::heapArray<_::WireValue<uint32_t>>(segmentCount() & ~1);
 
-    size_t size = moreSizes.size() * sizeof(moreSizes[0]);
+    size_t size = moreSizes.size() * sizeof(moreSizes[0]);    
     size_t consumable = inputStream.buffer.consumable();
     if (consumable >= size) { //If already read
       inputStream.buffer.copy(moreSizes.begin(), size);
+      // KJ_DBG(consumable);
       inputStream.buffer.consumed(size);
+      // KJ_DBG(size);
       return readSegments();
     }
 
+
     if (inputStream.buffer.available() < size ) {
+      KJ_DBG("Reset 2");
       inputStream.buffer.reset();
     }
 
-    return inputStream.read().then([this, size](size_t n) mutable -> kj::Promise<void> {
+    // KJ_DBG(size,consumable);
+    return inputStream.read(size - consumable).then([this, size](size_t n) mutable -> kj::Promise<void> {
       if (n == 0) {
         return kj::READY_NOW;
       } else if (n < size) {
@@ -216,49 +231,55 @@ kj::Promise<void> SeastarAsyncMessageReader::readAfterFirstWord() {
   }
 }
 
-kj::Promise<void> SeastarAsyncMessageReader::readSegments() {
-  if (totalWords < 0) {
-    totalWords = segment0Size();
+kj::Promise<void> SeastarAsyncMessageReader::readSegments() {  
+  // KJ_DBG(segmentCount() , segment0Size());
+  totalWords = segment0Size();
 
-    if (segmentCount() > 1) {
-      for (uint i = 0; i < segmentCount() - 1; i++) {
-        totalWords += moreSizes[i].get();
-      }
-    }
-
-    // Don't accept a message which the receiver couldn't possibly traverse without hitting the
-    // traversal limit.  Without this check, a malicious client could transmit a very large segment
-    // size to make the receiver allocate excessive space and possibly crash.
-    KJ_REQUIRE(totalWords <= getOptions().traversalLimitInWords,
-               "Message is too large.  To increase the limit on the receiving end, see "
-               "capnp::ReaderOptions.") {
-      return kj::READY_NOW;  // exception will be propagated
-    }
-
-    if (inputStream.buffer.size() < totalWords) {
-      // TODO(perf):  Consider allocating each segment as a separate chunk to reduce memory
-      //   fragmentation.
-      // printf("Allocate more space\n");
-      inputStream.buffer.reserve(totalWords);
-    } else if (inputStream.buffer.available() < totalWords) {
-      inputStream.buffer.reset();
-    }
-
-    segmentStarts = kj::heapArray<const word*>(segmentCount());
-    kj::ArrayPtr<capnp::word> scratchSpace(inputStream.buffer.consuming(totalWords));
-    segmentStarts[0] = scratchSpace.begin();
-
-    if (segmentCount() > 1) {
-      size_t offset = segment0Size();
-
-      for (uint i = 1; i < segmentCount(); i++) {
-        segmentStarts[i] = scratchSpace.begin() + offset;
-        offset += moreSizes[i - 1].get();
-      }
+  if (segmentCount() > 1) {
+    for (uint i = 0; i < segmentCount() - 1; i++) {
+      totalWords += moreSizes[i].get();
     }
   }
 
+  totalWords *= sizeof(word);
+
+  // Don't accept a message which the receiver couldn't possibly traverse without hitting the
+  // traversal limit.  Without this check, a malicious client could transmit a very large segment
+  // size to make the receiver allocate excessive space and possibly crash.
+  KJ_REQUIRE(totalWords <= getOptions().traversalLimitInWords,
+             "Message is too large.  To increase the limit on the receiving end, see "
+             "capnp::ReaderOptions.") {
+    return kj::READY_NOW;  // exception will be propagated
+  }
+
+  if (inputStream.buffer.size() < totalWords) {
+    // TODO(perf):  Consider allocating each segment as a separate chunk to reduce memory
+    //   fragmentation.
+    // printf("Allocate more space\n");
+    KJ_DBG("Reset 3");
+    inputStream.buffer.reserve(totalWords);
+  } else if (inputStream.buffer.available() < totalWords) {
+    KJ_DBG("Reset 4");
+    KJ_DBG(totalWords,segmentCount(),inputStream.buffer.readCouter,inputStream.buffer.available());
+    inputStream.buffer.reset();
+    KJ_DBG(totalWords,segmentCount(),inputStream.buffer.readCouter,inputStream.buffer.available());    
+  }
+
+  segmentStarts = kj::heapArray<const word*>(segmentCount());
+  kj::ArrayPtr<capnp::word> scratchSpace(inputStream.buffer.consuming(totalWords));
+  segmentStarts[0] = scratchSpace.begin();
+
+  if (segmentCount() > 1) {
+    size_t offset = segment0Size()*sizeof(word);
+
+    for (uint i = 1; i < segmentCount(); i++) {
+      segmentStarts[i] = scratchSpace.begin() + offset;
+      offset += moreSizes[i - 1].get()*sizeof(word);
+    }
+  }
+  
   size_t consumable = inputStream.buffer.consumable();
+  // KJ_DBG(totalWords,consumable);
   if (consumable >= totalWords) { //If already read
     // printf("Now read everything %zu     %zu\n",(size_t)scratchSpace.begin(),totalWords * sizeof(word));
     inputStream.buffer.consumed(totalWords);
@@ -267,8 +288,10 @@ kj::Promise<void> SeastarAsyncMessageReader::readSegments() {
 
 
   // printf("Now read everything %zu     %zu\n",(size_t)scratchSpace.begin(),totalWords * sizeof(word));
-  return inputStream.read().then([this](auto n) -> kj::Promise<void> {
-    return this->readSegments();
+  return inputStream.read(totalWords - consumable).then([this](auto n) -> kj::Promise<void> {
+    inputStream.buffer.consumed(totalWords);
+    return kj::READY_NOW;
+    // return this->readSegments();
 
   });
 }
@@ -325,8 +348,8 @@ private:
 kj::Own<OutgoingRpcMessage> SeastarNetwork::newOutgoingMessage(uint firstSegmentWordSize) {
   return kj::refcounted<OutgoingMessageImpl>(*this, firstSegmentWordSize);
 }
-kj::Promise<kj::Maybe<kj::Own<MessageReader>>> tryReadMessage(
-  kj::UvIoStream& input, ReaderOptions options, kj::ArrayPtr<word> scratchSpace) {
+kj::Promise<kj::Maybe<kj::Own<MessageReader>>> _tryReadMessage(
+  kj::UvIoStream& input, ReaderOptions options) {
   auto reader = kj::heap<SeastarAsyncMessageReader>(input, options);
   auto promise = reader->read();
   return promise.then(kj::mvCapture(reader,
@@ -340,8 +363,8 @@ kj::Promise<kj::Maybe<kj::Own<MessageReader>>> tryReadMessage(
 }
 
 kj::Promise<kj::Maybe<kj::Own<IncomingRpcMessage>>> SeastarNetwork::receiveIncomingMessage() {
-  return kj::evalLater([&]() {
-    return tryReadMessage(stream, receiveOptions)
+  return kj::evalLater([this]() {
+    return _tryReadMessage(this->stream, receiveOptions)
         .then([&](kj::Maybe<kj::Own<MessageReader>>&& message)
               -> kj::Maybe<kj::Own<IncomingRpcMessage>> {
       KJ_IF_MAYBE(m, message) {

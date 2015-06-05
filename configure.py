@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding:utf-8 -*-
 #!/usr/bin/python3
 #
 # This file is open source software, licensed to you under the terms

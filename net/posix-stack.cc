@@ -169,7 +169,7 @@ posix_data_source_impl::kj_get(size_t maxBytes) {
     return _fd.kj_read_some(_buf.get_write(), maxBytes).then([this,maxBytes] (size_t size) {        
         _buf.trim(size);
         auto ret = std::move(_buf);
-        _buf = std::move(temporary_buffer<char>((char*)_buf.end(),maxBytes - size, make_free_deleter(NULL) ));
+        // _buf = std::move(temporary_buffer<char>((char*)_buf.end(),maxBytes - size, make_free_deleter(NULL) ));
         return kj::Promise<temporary_buffer<char>>(std::move(ret));
     });
 }

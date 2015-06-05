@@ -244,7 +244,7 @@ private:
         // printf("Buffer now = %zu    %zu\t%zu\t%zu\n",(size_t)buffer,alreadyRead,minBytes,maxBytes);
 
         if (minBytes <= 0) {
-            // printf("Done %zu\n",alreadyRead);
+            printf("Done %zu\n",alreadyRead);
             return alreadyRead;
         }
 
@@ -264,16 +264,26 @@ private:
                 return kj::Promise<size_t>(alreadyRead);
             }
             _buf = std::move(buf);
+
             // printf("Buff now = %zu     %zu\n",(size_t)_buf.get(),_buf.size() );
 
-            auto now = std::min(maxBytes, _buf.size());
+            auto now = kj::min(minBytes, _buf.size());
+            // KJ_DBG(now);
             if (_buf.get() != reinterpret_cast<CharType*>(buffer) + alreadyRead)
                 std::copy(_buf.get(), _buf.get() + now, reinterpret_cast<CharType*>(buffer) + alreadyRead);
-            _buf.trim_front(now);
 
-            alreadyRead += now;
+            alreadyRead += _buf.size();
             minBytes -= now;
             maxBytes -= now;
+
+            // for (size_t i=0;i<21;++i){
+            //     printf("%d\t",(int)_buf[i]);
+            // }
+            // printf("\n");
+
+            _buf.trim_front(_buf.size());
+
+
             
             // printf("Buff after trim now = %zu\t%zu\n",(size_t)_buf.get(), (size_t)(reinterpret_cast<CharType*>(buffer) + alreadyRead) );
             // printf("Hey a, alreadyRead = %zu,  buff size = %zu,  minBytes = %zu\n",alreadyRead,_buf.size(),minBytes);
