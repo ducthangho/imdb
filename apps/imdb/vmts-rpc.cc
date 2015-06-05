@@ -240,8 +240,7 @@ kj::Promise<void> SeastarAsyncMessageReader::readSegments() {
       totalWords += moreSizes[i].get();
     }
   }
-
-  totalWords *= sizeof(word);
+  
 
   // Don't accept a message which the receiver couldn't possibly traverse without hitting the
   // traversal limit.  Without this check, a malicious client could transmit a very large segment
@@ -251,6 +250,8 @@ kj::Promise<void> SeastarAsyncMessageReader::readSegments() {
              "capnp::ReaderOptions.") {
     return kj::READY_NOW;  // exception will be propagated
   }
+
+  totalWords *= sizeof(word);
 
   if (inputStream.buffer.size() < totalWords) {
     // TODO(perf):  Consider allocating each segment as a separate chunk to reduce memory
