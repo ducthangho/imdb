@@ -20,6 +20,7 @@
  */
 
 #include <sys/syscall.h>
+#include "task.hh"
 #include "reactor.hh"
 #include "memory.hh"
 #include "core/posix.hh"
@@ -35,6 +36,9 @@
 #include <fcntl.h>
 #include <sys/eventfd.h>
 #include <boost/thread/barrier.hpp>
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/split.hpp>
+#include <boost/iterator/counting_iterator.hpp>
 #include <atomic>
 #include <dirent.h>
 #ifdef HAVE_DPDK
@@ -44,6 +48,7 @@
 #endif
 #include "prefetch.hh"
 #include <exception>
+#include <regex>
 #ifdef __GNUC__
 #include <iostream>
 #include <system_error>
@@ -276,6 +281,24 @@ future<> reactor_backend_epoll::get_epoll_future(pollable_fd_state& pfd,
     return (pfd.*pr).get_future();
 }
 
+void reactor_backend_epoll::abort_fd(pollable_fd_state& pfd, std::exception_ptr ex,
+                                     promise<> pollable_fd_state::* pr, int event) {
+    if (pfd.events_epoll & event) {
+        pfd.events_epoll &= ~event;
+        auto ctl = pfd.events_epoll ? EPOLL_CTL_MOD : EPOLL_CTL_DEL;
+        ::epoll_event eevt;
+        eevt.events = pfd.events_epoll;
+        eevt.data.ptr = &pfd;
+        int r = ::epoll_ctl(_epollfd.get(), ctl, pfd.fd.get(), &eevt);
+        assert(r == 0);
+    }
+    if (pfd.events_requested & event) {
+        pfd.events_requested &= ~event;
+        (pfd.*pr).set_exception(std::move(ex));
+    }
+    pfd.events_known &= ~event;
+}
+
 future<> reactor_backend_epoll::readable(pollable_fd_state& fd) {
     return get_epoll_future(fd, &pollable_fd_state::pollin, EPOLLIN);
 }
@@ -284,11 +307,6 @@ future<> reactor_backend_epoll::writeable(pollable_fd_state& fd) {
     return get_epoll_future(fd, &pollable_fd_state::pollout, EPOLLOUT);
 }
 
-void reactor_backend_epoll::forget(pollable_fd_state& fd) {
-    if (fd.events_epoll) {
-        ::epoll_ctl(_epollfd.get(), EPOLL_CTL_DEL, fd.fd.get(), nullptr);
-    }
-}
 
 #ifdef __USE_KJ__
 
@@ -343,6 +361,22 @@ kj::Promise<void> reactor_backend_epoll::kj_notified(reactor_notifier *n) {
 
 
 #endif
+
+void reactor_backend_epoll::abort_reader(pollable_fd_state& fd, std::exception_ptr ex) {
+    abort_fd(fd, std::move(ex), &pollable_fd_state::pollin, EPOLLIN);
+}
+
+void reactor_backend_epoll::abort_writer(pollable_fd_state& fd, std::exception_ptr ex) {
+    abort_fd(fd, std::move(ex), &pollable_fd_state::pollout, EPOLLOUT);
+}
+
+void reactor_backend_epoll::forget(pollable_fd_state& fd) {
+    if (fd.events_epoll) {
+        ::epoll_ctl(_epollfd.get(), EPOLL_CTL_DEL, fd.fd.get(), nullptr);
+    }
+}
+
+
 future<> reactor_backend_epoll::notified(reactor_notifier *n) {
     // Currently reactor_backend_epoll doesn't need to support notifiers,
     // because we add to it file descriptors instead. But this can be fixed
@@ -472,12 +506,33 @@ reactor::submit_io(Func prepare_io) {
         iocb io;
         prepare_io(io);
         io.data = pr.get();
-        iocb* p = &io;
-        auto r = ::io_submit(_io_context, 1, &p);
-        throw_kernel_error(r);
+        _pending_aio.push_back(io);
+        if (_pending_aio.size() >= max_aio / 4) {
+            flush_pending_aio();
+        }
         return pr.release()->get_future();
     });
 }
+
+bool
+reactor::flush_pending_aio() {
+    while (!_pending_aio.empty()) {
+        auto nr = _pending_aio.size();
+        struct iocb* iocbs[max_aio];
+        for (size_t i = 0; i < nr; ++i) {
+            iocbs[i] = &_pending_aio[i];
+        }
+        auto r = ::io_submit(_io_context, nr, iocbs);
+        throw_kernel_error(r);
+        if (size_t(r) == nr) {
+            _pending_aio.clear();
+        } else {
+            _pending_aio.erase(_pending_aio.begin(), _pending_aio.begin() + r);
+        }
+    }
+    return false; // We always submit all pending aios
+}
+
 
 template <typename Func>
 future<io_event>
@@ -675,6 +730,56 @@ posix_file_impl::discard(uint64_t offset, uint64_t length) {
 }
 
 future<>
+posix_file_impl::allocate(uint64_t position, uint64_t length) {
+#ifdef FALLOC_FL_ZERO_RANGE
+    // FALLOC_FL_ZERO_RANGE is fairly new, so don't fail if it's not supported.
+    static bool supported = true;
+    if (!supported) {
+        return make_ready_future<>();
+    }
+    return engine()._thread_pool.submit<syscall_result<int>>([this, position, length] () mutable {
+        auto ret = ::fallocate(_fd, FALLOC_FL_ZERO_RANGE|FALLOC_FL_KEEP_SIZE, position, length);
+        if (ret == -1 && errno == EOPNOTSUPP) {
+            ret = 0;
+            supported = false; // Racy, but harmless.  At most we issue an extra call or two.
+        }
+        return wrap_syscall<int>(ret);
+    }).then([] (syscall_result<int> sr) {
+        sr.throw_if_error();
+        return make_ready_future<>();
+    });
+#else
+    return make_ready_future<>();
+#endif
+}
+
+#ifdef __USE_KJ__
+kj::Promise<void>
+posix_file_impl::kj_allocate(uint64_t position, uint64_t length) {
+#ifdef FALLOC_FL_ZERO_RANGE
+    // FALLOC_FL_ZERO_RANGE is fairly new, so don't fail if it's not supported.
+    static bool supported = true;
+    if (!supported) {
+        return kj::READY_NOW;
+    }
+    return make_kj_promise(engine()._thread_pool.submit<syscall_result<int>>([this, position, length] () mutable {
+        auto ret = ::fallocate(_fd, FALLOC_FL_ZERO_RANGE|FALLOC_FL_KEEP_SIZE, position, length);
+        if (ret == -1 && errno == EOPNOTSUPP) {
+            ret = 0;
+            supported = false; // Racy, but harmless.  At most we issue an extra call or two.
+        }
+        return wrap_syscall<int>(ret);
+    }).then([] (syscall_result<int> sr) {
+        sr.throw_if_error();
+        return make_ready_future<>();
+    }));
+#else
+    return kj::READY_NOW;
+#endif
+}
+#endif
+
+future<>
 blockdev_file_impl::discard(uint64_t offset, uint64_t length) {
     return engine()._thread_pool.submit<syscall_result<int>>([this, offset, length] () mutable {
         uint64_t range[2] { offset, length };
@@ -684,6 +789,21 @@ blockdev_file_impl::discard(uint64_t offset, uint64_t length) {
         return make_ready_future<>();
     });
 }
+
+future<>
+blockdev_file_impl::allocate(uint64_t position, uint64_t length) {
+    // nothing to do for block device
+    return make_ready_future<>();
+}
+
+#ifdef __USE_KJ__
+kj::Promise<void>
+blockdev_file_impl::kj_allocate(uint64_t position, uint64_t length) {
+    // nothing to do for block device
+    return kj::READY_NOW;
+}
+
+#endif
 
 future<size_t>
 posix_file_impl::size(void) {
@@ -1718,14 +1838,58 @@ reactor::get_options_description() {
     return opts;
 }
 
+// We need a wrapper class, because boost::program_options wants validate()
+// (below) to be in the same namespace as the type it is validating.
+struct cpuset_wrapper {
+    resource::cpuset value;
+};
+
+// Overload for boost program options parsing/validation
+void validate(boost::any& v,
+              const std::vector<std::string>& values,
+              cpuset_wrapper* target_type, int) {
+    using namespace boost::program_options;
+    static std::regex r("(\\d+-)?(\\d+)(,(\\d+-)?(\\d+))*");
+    validators::check_first_occurrence(v);
+    // Extract the first string from 'values'. If there is more than
+    // one string, it's an error, and exception will be thrown.
+    auto&& s = validators::get_single_string(values);
+    std::smatch match;
+    if (std::regex_match(s, match, r)) {
+        std::vector<std::string> ranges;
+        boost::split(ranges, s, boost::is_any_of(","));
+        cpuset_wrapper ret;
+        for (auto&& range: ranges) {
+            std::string beg = range;
+            std::string end = range;
+            auto dash = range.find('-');
+            if (dash != range.npos) {
+                beg = range.substr(0, dash);
+                end = range.substr(dash + 1);
+            }
+            auto b = boost::lexical_cast<unsigned>(beg);
+            auto e = boost::lexical_cast<unsigned>(end);
+            if (b > e) {
+                throw validation_error(validation_error::invalid_option_value);
+            }
+            for (auto i = b; i <= e; ++i) {
+                std::cout << "adding " << i << "\n";
+                ret.value.insert(i);
+            }
+        }
+        v = std::move(ret);
+    } else {
+        throw validation_error(validation_error::invalid_option_value);
+    }
+}
 boost::program_options::options_description
 smp::get_options_description()
 {
     namespace bpo = boost::program_options;
     bpo::options_description opts("SMP options");
-    auto cpus = resource::nr_processing_units();
     opts.add_options()
-        ("smp,c", bpo::value<unsigned>()->default_value(cpus), "number of threads")
+        ("smp,c", bpo::value<unsigned>(), "number of threads (default: one per CPU)")
+        ("cpuset", bpo::value<cpuset_wrapper>(), "CPUs to use (in cpuset(7) format; default: all))")
         ("memory,m", bpo::value<std::string>(), "memory to use, in bytes (ex: 4G) (default: all)")
         ("reserve-memory", bpo::value<std::string>()->default_value("512M"), "memory reserved to OS")
         ("hugepages", bpo::value<std::string>(), "path to accessible hugetlbfs mount (typically /dev/hugepages/something)")
@@ -1796,7 +1960,19 @@ void smp::configure(boost::program_options::variables_map configuration)
 {
     smp::count = 1;
     smp::_tmain = std::this_thread::get_id();
-    smp::count = configuration["smp"].as<unsigned>();
+    auto nr_cpus = resource::nr_processing_units();
+    resource::cpuset cpu_set;
+    std::copy(boost::counting_iterator<unsigned>(0), boost::counting_iterator<unsigned>(nr_cpus),
+            std::inserter(cpu_set, cpu_set.end()));
+    if (configuration.count("cpuset")) {
+        cpu_set = configuration["cpuset"].as<cpuset_wrapper>().value;
+    }
+    if (configuration.count("smp")) {
+        nr_cpus = configuration["smp"].as<unsigned>();
+    } else {
+        nr_cpus = cpu_set.size();
+    }
+    smp::count = nr_cpus;
     resource::configuration rc;
     if (configuration.count("memory")) {
         rc.total_memory = parse_memory_size(configuration["memory"].as<std::string>());
@@ -1829,6 +2005,7 @@ void smp::configure(boost::program_options::variables_map configuration)
         hugepages_path = configuration["hugepages"].as<std::string>();
     }
     rc.cpus = smp::count;
+    rc.cpu_set = std::move(cpu_set);
     std::vector<resource::cpu> allocations = resource::allocate(rc);
     smp::pin(allocations[0].cpu_id);
     memory::configure(allocations[0].mem, hugepages_path);

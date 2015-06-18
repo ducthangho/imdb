@@ -55,12 +55,12 @@
 #include <boost/lockfree/spsc_queue.hpp>
 #include <boost/optional.hpp>
 #include <boost/program_options.hpp>
+#include <set>
 #include "util/eclipse.hh"
 #include "future.hh"
 #include "posix.hh"
 #include "apply.hh"
 #include "sstring.hh"
-#include "timer-set.hh"
 #include "deleter.hh"
 #include "net/api.hh"
 #include "temporary_buffer.hh"
@@ -70,6 +70,7 @@
 #include "core/scattered_message.hh"
 #include "core/enum.hh"
 #include <boost/range/irange.hpp>
+#include "timer.hh"
 
 #ifdef HAVE_OSV
 #include <osv/sched.hh>
@@ -83,7 +84,6 @@ namespace scollectd { class registration; }
 class reactor;
 class pollable_fd;
 class pollable_fd_state;
-class lowres_clock;
 
 struct free_deleter {
     void operator()(void* p) { ::free(p); }
@@ -99,41 +99,6 @@ std::unique_ptr<CharType[], free_deleter> allocate_aligned_buffer(size_t size, s
     return std::unique_ptr<CharType[], free_deleter>(reinterpret_cast<CharType*>(ret));
 }
 
-using clock_type = std::chrono::high_resolution_clock;
-
-template <typename Clock = std::chrono::high_resolution_clock>
-class timer {
-public:
-    typedef typename Clock::time_point time_point;
-    typedef typename Clock::duration duration;
-    typedef Clock clock;
-private:
-    using callback_t = std::function<void()>;
-    boost::intrusive::list_member_hook<> _link;
-    callback_t _callback;
-    time_point _expiry;
-    std::experimental::optional<duration> _period;
-    bool _armed = false;
-    bool _queued = false;
-    bool _expired = false;
-    void readd_periodic();
-    void arm_state(time_point until, std::experimental::optional<duration> period);
-public:
-    timer() = default;
-    explicit timer(callback_t&& callback);
-    ~timer();
-    future<> expired();
-    void set_callback(callback_t&& callback);
-    void arm(time_point until, std::experimental::optional<duration> period = {});
-    void rearm(time_point until, std::experimental::optional<duration> period = {});
-    void arm(duration delta);
-    void arm_periodic(duration delta);
-    bool armed() const { return _armed; }
-    bool cancel();
-    time_point get_timeout();
-    friend class reactor;
-    friend class seastar::timer_set<timer, &timer::_link>;
-};
 
 class lowres_clock {
 public:
@@ -216,6 +181,8 @@ public:
     future<> write_all(net::packet& p);
     future<> readable();
     future<> writeable();
+    void abort_reader(std::exception_ptr ex);
+    void abort_writer(std::exception_ptr ex);
     future<pollable_fd, socket_address> accept();
     future<size_t> sendmsg(struct msghdr *msg);
     future<size_t> recvmsg(struct msghdr *msg);
@@ -237,6 +204,7 @@ public:
     kj::Promise<size_t> kj_sendto(socket_address addr, const void* buf, size_t len);
 #endif    
     file_desc& get_file_desc() const { return _s->fd; }
+    void shutdown(int how) { _s->fd.shutdown(how); }
     void close() { _s.reset(); }
 protected:
     int get_fd() const { return _s->fd.get(); }
@@ -252,29 +220,69 @@ public:
     virtual ~connected_socket_impl() {}
     virtual input_stream<char> input() = 0;
     virtual output_stream<char> output() = 0;
+    virtual void shutdown_input() = 0;
+    virtual void shutdown_output() = 0;
 };
 
+/// \addtogroup networking-module
+/// @{
+
+/// A TCP (or other stream-based protocol) connection.
+///
+/// A \c connected_socket represents a full-duplex stream between
+/// two endpoints, a local endpoint and a remote endpoint.
 class connected_socket {
     std::unique_ptr<connected_socket_impl> _csi;
 public:
+    /// Constructs a \c connected_socket not corresponding to a connection
     connected_socket() {};
+    /// \cond internal
     explicit connected_socket(std::unique_ptr<connected_socket_impl> csi)
         : _csi(std::move(csi)) {}
+    /// \endcond
+    /// Moves a \c connected_socket object.
     connected_socket(connected_socket&& cs) = default;
+    /// Move-assigns a \c connected_socket object.
     connected_socket& operator=(connected_socket&& cs) = default;
+    /// Gets the input stream.
+    ///
+    /// Gets an object returning data sent from the remote endpoint.
     input_stream<char> input();
+    /// Gets the output stream.
+    ///
+    /// Gets an object that sends data to the remote endpoint.
     output_stream<char> output();
+    /// Disables output to the socket.
+    ///
+    /// Current or future writes that have not been successfully flushed
+    /// will immediately fail with an error.  This is useful to abort
+    /// operations on a socket that is not making progress due to a
+    /// peer failure.
+    void shutdown_output();
+    /// Disables input from the socket.
+    ///
+    /// Current or future reads will immediately fail with an error.
+    /// This is useful to abort operations on a socket that is not making
+    /// progress due to a peer failure.
+    void shutdown_input();
+    /// Disables socket input and output.
+    ///
+    /// Equivalent to \ref shutdown_input() and \ref shutdown_output().
 };
+/// @}
 
+/// \cond internal
 class server_socket_impl {
 public:
     virtual ~server_socket_impl() {}
     virtual future<connected_socket, socket_address> accept() = 0;
+	virtual void abort_accept() = 0;
 #ifdef __USE_KJ__
     virtual kj::Promise< std::pair<connected_socket, socket_address> > kj_accept() = 0;
 #endif    
 };
 
+/// \endcond
 
 namespace std {
 
@@ -289,13 +297,35 @@ struct hash<::sockaddr_in> {
 
 bool operator==(const ::sockaddr_in a, const ::sockaddr_in b);
 
+/// \addtogroup networking-module
+/// @{
+
+/// A listening socket, waiting to accept incoming network connections.
 class server_socket {
     std::unique_ptr<server_socket_impl> _ssi;
 public:
+    /// \cond internal
     explicit server_socket(std::unique_ptr<server_socket_impl> ssi)
         : _ssi(std::move(ssi)) {}
+    /// \endcond
+
+    /// Accepts the next connection to successfully connect to this socket.
+    ///
+    /// \return a \ref connected_socket representing the connection, and
+    ///         a \ref socket_address describing the remote endpoint.
+    ///
+    /// \see listen(socket_address sa)
+    /// \see listen(socket_address sa, listen_options opts)
     future<connected_socket, socket_address> accept() {
         return _ssi->accept();
+    }
+
+    /// Stops any \ref accept() in progress.
+    ///
+    /// Current and future \ref accept() calls will terminate immediately
+    /// with an error.
+    void abort_accept() {
+        return _ssi->abort_accept();
     }
 
 #ifdef __USE_KJ__
@@ -305,6 +335,7 @@ public:
 #endif    
 
 };
+/// @}
 
 class network_stack {
 public:
@@ -632,6 +663,8 @@ private:
 #endif    
     void complete_epoll_event(pollable_fd_state& fd,
             promise<> pollable_fd_state::* pr, int events, int event);
+    void abort_fd(pollable_fd_state& fd, std::exception_ptr ex,
+            promise<> pollable_fd_state::* pr, int event);
 public:
     reactor_backend_epoll();
     virtual ~reactor_backend_epoll() override { }
@@ -649,6 +682,8 @@ public:
         int events, int event);
 #endif    
     virtual std::unique_ptr<reactor_notifier> make_reactor_notifier() override;
+    void abort_reader(pollable_fd_state& fd, std::exception_ptr ex);
+    void abort_writer(pollable_fd_state& fd, std::exception_ptr ex);
 };
 
 #ifdef HAVE_OSV
@@ -760,6 +795,7 @@ private:
     seastar::timer_set<timer<lowres_clock>, &timer<lowres_clock>::_link> _lowres_timers;
     seastar::timer_set<timer<lowres_clock>, &timer<lowres_clock>::_link>::timer_list_t _expired_lowres_timers;
     io_context_t _io_context;
+    std::vector<struct ::iocb> _pending_aio;
     semaphore _io_context_available;
     uint64_t _aio_reads = 0;
     uint64_t _aio_writes = 0;
@@ -776,6 +812,7 @@ private:
     circular_buffer<double> _loads;
     double _load = 0;
 private:
+    bool flush_pending_aio();
     void abort_on_error(int ret);
     template <typename T, typename E, typename EnableFunc>
     void complete_timers(T&, E&, EnableFunc&& enable_fn);
@@ -1017,6 +1054,14 @@ public:
     future<> notified(reactor_notifier *n) {
         return _backend.notified(n);
     }
+
+	void abort_reader(pollable_fd_state& fd, std::exception_ptr ex) {
+        return _backend.abort_reader(fd, std::move(ex));
+    }
+    void abort_writer(pollable_fd_state& fd, std::exception_ptr ex) {
+        return _backend.abort_writer(fd, std::move(ex));
+    }
+
 #ifdef __USE_KJ__
 
     bool kj_wait_and_process() {
@@ -1547,6 +1592,18 @@ future<> pollable_fd::writeable() {
 }
 
 inline
+void
+pollable_fd::abort_reader(std::exception_ptr ex) {
+    engine().abort_reader(*_s, std::move(ex));
+}
+
+inline
+void
+pollable_fd::abort_writer(std::exception_ptr ex) {
+    engine().abort_writer(*_s, std::move(ex));
+}
+
+inline
 future<pollable_fd, socket_address> pollable_fd::accept() {
     return engine().accept(*_s);
 }
@@ -1705,6 +1762,18 @@ inline
 output_stream<char>
 connected_socket::output() {
     return _csi->output();
+}
+
+inline
+void
+connected_socket::shutdown_input() {
+    return _csi->shutdown_input();
+}
+
+inline
+void
+connected_socket::shutdown_output() {
+    return _csi->shutdown_output();
 }
 
 #endif /* REACTOR_HH_ */

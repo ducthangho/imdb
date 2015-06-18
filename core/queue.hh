@@ -75,6 +75,24 @@ public:
     // resolves when data was pushed.
     future<> push_eventually(T&& data);
 
+	size_t size() const { return _q.size(); }
+
+    // Destroy any items in the queue, and pass the provided exception to any
+    // waiting readers or writers.
+    void abort(std::exception_ptr ex) {
+        while (!_q.empty()) {
+            _q.pop();
+        }
+        if (_not_full) {
+            _not_full->set_exception(ex);
+            _not_full= std::experimental::nullopt;
+        }
+        if (_not_empty) {
+            _not_empty->set_exception(std::move(ex));
+            _not_empty = std::experimental::nullopt;
+        }
+    }
+
 #ifdef __USE_KJ__
 
     // Returns a future<> that becomes available when pop() or consume()
@@ -94,7 +112,6 @@ public:
 
 #endif    
 
-    size_t size() const { return _q.size(); }
 };
 
 template <typename T>

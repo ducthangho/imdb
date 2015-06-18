@@ -25,6 +25,7 @@
 #include "future.hh"
 #include "circular_buffer.hh"
 #include <stdexcept>
+#include "timer.hh"
 
 #ifdef __USE_KJ__
 #include "kj/debug.h"
@@ -38,10 +39,22 @@ public:
     }
 };
 
+class semaphore_timed_out : public std::exception {
+public:
+    virtual const char* what() const noexcept {
+        return "Semaphore timedout";
+    }
+};
 class semaphore {
 private:
     size_t _count;
-    circular_buffer<std::pair<promise<>, size_t>> _wait_list;
+    struct entry {
+        promise<> pr;
+        size_t nr;
+        timer<> tr;
+        entry(promise<>&& pr_, size_t nr_) : pr(std::move(pr_)), nr(nr_) {}
+    };
+    circular_buffer<entry> _wait_list;
 public:
     semaphore(size_t count = 1) : _count(count) {}
     future<> wait(size_t nr = 1) {
@@ -51,7 +64,7 @@ public:
         }
         promise<> pr;
         auto fut = pr.get_future();
-        _wait_list.push_back({ std::move(pr), nr });
+        _wait_list.push_back(entry(std::move(pr), nr));
         return fut;
     }
 #ifdef __USE_KJ__
@@ -64,17 +77,20 @@ public:
 
         promise<> pr;
         auto fut = pr.get_future();
-        _wait_list.push_back({ std::move(pr), nr });
+         _wait_list.push_back(entry(std::move(pr), nr));
         return make_kj_promise(std::forward<future<>>(fut) );
         
     }
 #endif
     void signal(size_t nr = 1) {
         _count += nr;
-        while (!_wait_list.empty() && _wait_list.front().second <= _count) {
+        while (!_wait_list.empty() && _wait_list.front().nr <= _count) {
             auto& x = _wait_list.front();
-            _count -= x.second;
-            x.first.set_value();
+            if (x.nr) {
+               _count -= x.nr;
+               x.pr.set_value();
+               x.tr.cancel();
+            }
             _wait_list.pop_front();
         }
     }
@@ -109,7 +125,8 @@ void semaphore::broken(const Exception& ex) {
     auto xp = std::make_exception_ptr(ex);
     while (!_wait_list.empty()) {
         auto& x = _wait_list.front();
-        x.first.set_exception(xp);
+        x.pr.set_exception(xp);
+        x.tr.cancel();
         _wait_list.pop_front();
     }
 }

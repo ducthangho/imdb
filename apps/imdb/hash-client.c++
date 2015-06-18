@@ -2,6 +2,11 @@
 #include <kj/debug.h>
 #include <capnp/ez-rpc.h>
 #include <capnp/message.h>
+#include <capnp/rpc-twoparty.h>
+#include "capnp/rpc.h"
+#include <capnp/dynamic.h>
+#include <capnp/schema-parser.h>
+#include <capnp/schema.h>
 #include <iostream>
 #include <chrono>
 
@@ -27,7 +32,9 @@ int main(int argc, const char* argv[]) {
   	capnp::EzRpcClient client(argv[1]);
   	HashProtocol::Client hashprotocol = client.getMain<HashProtocol>();
 
-      int iterrationsCnt =10000;
+    capnp::dumper.addSchema(capnp::Schema::from<HashProtocol>());
+
+      int iterrationsCnt =5;
     // printf("IterationCnt =  %d\n", iterrationsCnt);
 
   	auto& waitScope = client.getWaitScope();

@@ -19,6 +19,7 @@
  * Copyright (C) 2014 Cloudius Systems, Ltd.
  */
 
+/// \cond internal
 //
 // Seastar memory allocator
 //
@@ -901,7 +902,7 @@ void* malloc(size_t n) throw () {
     }
     try {
         return allocate(n);
-    } catch (std::bad_alloc& ba) {
+    } catch (std::bad_alloc& ba) {        
         return nullptr;
     }
 }
@@ -1198,3 +1199,4 @@ void operator delete[](void* ptr, with_alignment wa) {
 }
 
 #endif
+/// \endcond

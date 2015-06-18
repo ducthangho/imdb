@@ -14,7 +14,7 @@ APPLY_HH_	core/apply.hh	23;"	d
 APPS_HTTPD_HTTPD_HH_	http/httpd.hh	23;"	d
 ARP_HH_	net/arp.hh	24;"	d
 ARRAY_MAP_HH_	core/array_map.hh	23;"	d
-AcceptedConnection	apps/imdb/vmts-rpc.cc	/^  explicit AcceptedConnection(Capability::Client bootstrapInterface,$/;"	f	struct:capnp::SeastarServer::AcceptedConnection
+AcceptedConnection	apps/imdb/vmts-rpc.cc	/^  explicit AcceptedConnection(kj::Maybe<Capability::Client> bootstrapInterface,$/;"	f	struct:capnp::SeastarServer::AcceptedConnection
 AcceptedConnection	apps/imdb/vmts-rpc.cc	/^struct SeastarServer::AcceptedConnection {$/;"	s	class:capnp::SeastarServer	file:
 Action	json/argparse.py	/^class Action(_AttributeHolder):$/;"	c
 AddContext	apps/imdb/adder.capnp.hh	/^  typedef ::capnp::CallContext<AddParams, AddResults> AddContext;$/;"	t	class:Adder::Server
@@ -28,6 +28,9 @@ ArgumentDefaultsHelpFormatter	json/argparse.py	/^class ArgumentDefaultsHelpForma
 ArgumentError	json/argparse.py	/^class ArgumentError(Exception):$/;"	c
 ArgumentParser	json/argparse.py	/^class ArgumentParser(_AttributeHolder, _ActionsContainer):$/;"	c
 ArgumentTypeError	json/argparse.py	/^class ArgumentTypeError(Exception):$/;"	c
+ArrDisposer	apps/imdb/vmts-rpc.hh	/^    ArrDisposer() : parent(nullptr) {};$/;"	f	class:kj::ZeroCopyScratchspace::ArrDisposer
+ArrDisposer	apps/imdb/vmts-rpc.hh	/^    ArrDisposer(ZeroCopyScratchspace* parent) : parent(parent) {};$/;"	f	class:kj::ZeroCopyScratchspace::ArrDisposer
+ArrDisposer	apps/imdb/vmts-rpc.hh	/^  class ArrDisposer : public kj::ArrayDisposer {$/;"	c	struct:kj::ZeroCopyScratchspace
 B	tests/shared_ptr_test.cc	/^struct B {$/;"	s	file:
 BITOPS_HH_	core/bitops.hh	23;"	d
 BOOST_AUTO_TEST_CASE	tests/foreign_ptr_test.cc	/^BOOST_AUTO_TEST_CASE(make_foreign_ptr_from_lw_shared_ptr) {$/;"	f
@@ -125,8 +128,6 @@ Client	apps/imdb/hashprotocol.capnp.hh	/^inline HashProtocol::Client::Client($/;
 Client	apps/imdb/hashprotocol.capnp.hh	/^inline HashProtocol::Client::Client(::kj::Exception&& exception)$/;"	f	class:HashProtocol::Client
 Client	apps/imdb/hashprotocol.capnp.hh	/^inline HashProtocol::Client::Client(::kj::Own<_t>&& server)$/;"	f	class:HashProtocol::Client
 Client	apps/imdb/hashprotocol.capnp.hh	/^inline HashProtocol::Client::Client(::kj::Promise<_t>&& promise)$/;"	f	class:HashProtocol::Client
-ClientContext	apps/imdb/vmts-rpc.cc	/^    ClientContext(kj::Own<kj::AsyncIoStream>&& stream, ReaderOptions readerOpts)$/;"	f	struct:capnp::VmtsRpcClient::Impl::ClientContext
-ClientContext	apps/imdb/vmts-rpc.cc	/^  struct ClientContext {$/;"	s	struct:capnp::VmtsRpcClient::Impl	file:
 ConsumerConcept	apps/imdb/kj_iostream.hh	/^    struct ConsumerConcept {$/;"	s	class:final
 ConsumerConcept	core/iostream.hh	/^    struct ConsumerConcept {$/;"	s	class:final
 D	tests/shared_ptr_test.cc	/^struct D {};$/;"	s	file:
@@ -135,8 +136,8 @@ DEFAULT_DIR	http/api_docs.cc	/^const sstring api_registry_builder::DEFAULT_DIR =
 DEFAULT_DIR	http/api_docs.hh	/^    static const sstring DEFAULT_DIR;$/;"	m	class:httpd::api_registry_builder
 DEFAULT_PATH	http/api_docs.cc	/^const sstring api_registry_builder::DEFAULT_PATH = "\/api-doc";$/;"	m	class:httpd::api_registry_builder	file:
 DEFAULT_PATH	http/api_docs.hh	/^    static const sstring DEFAULT_PATH;$/;"	m	class:httpd::api_registry_builder
-DEFAUlT_RELOCATE_THREADSHOLD	apps/imdb/event_port.hh	329;"	d
-DEFAUlT_SCRACH_SPACE_SIZE	apps/imdb/event_port.hh	328;"	d
+DEFAUlT_RELOCATE_THREADSHOLD	apps/imdb/vmts-rpc.hh	92;"	d
+DEFAUlT_SCRATCH_SPACE_SIZE	apps/imdb/vmts-rpc.hh	91;"	d
 DELETE	http/common.hh	/^    GET, POST, PUT, DELETE, NUM_OPERATION$/;"	e	enum:httpd::operation_type
 DELETER_HH_	core/deleter.hh	23;"	d
 DERIVE	core/scollectd.hh	/^    DERIVE, \/\/ signed int 64$/;"	m	class:scollectd::data_type
@@ -161,9 +162,8 @@ EXCEPTION_HH_	http/exception.hh	23;"	d
 EXPECT_ANY_THROW	apps/imdb/imdb-async-test.cc	350;"	d	file:
 EXPECT_ANY_THROW	apps/imdb/imdb-async-test.cc	351;"	d	file:
 Encryption	core/scollectd.cc	/^        Encryption = 0x0210, \/\/	Encryption (AES-256\/OFB$/;"	m	class:scollectd::impl::part_type	file:
+ErrorHandlerImpl	apps/imdb/hash-client.c++	/^class ErrorHandlerImpl: public kj::TaskSet::ErrorHandler {$/;"	c	file:
 ErrorHandlerImpl	apps/imdb/imdb-async-test.cc	/^class ErrorHandlerImpl: public TaskSet::ErrorHandler {$/;"	c	file:
-ExportedCap	apps/imdb/vmts-rpc.cc	/^    ExportedCap(kj::StringPtr name, Capability::Client cap)$/;"	f	struct:capnp::final::ExportedCap
-ExportedCap	apps/imdb/vmts-rpc.cc	/^  struct ExportedCap {$/;"	s	struct:capnp::final	file:
 FAIL	net/dhcp.cc	/^        FAIL,$/;"	m	class:net::dhcp::impl::state	file:
 FILE_DESC_HH_	core/posix.hh	23;"	d
 FILE_HH_	core/file.hh	23;"	d
@@ -175,7 +175,7 @@ FORMATTER_HH_	json/formatter.hh	23;"	d
 FUTURE_HH_	core/future.hh	23;"	d
 FileType	json/argparse.py	/^class FileType(object):$/;"	c
 Fulfiller	net/tcp.hh	/^typedef kj::Own< kj::PromiseFulfiller<void> > Fulfiller;$/;"	t	class:net::tcp_state::tcp_option::option_kind
-FulfillerDisposer	apps/imdb/event_port.hh	/^  class FulfillerDisposer: public kj::Disposer {$/;"	c	class:capnp::final
+FulfillerDisposer	apps/imdb/vmts-rpc.hh	/^  class FulfillerDisposer: public kj::Disposer {$/;"	c	class:capnp::final
 GAUGE	core/scollectd.hh	/^    GAUGE, \/\/ double$/;"	m	class:scollectd::data_type
 GB	core/units.hh	/^static constexpr size_t GB = 1 << 30;$/;"	v
 GET	http/common.hh	/^    GET, POST, PUT, DELETE, NUM_OPERATION$/;"	e	enum:httpd::operation_type
@@ -197,15 +197,7 @@ INVALID	net/dhcp.cc	/^        INVALID = 255$/;"	m	class:net::dhcp::impl::m_type:
 IOV_MAX	core/iostream.hh	50;"	d
 IP_CHECKSUM_HH_	net/ip_checksum.hh	23;"	d
 IP_HH_	net/ip.hh	24;"	d
-Impl	apps/imdb/vmts-rpc.cc	/^  Impl(Capability::Client mainInterface, int socketFd, uint port, ReaderOptions readerOpts)$/;"	f	struct:capnp::final
-Impl	apps/imdb/vmts-rpc.cc	/^  Impl(Capability::Client mainInterface, kj::StringPtr bindAddress, uint defaultPort,$/;"	f	struct:capnp::final
-Impl	apps/imdb/vmts-rpc.cc	/^  Impl(Capability::Client mainInterface, lw_shared_ptr<kj::connection>& _conn, kj::WaitScope& ws, ReaderOptions readerOpts):$/;"	f	struct:capnp::final
-Impl	apps/imdb/vmts-rpc.cc	/^  Impl(Capability::Client mainInterface, struct sockaddr* bindAddress, uint addrSize,$/;"	f	struct:capnp::final
-Impl	apps/imdb/vmts-rpc.cc	/^  Impl(const struct sockaddr* serverAddress, uint addrSize,$/;"	f	struct:capnp::VmtsRpcClient::Impl
-Impl	apps/imdb/vmts-rpc.cc	/^  Impl(int socketFd, ReaderOptions readerOpts)$/;"	f	struct:capnp::VmtsRpcClient::Impl
-Impl	apps/imdb/vmts-rpc.cc	/^  Impl(kj::StringPtr serverAddress, uint defaultPort,$/;"	f	struct:capnp::VmtsRpcClient::Impl
-Impl	apps/imdb/vmts-rpc.cc	/^struct VmtsRpcClient::Impl {$/;"	s	class:capnp::VmtsRpcClient	file:
-IncomingMessageImpl	apps/imdb/vmts-rpc.cc	/^  IncomingMessageImpl(kj::Own<MessageReader> message): message(kj::mv(message)) {}$/;"	f	class:capnp::final
+IncomingMessageImpl	apps/imdb/vmts-rpc.cc	/^  IncomingMessageImpl(kj::Own<MessageReader> message): message(kj::mv(message)) {    $/;"	f	class:capnp::final
 Interval	core/scollectd.cc	/^        Interval = 0x0007, \/\/ Interval Numeric Interval used to set the "step" when creating new RRDs unless rrdtool plugin forces StepSize. Also used to detect values that have timed out.$/;"	m	class:scollectd::impl::part_type	file:
 IntervalHr	core/scollectd.cc	/^        IntervalHr = 0x0009, \/\/	Interval (high resolution) 	Numeric 	The interval in which subsequent data values are collected. The interval is given in 2–30 seconds. New in Version 5.0.$/;"	m	class:scollectd::impl::part_type	file:
 JSON_ELEMENTS_HH_	json/json_elements.hh	23;"	d
@@ -365,16 +357,14 @@ SYN_RECEIVED	net/tcp.hh	/^        static constexpr tcp_state SYN_RECEIVED   = tc
 SYN_RECEIVED	net/tcp.hh	/^    SYN_RECEIVED    = (1 << 3),$/;"	m	class:net::tcp_state
 SYN_SENT	net/tcp.hh	/^        static constexpr tcp_state SYN_SENT       = tcp_state::SYN_SENT;$/;"	m	class:net::tcp_state::tcp_option::option_kind::tcp::tcb
 SYN_SENT	net/tcp.hh	/^    SYN_SENT        = (1 << 2),$/;"	m	class:net::tcp_state
-SeastarAsyncMessageReader	apps/imdb/vmts-rpc.cc	/^  inline SeastarAsyncMessageReader(kj::UvIoStream& _inputStream, ReaderOptions options): MessageReader(options), inputStream(_inputStream), totalWords(-1) {$/;"	f	class:capnp::SeastarAsyncMessageReader
+SeastarAsyncMessageReader	apps/imdb/vmts-rpc.cc	/^  inline SeastarAsyncMessageReader(kj::UvIoStream& _inputStream, ReaderOptions options): MessageReader(options), inputStream(_inputStream), totalWords(0), ownership(true) {$/;"	f	class:capnp::SeastarAsyncMessageReader
 SeastarAsyncMessageReader	apps/imdb/vmts-rpc.cc	/^class SeastarAsyncMessageReader: public MessageReader {$/;"	c	namespace:capnp	file:
 SeastarNetwork	apps/imdb/vmts-rpc.cc	/^SeastarNetwork::SeastarNetwork(kj::UvIoStream& stream, rpc::twoparty::Side side,$/;"	f	class:capnp::SeastarNetwork
-SeastarServer	apps/imdb/event_port.hh	/^class SeastarServer: private kj::TaskSet::ErrorHandler {$/;"	c	namespace:capnp
-SeastarServer	apps/imdb/vmts-rpc.cc	/^SeastarServer::SeastarServer(Capability::Client bootstrapInterface)$/;"	f	class:capnp::SeastarServer
+SeastarServer	apps/imdb/vmts-rpc.cc	/^SeastarServer::SeastarServer(kj::Maybe<Capability::Client> bootstrapInterface)$/;"	f	class:capnp::SeastarServer
+SeastarServer	apps/imdb/vmts-rpc.hh	/^class SeastarServer: private kj::TaskSet::ErrorHandler {$/;"	c	namespace:capnp
 SerializerConcept	rpc/rpc.hh	/^struct SerializerConcept {$/;"	s	namespace:rpc
 Server	apps/imdb/adder.capnp.hh	/^class Adder::Server$/;"	c	class:Adder
 Server	apps/imdb/hashprotocol.capnp.hh	/^class HashProtocol::Server$/;"	c	class:HashProtocol
-ServerContext	apps/imdb/vmts-rpc.cc	/^    ServerContext(kj::Own<kj::UvIoStream>&& stream, SturdyRefRestorer<AnyPointer>& restorer,$/;"	f	struct:capnp::final::ServerContext
-ServerContext	apps/imdb/vmts-rpc.cc	/^  struct ServerContext {$/;"	s	struct:capnp::final	file:
 Serves	apps/imdb/adder.capnp.hh	/^  typedef Adder Serves;$/;"	t	class:Adder::Server
 Serves	apps/imdb/hashprotocol.capnp.hh	/^  typedef HashProtocol Serves;$/;"	t	class:HashProtocol::Server
 SetContext	apps/imdb/hashprotocol.capnp.hh	/^  typedef ::capnp::CallContext<SetParams, SetResults> SetContext;$/;"	t	class:HashProtocol::Server
@@ -439,13 +429,9 @@ UNITS_HH_	core/units.hh	23;"	d
 UTIL_DEFER_HH_	util/defer.hh	23;"	d
 UTIL_FUNCTION_INPUT_ITERATOR_HH_	util/function_input_iterator.hh	23;"	d
 UTIL_TRANSFORM_ITERATOR_HH_	util/transform_iterator.hh	23;"	d
-UV_CALL	apps/imdb/event_port.hh	79;"	d
 UdpSpecificTests	tests/memcached/test_memcached.py	/^class UdpSpecificTests(MemcacheTest):$/;"	c
-UvConnectionReceiver	apps/imdb/event_port.hh	/^  UvConnectionReceiver(lw_shared_ptr<connection>& _conn): conn(_conn), port(0) {};$/;"	f	class:kj::final
-UvIoStream	apps/imdb/event_port.hh	/^  UvIoStream(lw_shared_ptr<kj::connection>& _conn, size_t buffer_size = DEFAUlT_SCRACH_SPACE_SIZE ): conn(_conn), buffer(buffer_size) {$/;"	f	class:kj::UvIoStream
-UvIoStream	apps/imdb/event_port.hh	/^class UvIoStream: public kj::AsyncIoStream {$/;"	c	namespace:kj
-UvLowLevelAsyncIoProvider	apps/imdb/event_port.hh	/^  UvLowLevelAsyncIoProvider(){    $/;"	f	class:kj::final
-UvLowLevelAsyncIoProvider	apps/imdb/event_port.hh	/^  UvLowLevelAsyncIoProvider(lw_shared_ptr<connection>& _conn): conn(_conn) {    $/;"	f	class:kj::final
+UvIoStream	apps/imdb/vmts-rpc.hh	/^  UvIoStream(kj::connection&& _conn, size_t buffer_size = DEFAUlT_SCRATCH_SPACE_SIZE ): conn(kj::mv(_conn) ),buffer( kj::heap<ZeroCopyScratchspace>(buffer_size) ) {    $/;"	f	struct:kj::UvIoStream
+UvIoStream	apps/imdb/vmts-rpc.hh	/^struct UvIoStream: public kj::AsyncIoStream {$/;"	s	namespace:kj
 VECTOR_DATA_SINK_HH_	core/vector-data-sink.hh	23;"	d
 VERSION	apps/memcached/memcache.cc	48;"	d	file:
 VERSION_STRING	apps/memcached/memcache.cc	49;"	d	file:
@@ -480,21 +466,6 @@ VRING_DESC_F_NEXT	net/virtio-interface.hh	62;"	d
 VRING_DESC_F_WRITE	net/virtio-interface.hh	64;"	d
 VRING_USED_F_NO_NOTIFY	net/virtio-interface.hh	71;"	d
 Values	core/scollectd.cc	/^        Values = 0x0006, \/\/	Values 	other 	Data values, see above$/;"	m	class:scollectd::impl::part_type	file:
-VmtsRpcClient	apps/imdb/vmts-rpc.cc	/^VmtsRpcClient::VmtsRpcClient(const struct sockaddr* serverAddress, uint addrSize, ReaderOptions readerOpts)$/;"	f	class:capnp::VmtsRpcClient
-VmtsRpcClient	apps/imdb/vmts-rpc.cc	/^VmtsRpcClient::VmtsRpcClient(int socketFd, ReaderOptions readerOpts)$/;"	f	class:capnp::VmtsRpcClient
-VmtsRpcClient	apps/imdb/vmts-rpc.cc	/^VmtsRpcClient::VmtsRpcClient(kj::StringPtr serverAddress, uint defaultPort, ReaderOptions readerOpts)$/;"	f	class:capnp::VmtsRpcClient
-VmtsRpcClient	apps/imdb/vmts-rpc.hh	/^class VmtsRpcClient {$/;"	c	namespace:capnp
-VmtsRpcContext	apps/imdb/vmts-rpc.cc	/^  VmtsRpcContext() : ioContext( kj::newAsyncIoProvider(llaiop)) {    $/;"	f	class:capnp::VmtsRpcContext
-VmtsRpcContext	apps/imdb/vmts-rpc.cc	/^  VmtsRpcContext(lw_shared_ptr<kj::connection>& _conn,kj::WaitScope& _waitScope): llaiop(_conn), ioContext( kj::newAsyncIoProvider(llaiop) ),waitScope(&_waitScope) {    $/;"	f	class:capnp::VmtsRpcContext
-VmtsRpcContext	apps/imdb/vmts-rpc.cc	/^class VmtsRpcContext: public kj::Refcounted {$/;"	c	namespace:capnp	file:
-VmtsRpcServer	apps/imdb/vmts-rpc.cc	/^VmtsRpcServer::VmtsRpcServer(Capability::Client mainInterface, int socketFd, uint port,$/;"	f	class:capnp::VmtsRpcServer
-VmtsRpcServer	apps/imdb/vmts-rpc.cc	/^VmtsRpcServer::VmtsRpcServer(Capability::Client mainInterface, kj::StringPtr bindAddress,$/;"	f	class:capnp::VmtsRpcServer
-VmtsRpcServer	apps/imdb/vmts-rpc.cc	/^VmtsRpcServer::VmtsRpcServer(Capability::Client mainInterface, lw_shared_ptr<kj::connection>& _conn, kj::WaitScope& ws, ReaderOptions readerOpts)$/;"	f	class:capnp::VmtsRpcServer
-VmtsRpcServer	apps/imdb/vmts-rpc.cc	/^VmtsRpcServer::VmtsRpcServer(Capability::Client mainInterface, struct sockaddr* bindAddress,$/;"	f	class:capnp::VmtsRpcServer
-VmtsRpcServer	apps/imdb/vmts-rpc.cc	/^VmtsRpcServer::VmtsRpcServer(int socketFd, uint port, ReaderOptions readerOpts)$/;"	f	class:capnp::VmtsRpcServer
-VmtsRpcServer	apps/imdb/vmts-rpc.cc	/^VmtsRpcServer::VmtsRpcServer(kj::StringPtr bindAddress, uint defaultPort,$/;"	f	class:capnp::VmtsRpcServer
-VmtsRpcServer	apps/imdb/vmts-rpc.cc	/^VmtsRpcServer::VmtsRpcServer(struct sockaddr* bindAddress, uint addrSize,$/;"	f	class:capnp::VmtsRpcServer
-VmtsRpcServer	apps/imdb/vmts-rpc.hh	/^class VmtsRpcServer {$/;"	c	namespace:capnp
 X	core/circular_buffer.hh	/^    circular_buffer(const circular_buffer& X) = delete;$/;"	m	class:circular_buffer
 X	tests/distributed_test.cc	/^struct X {$/;"	s	file:
 XENFRONT_HH_	net/xenfront.hh	23;"	d
@@ -502,8 +473,8 @@ XENSTORE_HH_	core/xen/xenstore.hh	23;"	d
 Y	tests/distributed_test.cc	/^    Y(sstring s) : s(std::move(s)) {}$/;"	f	struct:Y
 Y	tests/distributed_test.cc	/^struct Y {$/;"	s	file:
 ZERO_OR_MORE	json/argparse.py	/^ZERO_OR_MORE = '*'$/;"	v
-ZeroCopyScratchspace	apps/imdb/event_port.hh	/^  ZeroCopyScratchspace(size_t sz = DEFAUlT_SCRACH_SPACE_SIZE) : scratchSpace(kj::heapArray<char>(sz)) {};$/;"	f	struct:kj::ZeroCopyScratchspace
-ZeroCopyScratchspace	apps/imdb/event_port.hh	/^struct ZeroCopyScratchspace {$/;"	s	namespace:kj
+ZeroCopyScratchspace	apps/imdb/vmts-rpc.hh	/^  ZeroCopyScratchspace(size_t sz = DEFAUlT_SCRATCH_SPACE_SIZE) : scratchSpace(kj::heapArray<char>(sz)), readCounter(0), writerCounter(0), freed(0), disposer(this) { };$/;"	f	struct:kj::ZeroCopyScratchspace
+ZeroCopyScratchspace	apps/imdb/vmts-rpc.hh	/^struct ZeroCopyScratchspace {$/;"	s	namespace:kj
 _APP_TEMPLATE_HH	core/app-template.hh	22;"	d
 _ActionsContainer	json/argparse.py	/^class _ActionsContainer(object):$/;"	c
 _AppendAction	json/argparse.py	/^class _AppendAction(Action):$/;"	c
@@ -512,7 +483,6 @@ _ArgumentGroup	json/argparse.py	/^class _ArgumentGroup(_ActionsContainer):$/;"	c
 _AttributeHolder	json/argparse.py	/^class _AttributeHolder(object):$/;"	c
 _ChoicesPseudoAction	json/argparse.py	/^    class _ChoicesPseudoAction(Action):$/;"	c	class:_SubParsersAction
 _CountAction	json/argparse.py	/^class _CountAction(Action):$/;"	c
-_GLIBCXX_HAVE_GETS	apps/imdb/event_port.hh	25;"	d
 _HelpAction	json/argparse.py	/^class _HelpAction(Action):$/;"	c
 _LINUX_VIRTIO_RING_H	net/virtio-interface.hh	27;"	d
 _MEMCACHED_HH	apps/memcached/memcached.hh	19;"	d
@@ -778,9 +748,9 @@ _expiry	core/reactor.hh	/^    time_point _expiry;$/;"	m	class:timer
 _f	util/transform_iterator.hh	/^    Func _f;$/;"	m	class:transform_iterator
 _f_handle	http/function_handlers.hh	/^                    std::unique_ptr<reply> rep)> _f_handle;$/;"	m	class:httpd::function_handler
 _fc	net/dpdk.cc	/^        tx_buf_factory& _fc;$/;"	m	class:dpdk::dpdk_qp::tx_buf	file:
-_fd	apps/imdb/event_port.hh	/^  connected_socket _fd;$/;"	m	struct:kj::connection
 _fd	apps/imdb/kj_iostream.hh	/^    kj_data_sink _fd;$/;"	m	class:final
 _fd	apps/imdb/kj_iostream.hh	/^    kj_data_source _fd;$/;"	m	class:final
+_fd	apps/imdb/vmts-rpc.hh	/^  connected_socket _fd;$/;"	m	struct:kj::connection
 _fd	apps/seawreck/seawreck.cc	/^        connected_socket _fd;$/;"	m	class:http_client::connection	file:
 _fd	core/file.hh	/^    int _fd;$/;"	m	class:posix_file_impl
 _fd	core/iostream.hh	/^    data_sink _fd;$/;"	m	class:final
@@ -978,7 +948,6 @@ _lfd	net/posix-stack.hh	/^    pollable_fd _lfd;$/;"	m	class:net::posix_server_so
 _link_ready_promise	net/dpdk.cc	/^    promise<> _link_ready_promise;$/;"	m	class:dpdk::dpdk_device	file:
 _listener	apps/memcached/memcache.cc	/^    lw_shared_ptr<server_socket> _listener;$/;"	m	class:memcache::tcp_server	file:
 _listener	net/native-stack-impl.hh	/^    typename Protocol::listener _listener;$/;"	m	class:net::native_server_socket_impl
-_listeners	apps/imdb/main.cc	/^    std::vector<server_socket> _listeners;$/;"	m	class:tcp_server	file:
 _listeners	http/httpd.hh	/^    std::vector<server_socket> _listeners;$/;"	m	class:httpd::http_server
 _listeners	tests/tcp_server.cc	/^    std::vector<server_socket> _listeners;$/;"	m	class:tcp_server	file:
 _load	core/reactor.hh	/^    double _load = 0;$/;"	m	class:reactor
@@ -1172,7 +1141,7 @@ _rcv	net/tcp.hh	/^        } _rcv;$/;"	m	class:net::tcp_state::tcp_option::option
 _rcv_msg_id	rpc/rpc.hh	/^        id_type _rcv_msg_id = 0;$/;"	m	class:rpc::protocol::client
 _read	core/reactor.cc	/^    readable_eventfd _read;$/;"	m	class:reactor_notifier_epoll	file:
 _read_args_from_files	json/argparse.py	/^    def _read_args_from_files(self, arg_strings):$/;"	m	class:ArgumentParser
-_read_buf	apps/imdb/event_port.hh	/^  input_stream<char> _read_buf;$/;"	m	struct:kj::connection
+_read_buf	apps/imdb/vmts-rpc.hh	/^  input_stream<char> _read_buf;$/;"	m	struct:kj::connection
 _read_buf	apps/seawreck/seawreck.cc	/^        input_stream<char> _read_buf;$/;"	m	class:http_client::connection	file:
 _read_buf	http/httpd.hh	/^        input_stream<char> _read_buf;$/;"	m	class:httpd::http_server::connection
 _read_buf	rpc/rpc.hh	/^        input_stream<char> _read_buf;$/;"	m	class:rpc::protocol::connection
@@ -1391,6 +1360,7 @@ _total_pings	tests/tcp_client.cc	/^    unsigned _total_pings;$/;"	m	class:client
 _trim	tests/output_stream_test.cc	/^    bool _trim = false;$/;"	m	struct:stream_maker	file:
 _trim_to_size	apps/imdb/kj_iostream.hh	/^    bool _trim_to_size = false;$/;"	m	class:final
 _trim_to_size	core/iostream.hh	/^    bool _trim_to_size = false;$/;"	m	class:final
+_tryReadMessage	apps/imdb/vmts-rpc.cc	/^kj::Promise<kj::Maybe<kj::Own<SeastarAsyncMessageReader>>> _tryReadMessage($/;"	f	namespace:capnp
 _tx	core/reactor.hh	/^    } _tx;$/;"	m	class:smp_message_queue	typeref:union:smp_message_queue::tx_side
 _tx_buf_factory	net/dpdk.cc	/^    tx_buf_factory _tx_buf_factory;$/;"	m	class:dpdk::dpdk_qp	file:
 _tx_burst	net/dpdk.cc	/^    std::vector<rte_mbuf*> _tx_burst;$/;"	m	class:dpdk::dpdk_qp	file:
@@ -1449,7 +1419,7 @@ _win_scale_received	net/tcp.hh	/^    bool _win_scale_received = false;$/;"	m	cla
 _window_opened	net/tcp.hh	/^            promise<> _window_opened;$/;"	m	struct:net::tcp_state::tcp_option::option_kind::tcp::tcb::send
 _worker_thread	core/reactor.hh	/^    posix_thread _worker_thread;$/;"	m	class:thread_pool
 _write	core/reactor.cc	/^    writeable_eventfd _write;$/;"	m	class:reactor_notifier_epoll	file:
-_write_buf	apps/imdb/event_port.hh	/^  output_stream<char> _write_buf;$/;"	m	struct:kj::connection
+_write_buf	apps/imdb/vmts-rpc.hh	/^  output_stream<char> _write_buf;$/;"	m	struct:kj::connection
 _write_buf	apps/seawreck/seawreck.cc	/^        output_stream<char> _write_buf;$/;"	m	class:http_client::connection	file:
 _write_buf	http/httpd.hh	/^        output_stream<char> _write_buf;$/;"	m	class:httpd::http_server::connection
 _write_buf	rpc/rpc.hh	/^        output_stream<char> _write_buf;$/;"	m	class:rpc::protocol::connection
@@ -1475,10 +1445,9 @@ accept	net/posix-stack.cc	/^future<connected_socket, socket_address> posix_ap_se
 accept	net/posix-stack.cc	/^posix_reuseport_server_socket_impl::accept() {$/;"	f	class:net::posix_reuseport_server_socket_impl
 accept	net/posix-stack.cc	/^posix_server_socket_impl::accept() {$/;"	f	class:net::posix_server_socket_impl
 accept	rpc/rpc_impl.hh	/^void protocol<Serializer, MsgType>::server::accept(server_socket&& ss) {$/;"	f	class:rpc::protocol::server
-acceptFulfiller	apps/imdb/event_port.hh	/^  kj::Own<kj::PromiseFulfiller<kj::Own<TwoPartyVatNetworkBase::Connection>>> acceptFulfiller;$/;"	m	class:capnp::final
-acceptLoop	apps/imdb/main.cc	/^    void acceptLoop(ipv4_addr addr){$/;"	f	class:tcp_server
-acceptLoop	apps/imdb/vmts-rpc.cc	/^  void acceptLoop(kj::Own<kj::ConnectionReceiver>&& listener, ReaderOptions readerOpts) {$/;"	f	struct:capnp::final
-accepted	apps/imdb/event_port.hh	/^  bool accepted = false;$/;"	m	class:capnp::final
+acceptFulfiller	apps/imdb/vmts-rpc.hh	/^  kj::Own<kj::PromiseFulfiller<kj::Own<TwoPartyVatNetworkBase::Connection>>> acceptFulfiller;$/;"	m	class:capnp::final
+acceptLoop	apps/imdb/main.cc	/^    void acceptLoop(ipv4_addr addr){        $/;"	f	class:tcp_server
+accepted	apps/imdb/vmts-rpc.hh	/^  bool accepted = false;$/;"	m	class:capnp::final
 accepted	http/reply.cc	/^const sstring accepted = " 202 Accepted\\r\\n";$/;"	m	namespace:httpd::status_strings	file:
 accepted	http/reply.hh	/^        accepted = 202, \/\/!< accepted$/;"	m	class:httpd::reply::status_type
 access_element_unsafe	core/circular_buffer.hh	/^circular_buffer<T, Alloc>::access_element_unsafe(size_t idx) {$/;"	f	class:circular_buffer
@@ -1715,9 +1684,9 @@ avail	net/virtio.cc	/^    char* avail;$/;"	m	struct:virtio::ring_config	file:
 avail	net/virtio.cc	/^    struct avail {$/;"	s	class:virtio::vring	file:
 avail	net/virtio.cc	/^vring<BufferChain, Completion>::avail::avail(ring_config conf)$/;"	f	class:virtio::vring::avail
 avail_layout	net/virtio.cc	/^    struct avail_layout {$/;"	s	class:virtio::vring	file:
-available	apps/imdb/event_port.hh	/^  inline size_t available() {$/;"	f	struct:kj::ZeroCopyScratchspace
 available	apps/imdb/kj_iostream.hh	/^    size_t available() const { return _buf.size(); }$/;"	f	class:final
 available	apps/imdb/kj_iostream.hh	/^    size_t available() const { return _end - _begin; }$/;"	f	class:final
+available	apps/imdb/vmts-rpc.hh	/^  inline size_t available() {$/;"	f	struct:kj::ZeroCopyScratchspace
 available	core/iostream.hh	/^    size_t available() const { return _buf.size(); }$/;"	f	class:final
 available	core/iostream.hh	/^    size_t available() const { return _end - _begin; }$/;"	f	class:final
 available_descriptors	net/virtio.cc	/^    semaphore& available_descriptors() { return _available_descriptors; }$/;"	f	class:virtio::vring
@@ -1780,7 +1749,7 @@ blockdev_file_impl	core/file.hh	/^class blockdev_file_impl : public posix_file_i
 boost_test_lib	configure.py	/^boost_test_lib = [$/;"	v
 boost_tests	test.py	/^boost_tests = [$/;"	v
 bootp	net/dhcp.cc	/^        dhcp_header bootp;$/;"	m	struct:net::dhcp::impl::m_type::htype::opt_type::msg_type::dhcp_payload	file:
-bootstrapInterface	apps/imdb/event_port.hh	/^  Capability::Client bootstrapInterface;$/;"	m	class:capnp::SeastarServer
+bootstrapInterface	apps/imdb/vmts-rpc.hh	/^  kj::Maybe<Capability::Client> bootstrapInterface;$/;"	m	class:capnp::SeastarServer
 bp_98ff8d7ca69e3522	apps/imdb/hashprotocol.capnp.cc	/^::capnp::word const* const bp_98ff8d7ca69e3522 = b_98ff8d7ca69e3522.words;$/;"	m	class:capnp::schemas::capnp	file:
 bp_b8be46ef26e86dff	apps/imdb/adder.capnp.cc	/^::capnp::word const* const bp_b8be46ef26e86dff = b_b8be46ef26e86dff.words;$/;"	m	class:capnp::schemas::capnp	file:
 bp_ba420be562e5bb4f	apps/imdb/hashprotocol.capnp.cc	/^::capnp::word const* const bp_ba420be562e5bb4f = b_ba420be562e5bb4f.words;$/;"	m	class:capnp::schemas::capnp	file:
@@ -1815,7 +1784,7 @@ broken_semaphore	core/semaphore.hh	/^class broken_semaphore : public std::except
 bucket_count	apps/memcached/memcache.cc	/^    size_t bucket_count() {$/;"	f	class:memcache::cache
 buf	core/file.hh	/^        tmp_buf_type buf;$/;"	m	struct:file::read_state
 buf	net/virtio.cc	/^            std::unique_ptr<char[], free_deleter> buf;$/;"	m	struct:virtio::qp::rxq::buffer_and_virt	file:
-buffer	apps/imdb/event_port.hh	/^  ZeroCopyScratchspace buffer;$/;"	m	class:kj::UvIoStream
+buffer	apps/imdb/vmts-rpc.hh	/^  kj::Own<ZeroCopyScratchspace> buffer;$/;"	m	struct:kj::UvIoStream
 buffer	net/virtio.cc	/^struct buffer {$/;"	s	namespace:virtio	file:
 buffer	tests/test-reactor.cc	/^        char buffer[8192];$/;"	m	struct:test::connection	file:
 buffer_and_virt	net/virtio.cc	/^        struct buffer_and_virt : buffer {$/;"	s	class:virtio::qp::rxq	file:
@@ -1827,7 +1796,7 @@ build_sw_reta	net/net.cc	/^void qp::build_sw_reta(const std::map<unsigned, float
 buildfile	configure.py	/^buildfile = 'build.ninja'$/;"	v
 bunch	net/virtio.cc	/^            void bunch(uint64_t c) {$/;"	f	struct:virtio::qp::rxq::complete
 bunch	net/virtio.cc	/^            void bunch(uint64_t c) {}$/;"	f	struct:virtio::qp::txq::complete
-byte	apps/imdb/event_port.hh	/^typedef unsigned char byte;$/;"	t	namespace:kj
+byte	apps/imdb/vmts-rpc.hh	/^typedef unsigned char byte;$/;"	t	namespace:kj
 bytes	core/resource.hh	/^    size_t bytes;$/;"	m	struct:resource::memory
 bytes	net/net.hh	/^    uint64_t bytes;      \/\/ total number of bytes$/;"	m	struct:net::qp_stats_good
 c	core/scollectd_api.hh	/^    collectd_value& operator=(const collectd_value& c) = default;$/;"	m	struct:scollectd::collectd_value
@@ -1849,12 +1818,10 @@ cancel	apps/memcached/memcache.cc	/^    bool cancel() {$/;"	f	class:memcache::it
 cancel	core/reactor.cc	/^    void cancel() {$/;"	f	class:reactor::poller::registration_task
 cancel	core/reactor.hh	/^bool timer<Clock>::cancel() {$/;"	f	class:timer
 cancel	util/defer.hh	/^    void cancel() { _cancelled = true; }$/;"	f	class:deferred_action
-cap	apps/imdb/vmts-rpc.cc	/^    Capability::Client cap = nullptr;$/;"	m	struct:capnp::final::ExportedCap	file:
 capacity	core/circular_buffer.hh	/^        size_t capacity = 0;$/;"	m	struct:circular_buffer::impl
 capacity	core/circular_buffer.hh	/^circular_buffer<T, Alloc>::capacity() const {$/;"	f	class:circular_buffer
 capnp	apps/imdb/adder.capnp.cc	/^namespace capnp {$/;"	n	file:
 capnp	apps/imdb/adder.capnp.hh	/^namespace capnp {$/;"	n
-capnp	apps/imdb/event_port.hh	/^namespace capnp{$/;"	n
 capnp	apps/imdb/hashprotocol.capnp.cc	/^namespace capnp {$/;"	n	file:
 capnp	apps/imdb/hashprotocol.capnp.hh	/^namespace capnp {$/;"	n
 capnp	apps/imdb/vmts-rpc.cc	/^namespace capnp {$/;"	n	file:
@@ -1894,7 +1861,6 @@ client	rpc/rpc.hh	/^    class client : public protocol::connection {$/;"	c	class
 client	rpc/rpc_impl.hh	/^protocol<Serializer, MsgType>::client::client(protocol<Serializer, MsgType>& proto, ipv4_addr addr, ipv4_addr local) : protocol<Serializer, MsgType>::connection(proto) {$/;"	f	class:rpc::protocol::client
 client	tests/tcp_client.cc	/^class client {$/;"	c	file:
 client	tests/udp_client.cc	/^class client {$/;"	c	file:
-clientContext	apps/imdb/vmts-rpc.cc	/^  kj::Maybe<kj::Own<ClientContext>> clientContext;$/;"	m	struct:capnp::VmtsRpcClient::Impl	file:
 client_info	rpc/rpc.hh	/^struct client_info {$/;"	s	namespace:rpc
 client_port	net/dhcp.cc	/^    static const uint16_t client_port = 68;$/;"	m	class:net::dhcp::impl::m_type::htype::opt_type::msg_type	file:
 client_port	net/dhcp.cc	/^const uint16_t net::dhcp::impl::client_port;$/;"	m	class:net::dhcp::impl::m_type::htype::opt_type::net::dhcp::impl	file:
@@ -1953,9 +1919,7 @@ configure	core/reactor.cc	/^void smp::configure(boost::program_options::variable
 configure	core/scollectd.cc	/^void configure(const boost::program_options::variables_map & opts) {$/;"	f	namespace:scollectd
 configure_args	configure.py	/^configure_args = str.join(' ', [shlex.quote(x) for x in sys.argv[1:]])$/;"	v
 configure_proxies	net/net.cc	/^void qp::configure_proxies(const std::map<unsigned, float>& cpu_weights) {$/;"	f	class:net::qp
-conn	apps/imdb/event_port.hh	/^  lw_shared_ptr<connection> conn;    $/;"	m	class:kj::final
-conn	apps/imdb/event_port.hh	/^  lw_shared_ptr<connection> conn;$/;"	m	class:kj::UvIoStream
-conn	apps/imdb/event_port.hh	/^  lw_shared_ptr<connection> conn;$/;"	m	class:kj::final
+conn	apps/imdb/vmts-rpc.hh	/^  kj::connection conn;$/;"	m	struct:kj::UvIoStream
 conn_q	net/posix-stack.cc	/^thread_local std::unordered_multimap<::sockaddr_in, posix_ap_server_socket_impl::connection> posix_ap_server_socket_impl::conn_q;$/;"	m	class:net::posix_ap_server_socket_impl	file:
 conn_q	net/posix-stack.hh	/^    static thread_local std::unordered_multimap<::sockaddr_in, connection> conn_q;$/;"	m	class:net::posix_ap_server_socket_impl
 connect	apps/imdb/vmts-rpc.cc	/^kj::Maybe<kj::Own<TwoPartyVatNetworkBase::Connection>> SeastarNetwork::connect($/;"	f	class:capnp::SeastarNetwork
@@ -1968,15 +1932,14 @@ connect	net/posix-stack.cc	/^posix_ap_network_stack::connect(socket_address sa, 
 connect	net/posix-stack.cc	/^posix_network_stack::connect(socket_address sa, socket_address local) {$/;"	f	class:net::posix_network_stack
 connect	net/tcp.hh	/^future<typename tcp<InetTraits>::connection> tcp<InetTraits>::connect(socket_address sa) {$/;"	f	class:net::tcp_state::tcp_option::option_kind::tcp::tcb::tcp
 connect	net/tcp.hh	/^void tcp<InetTraits>::tcb::connect() {$/;"	f	class:net::tcp_state::tcp_option::option_kind::tcp::tcb::tcp::tcb
-connectAttach	apps/imdb/vmts-rpc.cc	/^kj::Promise<kj::Own<kj::AsyncIoStream>> connectAttach(kj::Own<kj::NetworkAddress>&& addr) {$/;"	f	namespace:capnp
 connect_done	net/tcp.hh	/^        future<> connect_done() {$/;"	f	class:net::tcp_state::tcp_option::option_kind::tcp::tcb
 connected_socket	core/reactor.hh	/^    connected_socket() {};$/;"	f	class:connected_socket
 connected_socket	core/reactor.hh	/^    explicit connected_socket(std::unique_ptr<connected_socket_impl> csi)$/;"	f	class:connected_socket
 connected_socket	core/reactor.hh	/^class connected_socket {$/;"	c
 connected_socket_impl	core/reactor.hh	/^class connected_socket_impl {$/;"	c
-connection	apps/imdb/event_port.hh	/^  connection(connected_socket&& fd, socket_address addr)$/;"	f	struct:kj::connection
-connection	apps/imdb/event_port.hh	/^struct connection {$/;"	s	namespace:kj
 connection	apps/imdb/vmts-rpc.cc	/^  kj::Own<kj::UvIoStream> connection;$/;"	m	struct:capnp::SeastarServer::AcceptedConnection	file:
+connection	apps/imdb/vmts-rpc.hh	/^  connection(connected_socket&& fd, socket_address addr)$/;"	f	struct:kj::connection
+connection	apps/imdb/vmts-rpc.hh	/^struct connection {$/;"	s	namespace:kj
 connection	apps/memcached/memcache.cc	/^        connection(connected_socket&& socket, socket_address addr, sharded_cache& c, distributed<system_stats>& system_stats)$/;"	f	struct:memcache::tcp_server::connection
 connection	apps/memcached/memcache.cc	/^        connection(ipv4_addr src, uint16_t request_id, input_stream<char>&& in, size_t out_size,$/;"	f	struct:memcache::udp_server::connection
 connection	apps/memcached/memcache.cc	/^    struct connection {$/;"	s	class:memcache::tcp_server	file:
@@ -2006,29 +1969,27 @@ const_iterator	core/circular_buffer.hh	/^    typedef cbiterator<const circular_b
 const_mark_type	core/scollectd.cc	/^        typedef buffer_type::const_iterator const_mark_type;$/;"	t	struct:scollectd::impl::cpwriter	file:
 const_pointer_cast	core/shared_ptr.hh	/^const_pointer_cast(const shared_ptr<U>& p) {$/;"	f
 const_req	http/handlers.hh	/^typedef const httpd::request& const_req;$/;"	t	namespace:httpd
-consumable	apps/imdb/event_port.hh	/^  inline size_t consumable() {$/;"	f	struct:kj::ZeroCopyScratchspace
+consumable	apps/imdb/vmts-rpc.hh	/^  inline size_t consumable() {$/;"	f	struct:kj::ZeroCopyScratchspace
 consume	apps/imdb/kj_iostream-impl.hh	/^kj_input_stream<CharType>::consume(Consumer& consumer) {$/;"	f	class:kj_input_stream
 consume	core/iostream-impl.hh	/^input_stream<CharType>::consume(Consumer& consumer) {$/;"	f	class:input_stream
 consume	core/queue.hh	/^bool queue<T>::consume(Func&& func) {$/;"	f	class:queue
 consume_optional	json/argparse.py	/^        def consume_optional(start_index):$/;"	f	function:ArgumentParser._parse_known_args
 consume_positionals	json/argparse.py	/^        def consume_positionals(start_index):$/;"	f	function:ArgumentParser._parse_known_args
-consumed	apps/imdb/event_port.hh	/^  inline void consumed(size_t cnt) {$/;"	f	struct:kj::ZeroCopyScratchspace
-consuming	apps/imdb/event_port.hh	/^  inline kj::ArrayPtr<capnp::word> consuming(size_t cnt) {$/;"	f	struct:kj::ZeroCopyScratchspace
+consumed	apps/imdb/vmts-rpc.hh	/^  inline void consumed(size_t cnt) {$/;"	f	struct:kj::ZeroCopyScratchspace
+consuming	apps/imdb/vmts-rpc.hh	/^  inline kj::Array<char> consuming(size_t cnt) {$/;"	f	struct:kj::ZeroCopyScratchspace
 content	http/request.hh	/^    sstring content;$/;"	m	struct:httpd::request
 content_length	http/request.hh	/^    size_t content_length = 0;$/;"	m	struct:httpd::request
 content_replace	http/transformers.hh	/^    explicit content_replace(const sstring& extension = "")$/;"	f	class:httpd::content_replace
 content_replace	http/transformers.hh	/^class content_replace : public file_transformer {$/;"	c	namespace:httpd
 content_type_class	http/request.hh	/^    ctclass content_type_class;$/;"	m	struct:httpd::request
 contents	core/sstring.hh	/^    union contents {$/;"	u	class:basic_sstring
-context	apps/imdb/vmts-rpc.cc	/^  kj::Own<VmtsRpcContext> context;$/;"	m	struct:capnp::VmtsRpcClient::Impl	file:
-context	apps/imdb/vmts-rpc.cc	/^  kj::Own<VmtsRpcContext> context;$/;"	m	struct:capnp::final	file:
 context_switch_tester	tests/thread_context_switch.cc	/^class context_switch_tester {$/;"	c	file:
 continuation	core/future.hh	/^    continuation(Func&& func) : _func(std::move(func)) {}$/;"	f	struct:final
 continuation	core/future.hh	/^    continuation(Func&& func, future_state<T...>&& state) : _state(std::move(state)), _func(std::move(func)) {}$/;"	f	struct:final
 convert	core/scollectd.hh	/^    typename std::enable_if<std::is_floating_point<V>::value, uint64_t>::type convert($/;"	f	class:scollectd::value
 convert	core/scollectd.hh	/^    typename std::enable_if<std::is_integral<V>::value, uint64_t>::type convert($/;"	f	class:scollectd::value
 convert_arg_line_to_args	json/argparse.py	/^    def convert_arg_line_to_args(self, arg_line):$/;"	m	class:ArgumentParser
-copy	apps/imdb/event_port.hh	/^  inline void copy(void* buffer, size_t len) {$/;"	f	struct:kj::ZeroCopyScratchspace
+copy	apps/imdb/vmts-rpc.hh	/^  inline void copy(void* buffer, size_t len) {$/;"	f	struct:kj::ZeroCopyScratchspace
 copy	net/packet.hh	/^        static std::unique_ptr<impl> copy(impl* old) {$/;"	f	struct:net::final::impl
 copy	net/packet.hh	/^        static std::unique_ptr<impl> copy(impl* old, size_t nr) {$/;"	f	struct:net::final::impl
 copy_bytes	net/net.hh	/^    uint64_t copy_bytes; \/\/ bytes that were copied on L2 level$/;"	m	struct:net::qp_stats_good
@@ -2081,6 +2042,7 @@ create	core/slab.hh	/^    Item* create(const size_t size, Args&&... args) {$/;"	
 create	net/native-stack.cc	/^    static future<std::unique_ptr<network_stack>> create(boost::program_options::variables_map opts) {$/;"	f	class:net::native_network_stack
 create	net/posix-stack.hh	/^    static future<std::unique_ptr<network_stack>> create(boost::program_options::variables_map opts) {$/;"	f	class:net::posix_ap_network_stack
 create	net/posix-stack.hh	/^    static future<std::unique_ptr<network_stack>> create(boost::program_options::variables_map opts) {$/;"	f	class:net::posix_network_stack
+createNewSegment	apps/imdb/vmts-rpc.hh	/^  void createNewSegment(size_t size) {$/;"	f	struct:kj::UvIoStream
 create_dpdk_net_device	net/dpdk.cc	/^std::unique_ptr<net::device> create_dpdk_net_device($/;"	f
 create_explicit_metric	core/scollectd.hh	/^static notify_function create_explicit_metric(const plugin_id & plugin,$/;"	f	namespace:scollectd
 create_explicit_metric	core/scollectd.hh	/^static notify_function create_explicit_metric(const type_instance_id & id,$/;"	f	namespace:scollectd
@@ -2231,8 +2193,8 @@ directory_handler	http/file_handler.hh	/^class directory_handler : public file_i
 discard	core/file.hh	/^    future<> discard(uint64_t offset, uint64_t length) {$/;"	f	class:file
 discard	core/reactor.cc	/^blockdev_file_impl::discard(uint64_t offset, uint64_t length) {$/;"	f	class:blockdev_file_impl
 discard	core/reactor.cc	/^posix_file_impl::discard(uint64_t offset, uint64_t length) {$/;"	f	class:posix_file_impl
-disconnectFulfiller	apps/imdb/event_port.hh	/^  FulfillerDisposer disconnectFulfiller;$/;"	m	class:capnp::final
-disconnectPromise	apps/imdb/event_port.hh	/^  kj::ForkedPromise<void> disconnectPromise = nullptr;$/;"	m	class:capnp::final
+disconnectFulfiller	apps/imdb/vmts-rpc.hh	/^  FulfillerDisposer disconnectFulfiller;$/;"	m	class:capnp::final
+disconnectPromise	apps/imdb/vmts-rpc.hh	/^  kj::ForkedPromise<void> disconnectPromise = nullptr;$/;"	m	class:capnp::final
 discover	net/dhcp.cc	/^net::dhcp::result_type net::dhcp::discover(const clock_type::duration & timeout) {$/;"	f	class:net::dhcp::impl::m_type::htype::opt_type::net::dhcp	file:
 dispatchCall	apps/imdb/adder.capnp.cc	/^::kj::Promise<void> Adder::Server::dispatchCall($/;"	f	class:Adder::Server
 dispatchCall	apps/imdb/hashprotocol.capnp.cc	/^::kj::Promise<void> HashProtocol::Server::dispatchCall($/;"	f	class:HashProtocol::Server
@@ -2240,6 +2202,8 @@ dispatchCallInternal	apps/imdb/adder.capnp.cc	/^::kj::Promise<void> Adder::Serve
 dispatchCallInternal	apps/imdb/hashprotocol.capnp.cc	/^::kj::Promise<void> HashProtocol::Server::dispatchCallInternal($/;"	f	class:HashProtocol::Server
 dispatch_packet	net/net.cc	/^future<> interface::dispatch_packet(packet p) {$/;"	f	class:net::interface
 disposeImpl	apps/imdb/vmts-rpc.cc	/^void SeastarNetwork::FulfillerDisposer::disposeImpl(void* pointer) const {$/;"	f	class:capnp::SeastarNetwork::FulfillerDisposer
+disposeImpl	apps/imdb/vmts-rpc.hh	/^    virtual void disposeImpl(void* firstElement, size_t elementSize, size_t elementCount,$/;"	f	class:kj::ZeroCopyScratchspace::ArrDisposer
+disposer	apps/imdb/vmts-rpc.hh	/^  kj::Maybe<ArrDisposer> disposer;$/;"	m	struct:kj::ZeroCopyScratchspace
 distributed	core/distributed.hh	/^    distributed() {}$/;"	f	class:distributed
 distributed	core/distributed.hh	/^class distributed {$/;"	c
 div_roundup	core/resource.cc	/^size_t div_roundup(size_t num, size_t denom) {$/;"	f	namespace:resource
@@ -2251,7 +2215,6 @@ dma_read_bulk	core/file.hh	/^file::dma_read_bulk(uint64_t offset, size_t range_s
 dma_read_exactly	core/file.hh	/^    dma_read_exactly(uint64_t pos, size_t len) {$/;"	f	class:file
 dma_write	core/file.hh	/^    future<size_t> dma_write(uint64_t pos, const CharType* buffer, size_t len) {$/;"	f	class:file
 dma_write	core/file.hh	/^    future<size_t> dma_write(uint64_t pos, std::vector<iovec> iov) {$/;"	f	class:file
-do_accepts	apps/imdb/main.cc	/^    kj::Promise<void> do_accepts(int which) {$/;"	f	class:tcp_server
 do_accepts	http/httpd.hh	/^    void do_accepts(int which) {$/;"	f	class:httpd::http_server
 do_accepts	tests/tcp_server.cc	/^    void do_accepts(int which) {$/;"	f	class:tcp_server
 do_accepts	tests/udp_server.cc	/^    kj::Promise<void> do_accepts() {$/;"	f	class:udp_server
@@ -2310,6 +2273,7 @@ dump	net/xenfront.hh	/^    void dump(const char *str, netif_rx_response &r) {$/;
 dump	net/xenfront.hh	/^    void dump(const char *str, netif_tx_response &r) {$/;"	f	class:xen::front_ring
 dump_arp_packets	tests/l3_test.cc	/^void dump_arp_packets(l3_protocol& proto) {$/;"	f
 dump_packet	tests/echotest.cc	/^void dump_packet(const packet& p) {$/;"	f
+dumper	apps/imdb/vmts-rpc.hh	/^  RpcDumper dumper;$/;"	m	class:capnp::final
 dup	core/posix.hh	/^    file_desc dup() const {$/;"	f	class:file_desc
 dup	tests/shared_ptr_test.cc	/^    shared_ptr<C> dup() { return shared_from_this(); }$/;"	f	class:C
 dupacks	net/tcp.hh	/^            uint16_t dupacks = 0;$/;"	m	struct:net::tcp_state::tcp_option::option_kind::tcp::tcb::send
@@ -2397,6 +2361,7 @@ evtchn	core/xen/evtchn.hh	/^class evtchn {$/;"	c	namespace:xen
 ex	core/future.hh	/^        std::exception_ptr ex;$/;"	m	union:future_state::any
 ex	rpc/rpc_impl.hh	/^    sstring ex;$/;"	m	struct:rpc::reply_payload_base
 exception	core/future.hh	/^         exception,$/;"	m	class:future_state::state
+exceptionCount	apps/imdb/hash-client.c++	/^  int exceptionCount = 0;$/;"	m	class:ErrorHandlerImpl	file:
 exceptionCount	apps/imdb/imdb-async-test.cc	/^  uint exceptionCount = 0;$/;"	m	class:ErrorHandlerImpl	file:
 exception_future_marker	core/future.hh	/^struct exception_future_marker {};$/;"	s
 exception_min	core/future.hh	/^         exception_min = 3,  \/\/ or anything greater$/;"	m	class:future_state::state
@@ -2415,8 +2380,6 @@ expiration	apps/memcached/memcache.cc	/^struct expiration {$/;"	s	namespace:memc
 expire	apps/memcached/memcache.cc	/^    void expire() {$/;"	f	class:memcache::cache	file:
 expire	core/timer-set.hh	/^    timer_list_t expire(time_point now)$/;"	f	class:seastar::timer_set
 expiry	apps/memcached/memcache.cc	/^    expiration expiry;$/;"	m	struct:memcache::item_insertion_data	file:
-exportCap	apps/imdb/vmts-rpc.cc	/^void VmtsRpcServer::exportCap(kj::StringPtr name, Capability::Client cap) {$/;"	f	class:capnp::VmtsRpcServer
-exportMap	apps/imdb/vmts-rpc.cc	/^  std::map<kj::StringPtr, ExportedCap> exportMap;$/;"	m	struct:capnp::final	file:
 extension	http/mime_types.cc	/^    const char* extension;$/;"	m	struct:httpd::mime_types::mapping	file:
 extension	http/transformers.hh	/^    sstring extension;$/;"	m	class:httpd::content_replace
 extension_to_type	http/mime_types.cc	/^const char* extension_to_type(const sstring& extension)$/;"	f	namespace:httpd::mime_types
@@ -2471,9 +2434,6 @@ file_transformer	http/file_handler.hh	/^class file_transformer {$/;"	c	namespace
 file_type	core/reactor.cc	/^reactor::file_type(sstring name) {$/;"	f	class:reactor
 fill	net/tcp.cc	/^uint8_t tcp_option::fill(tcp_hdr* th, uint8_t options_size) {$/;"	f	class:net::tcp_option
 fin_retransmit	net/tcp.hh	/^            unsigned fin_retransmit = 0;$/;"	m	struct:net::tcp_state::tcp_option::option_kind::tcp::tcb::send
-final	apps/imdb/event_port.hh	/^class SeastarNetwork final : public TwoPartyVatNetworkBase,$/;"	c	namespace:capnp
-final	apps/imdb/event_port.hh	/^class UvConnectionReceiver final: public kj::ConnectionReceiver {$/;"	c	namespace:kj
-final	apps/imdb/event_port.hh	/^class UvLowLevelAsyncIoProvider final: public kj::LowLevelAsyncIoProvider {$/;"	c	namespace:kj
 final	apps/imdb/hash-server.c++	/^class HashProtocolImpl final: public HashProtocol::Server {$/;"	c	file:
 final	apps/imdb/imdb_server.cc	/^class AdderImpl final: public Adder::Server {$/;"	c	file:
 final	apps/imdb/kj_iostream.hh	/^class kj_input_stream final {$/;"	c
@@ -2482,7 +2442,7 @@ final	apps/imdb/main.cc	/^class AdderImpl final: public Adder::Server {$/;"	c	fi
 final	apps/imdb/main.cc	/^class HashProtocolImpl final: public HashProtocol::Server {$/;"	c	file:
 final	apps/imdb/vmts-rpc.cc	/^class SeastarNetwork::IncomingMessageImpl final: public IncomingRpcMessage {$/;"	c	namespace:capnp	file:
 final	apps/imdb/vmts-rpc.cc	/^class SeastarNetwork::OutgoingMessageImpl final$/;"	c	namespace:capnp	file:
-final	apps/imdb/vmts-rpc.cc	/^struct VmtsRpcServer::Impl final: public SturdyRefRestorer<AnyPointer>,$/;"	s	namespace:capnp	file:
+final	apps/imdb/vmts-rpc.hh	/^class SeastarNetwork final : public TwoPartyVatNetworkBase,$/;"	c	namespace:capnp
 final	core/deleter.hh	/^class deleter final {$/;"	c
 final	core/deleter.hh	/^struct free_deleter_impl final : deleter::impl {$/;"	s
 final	core/deleter.hh	/^struct lambda_deleter_impl final : deleter::impl {$/;"	s
@@ -2604,6 +2564,7 @@ free_span	core/memory.cc	/^void cpu_pages::free_span(uint32_t span_start, uint32
 free_span_no_merge	core/memory.cc	/^void cpu_pages::free_span_no_merge(uint32_t span_start, uint32_t nr_pages) {$/;"	f	class:memory::cpu_pages
 free_spans	core/memory.cc	/^        page_list free_spans[nr_span_lists];  \/\/ contains spans with span_size >= 2^idx$/;"	m	union:memory::cpu_pages::pla	file:
 free_vector	tests/slab_test.cc	/^static void free_vector(slab_allocator<Item>& slab, std::vector<item *>& items) {$/;"	f	file:
+freed	apps/imdb/vmts-rpc.hh	/^  size_t freed;$/;"	m	struct:kj::ZeroCopyScratchspace
 freelist	core/memory.cc	/^    free_object* freelist;$/;"	m	struct:memory::page	file:
 frees	core/memory.hh	/^    uint64_t frees() const { return _frees; }$/;"	f	class:memory::statistics
 frees	core/slab.hh	/^        uint64_t frees;$/;"	m	struct:slab_allocator::collectd_stats
@@ -2621,7 +2582,7 @@ front	core/memory.cc	/^    page& front(page* ary) { return ary[_front]; }$/;"	f	
 front_ring	net/xenfront.hh	/^    front_ring(gntref r, xenfront_qp& dev)$/;"	f	class:xen::front_ring
 front_ring	net/xenfront.hh	/^class front_ring {$/;"	c	namespace:xen
 fsu	core/memory.cc	/^    } fsu;$/;"	m	struct:memory::cpu_pages	typeref:union:memory::cpu_pages::pla	file:
-fulfiller	apps/imdb/event_port.hh	/^    mutable kj::Own<kj::PromiseFulfiller<void>> fulfiller;$/;"	m	class:capnp::final::FulfillerDisposer
+fulfiller	apps/imdb/vmts-rpc.hh	/^    mutable kj::Own<kj::PromiseFulfiller<void>> fulfiller;$/;"	m	class:capnp::final::FulfillerDisposer
 full	core/queue.hh	/^bool queue<T>::full() const {$/;"	f	class:queue
 func	rpc/rpc.hh	/^            Func func;$/;"	m	struct:rpc::protocol::client::final
 function_handler	http/function_handlers.hh	/^    function_handler(const future_json_function& _handle)$/;"	f	class:httpd::function_handler
@@ -2673,9 +2634,6 @@ get	net/dpdk.cc	/^        tx_buf* get() {$/;"	f	class:dpdk::dpdk_qp::tx_buf_fact
 get	net/ip_checksum.cc	/^uint16_t checksummer::get() const {$/;"	f	class:net::checksummer
 get	net/posix-stack.cc	/^posix_data_source_impl::get() {$/;"	f	class:net::posix_data_source_impl
 get	tests/shared_ptr_test.cc	/^    shared_ptr<const C> get() const { return shared_from_this(); }$/;"	f	class:C
-getIoProvider	apps/imdb/vmts-rpc.cc	/^  kj::AsyncIoProvider& getIoProvider() {$/;"	f	class:capnp::VmtsRpcContext
-getIoProvider	apps/imdb/vmts-rpc.cc	/^kj::AsyncIoProvider& VmtsRpcClient::getIoProvider() {$/;"	f	class:capnp::VmtsRpcClient
-getIoProvider	apps/imdb/vmts-rpc.cc	/^kj::AsyncIoProvider& VmtsRpcServer::getIoProvider() {$/;"	f	class:capnp::VmtsRpcServer
 getItemVersion	tests/memcached/test_memcached.py	/^    def getItemVersion(self, key):$/;"	m	class:MemcacheTest
 getKey	apps/imdb/hashprotocol.capnp.hh	/^inline  ::int32_t HashProtocol::GetParams::Builder::getKey() {$/;"	f	class:HashProtocol::GetParams::Builder
 getKey	apps/imdb/hashprotocol.capnp.hh	/^inline  ::int32_t HashProtocol::GetParams::Reader::getKey() const {$/;"	f	class:HashProtocol::GetParams::Reader
@@ -2683,20 +2641,11 @@ getKey	apps/imdb/hashprotocol.capnp.hh	/^inline  ::int32_t HashProtocol::SetPara
 getKey	apps/imdb/hashprotocol.capnp.hh	/^inline  ::int32_t HashProtocol::SetParams::Reader::getKey() const {$/;"	f	class:HashProtocol::SetParams::Reader
 getLeft	apps/imdb/adder.capnp.hh	/^inline  ::int32_t Adder::AddParams::Builder::getLeft() {$/;"	f	class:Adder::AddParams::Builder
 getLeft	apps/imdb/adder.capnp.hh	/^inline  ::int32_t Adder::AddParams::Reader::getLeft() const {$/;"	f	class:Adder::AddParams::Reader
-getLowLevelIoProvider	apps/imdb/vmts-rpc.cc	/^  kj::LowLevelAsyncIoProvider& getLowLevelIoProvider() {$/;"	f	class:capnp::VmtsRpcContext
-getLowLevelIoProvider	apps/imdb/vmts-rpc.cc	/^kj::LowLevelAsyncIoProvider& VmtsRpcClient::getLowLevelIoProvider() {$/;"	f	class:capnp::VmtsRpcClient
-getLowLevelIoProvider	apps/imdb/vmts-rpc.cc	/^kj::LowLevelAsyncIoProvider& VmtsRpcServer::getLowLevelIoProvider() {$/;"	f	class:capnp::VmtsRpcServer
-getMain	apps/imdb/vmts-rpc.cc	/^    Capability::Client getMain() {$/;"	f	struct:capnp::VmtsRpcClient::Impl::ClientContext
-getMain	apps/imdb/vmts-rpc.cc	/^Capability::Client VmtsRpcClient::getMain() {$/;"	f	class:capnp::VmtsRpcClient
-getMain	apps/imdb/vmts-rpc.hh	/^inline typename Type::Client VmtsRpcClient::getMain() {$/;"	f	class:capnp::VmtsRpcClient
 getPeerVatId	apps/imdb/vmts-rpc.cc	/^rpc::twoparty::VatId::Reader SeastarNetwork::getPeerVatId() {$/;"	f	class:capnp::SeastarNetwork
-getPort	apps/imdb/vmts-rpc.cc	/^kj::Promise<uint> VmtsRpcServer::getPort() {$/;"	f	class:capnp::VmtsRpcServer
 getRequest	apps/imdb/hashprotocol.capnp.cc	/^HashProtocol::Client::getRequest(::kj::Maybe< ::capnp::MessageSize> sizeHint) {$/;"	f	class:HashProtocol::Client
 getRight	apps/imdb/adder.capnp.hh	/^inline  ::int32_t Adder::AddParams::Builder::getRight() {$/;"	f	class:Adder::AddParams::Builder
 getRight	apps/imdb/adder.capnp.hh	/^inline  ::int32_t Adder::AddParams::Reader::getRight() const {$/;"	f	class:Adder::AddParams::Reader
 getStat	tests/memcached/test_memcached.py	/^    def getStat(self, name, call_fn=None):$/;"	m	class:MemcacheTest
-getThreadLocal	apps/imdb/vmts-rpc.cc	/^  static kj::Own<VmtsRpcContext> getThreadLocal() {$/;"	f	class:capnp::VmtsRpcContext
-getThreadLocal	apps/imdb/vmts-rpc.cc	/^  static kj::Own<VmtsRpcContext> getThreadLocal(lw_shared_ptr<kj::connection>& _conn,kj::WaitScope& _waitScope) {$/;"	f	class:capnp::VmtsRpcContext
 getValue	apps/imdb/adder.capnp.hh	/^inline  ::int32_t Adder::AddResults::Builder::getValue() {$/;"	f	class:Adder::AddResults::Builder
 getValue	apps/imdb/adder.capnp.hh	/^inline  ::int32_t Adder::AddResults::Reader::getValue() const {$/;"	f	class:Adder::AddResults::Reader
 getValue	apps/imdb/hashprotocol.capnp.hh	/^inline  ::capnp::Void HashProtocol::SetResults::Builder::getValue() {$/;"	f	class:HashProtocol::SetResults::Builder
@@ -2705,9 +2654,6 @@ getValue	apps/imdb/hashprotocol.capnp.hh	/^inline  ::int32_t HashProtocol::GetRe
 getValue	apps/imdb/hashprotocol.capnp.hh	/^inline  ::int32_t HashProtocol::GetResults::Reader::getValue() const {$/;"	f	class:HashProtocol::GetResults::Reader
 getValue	apps/imdb/hashprotocol.capnp.hh	/^inline  ::int32_t HashProtocol::SetParams::Builder::getValue() {$/;"	f	class:HashProtocol::SetParams::Builder
 getValue	apps/imdb/hashprotocol.capnp.hh	/^inline  ::int32_t HashProtocol::SetParams::Reader::getValue() const {$/;"	f	class:HashProtocol::SetParams::Reader
-getWaitScope	apps/imdb/vmts-rpc.cc	/^  kj::WaitScope& getWaitScope() {$/;"	f	class:capnp::VmtsRpcContext
-getWaitScope	apps/imdb/vmts-rpc.cc	/^kj::WaitScope& VmtsRpcClient::getWaitScope() {$/;"	f	class:capnp::VmtsRpcClient
-getWaitScope	apps/imdb/vmts-rpc.cc	/^kj::WaitScope& VmtsRpcServer::getWaitScope() {$/;"	f	class:capnp::VmtsRpcServer
 get_address	core/posix.hh	/^    socket_address get_address() {$/;"	f	class:file_desc
 get_assembled_packet	net/ip.cc	/^packet ipv4::frag::get_assembled_packet(ethernet_address from, ethernet_address to) {$/;"	f	class:net::ipv4::frag
 get_base_name	json/json2code.py	/^def get_base_name(param):$/;"	f
@@ -2825,7 +2771,6 @@ handle	http/file_handler.cc	/^future<std::unique_ptr<reply>> directory_handler::
 handle	http/file_handler.cc	/^future<std::unique_ptr<reply>> file_handler::handle(const sstring& path,$/;"	f	class:httpd::file_handler
 handle	http/routes.cc	/^future<std::unique_ptr<reply> > routes::handle(const sstring& path, std::unique_ptr<request> req, std::unique_ptr<reply> rep) {$/;"	f	class:httpd::routes
 handle	tests/httpd.cc	/^    virtual future<std::unique_ptr<reply> > handle(const sstring& path,$/;"	f	class:handl
-handleLoop	apps/imdb/vmts-rpc.cc	/^  void handleLoop(lw_shared_ptr<kj::connection>& conn, ReaderOptions readerOpts){    $/;"	f	struct:capnp::final
 handle_function	http/function_handlers.hh	/^typedef std::function<sstring(const_req req, reply&)> handle_function;$/;"	t	namespace:httpd
 handle_get	apps/memcached/memcache.cc	/^    future<> handle_get(output_stream<char>& out) {$/;"	f	class:memcache::ascii_protocol	file:
 handle_received_packet	net/ip.cc	/^ipv4::handle_received_packet(packet p, ethernet_address from) {$/;"	f	class:net::ipv4
@@ -2964,8 +2909,6 @@ idx_frac_bits	core/memory.cc	/^    static constexpr unsigned idx_frac_bits = 2;$
 idx_to_size	core/memory.cc	/^small_pool::idx_to_size(unsigned idx) {$/;"	f	class:memory::small_pool
 ihl	net/ip.hh	/^    uint8_t ihl : 4;$/;"	m	struct:net::ip_hdr
 impl	apps/imdb/kj_iostream.hh	/^    kj_data_source_impl* impl() const { return _dsi.get(); }$/;"	f	class:kj_data_source
-impl	apps/imdb/vmts-rpc.hh	/^  kj::Own<Impl> impl;$/;"	m	class:capnp::VmtsRpcClient
-impl	apps/imdb/vmts-rpc.hh	/^  kj::Own<Impl> impl;$/;"	m	class:capnp::VmtsRpcServer
 impl	core/circular_buffer.hh	/^    struct impl : Alloc {$/;"	s	class:circular_buffer
 impl	core/deleter.hh	/^    impl(deleter next) : next(std::move(next)) {}$/;"	f	struct:deleter::impl
 impl	core/deleter.hh	/^struct deleter::impl {$/;"	s	class:deleter
@@ -2976,8 +2919,6 @@ impl	net/dhcp.cc	/^class net::dhcp::impl : public ip_packet_filter {$/;"	c	class
 impl	net/packet.hh	/^    struct impl {$/;"	s	class:net::final
 impl	net/packet.hh	/^packet::impl::impl(fragment frag, size_t nr_frags)$/;"	f	class:net::packet::impl
 impl	net/packet.hh	/^packet::impl::impl(size_t nr_frags)$/;"	f	class:net::packet::impl
-importCap	apps/imdb/vmts-rpc.cc	/^Capability::Client VmtsRpcClient::importCap(kj::StringPtr name) {$/;"	f	class:capnp::VmtsRpcClient
-importCap	apps/imdb/vmts-rpc.hh	/^inline typename Type::Client VmtsRpcClient::importCap(kj::StringPtr name) {$/;"	f	class:capnp::VmtsRpcClient
 in	net/api.hh	/^        ::sockaddr_in in;$/;"	m	union:socket_address::__anon8
 in	rpc/rpc.hh	/^        auto& in() { return _read_buf; }$/;"	f	class:rpc::protocol::connection
 in	tests/fstream_test.cc	/^    input_stream<char> in;$/;"	m	struct:reader	file:
@@ -3063,7 +3004,6 @@ invoke_on	core/distributed.hh	/^    invoke_on(unsigned id, Ret (Service::*func)(
 invoke_on	core/distributed.hh	/^    void invoke_on(unsigned id, void (Service::*func)(FuncArgs...), Args&&... args) {$/;"	f	class:distributed
 invoke_on_all	core/distributed.hh	/^distributed<Service>::invoke_on_all(Func&& func) {$/;"	f	class:distributed
 invoke_on_all	core/distributed.hh	/^distributed<Service>::invoke_on_all(void (Service::*func)(Args...), Args... args) {$/;"	f	class:distributed
-ioContext	apps/imdb/vmts-rpc.cc	/^  kj::Own<kj::AsyncIoProvider> ioContext;$/;"	m	class:capnp::VmtsRpcContext	file:
 ioctl	core/posix.hh	/^    int ioctl(int request) {$/;"	f	class:file_desc
 ioctl	core/posix.hh	/^    int ioctl(int request, X& data) {$/;"	f	class:file_desc
 ioctl	core/posix.hh	/^    int ioctl(int request, X&& data) {$/;"	f	class:file_desc
@@ -3201,8 +3141,7 @@ kind	net/tcp.hh	/^        option_kind kind = option_kind::nop;$/;"	m	struct:net:
 kind	net/tcp.hh	/^        option_kind kind = option_kind::sack;$/;"	m	struct:net::tcp_state::tcp_option::option_kind::option_len::sack
 kind	net/tcp.hh	/^        option_kind kind = option_kind::timestamps;$/;"	m	struct:net::tcp_state::tcp_option::option_kind::option_len::timestamps
 kind	net/tcp.hh	/^        option_kind kind = option_kind::win_scale;$/;"	m	struct:net::tcp_state::tcp_option::option_kind::option_len::win_scale
-kj	apps/imdb/event_port.hh	/^namespace kj { \/\/ so we get warnings if anything declared in this file is left undefined...$/;"	n
-kj	apps/imdb/vmts-rpc.hh	/^namespace kj { class AsyncIoProvider; class LowLevelAsyncIoProvider;}$/;"	n
+kj	apps/imdb/vmts-rpc.hh	/^namespace kj {$/;"	n
 kj__all_data_acked_promise	net/tcp.hh	/^            Fulfiller kj__all_data_acked_promise;$/;"	m	struct:net::tcp_state::tcp_option::option_kind::tcp::tcb::send
 kj__data_received_promise	net/tcp.hh	/^            Fulfiller kj__data_received_promise;$/;"	m	struct:net::tcp_state::tcp_option::option_kind::tcp::tcb::receive
 kj__window_opened	net/tcp.hh	/^            Fulfiller kj__window_opened;$/;"	m	struct:net::tcp_state::tcp_option::option_kind::tcp::tcb::send
@@ -3395,7 +3334,6 @@ link_ready	net/net.hh	/^    virtual future<> link_ready() { return make_ready_fu
 list	core/reactor.cc	/^std::vector<sstring> network_stack_registry::list() {$/;"	f	class:network_stack_registry
 list_directory	core/file.hh	/^    subscription<directory_entry> list_directory(std::function<future<> (directory_entry de)> next) {$/;"	f	class:file
 list_directory	core/reactor.cc	/^posix_file_impl::list_directory(std::function<future<> (directory_entry de)> next) {$/;"	f	class:posix_file_impl
-listen	apps/imdb/main.cc	/^    future<> listen(ipv4_addr addr) {$/;"	f	class:tcp_server
 listen	apps/imdb/vmts-rpc.cc	/^kj::Promise<void> SeastarServer::listen(ipv4_addr addr) {$/;"	f	class:capnp::SeastarServer
 listen	core/posix.hh	/^    void listen(int backlog) {$/;"	f	class:file_desc
 listen	core/reactor.cc	/^reactor::listen(socket_address sa, listen_options opt) {$/;"	f	class:reactor
@@ -3412,7 +3350,6 @@ listen	tests/tcp_server.cc	/^    future<> listen(ipv4_addr addr) {$/;"	f	class:t
 listen_options	net/api.hh	/^struct listen_options {$/;"	s
 listener	tests/test-reactor.cc	/^    pollable_fd listener;$/;"	m	struct:test	file:
 live_objects	core/memory.hh	/^    size_t live_objects() const { return mallocs() - frees(); }$/;"	f	class:memory::statistics
-llaiop	apps/imdb/vmts-rpc.cc	/^  kj::UvLowLevelAsyncIoProvider llaiop;$/;"	m	class:capnp::VmtsRpcContext	file:
 load_factor	apps/memcached/memcache.cc	/^    static constexpr float load_factor = 0.75f;$/;"	m	class:memcache::cache	file:
 loader	tests/memcached/test_memcached.py	/^    loader = unittest.TestLoader()$/;"	v
 local	core/distributed.hh	/^Service& distributed<Service>::local() {$/;"	f	class:distributed
@@ -3483,7 +3420,6 @@ main	tests/udp_server.cc	/^int main(int ac, char ** av) {$/;"	f
 main	tests/udp_zero_copy.cc	/^int main(int ac, char ** av) {$/;"	f
 main1	tests/thread_context_switch.cc	/^    void main1() {$/;"	f	class:context_switch_tester	file:
 main2	tests/thread_context_switch.cc	/^    void main2() {$/;"	f	class:context_switch_tester	file:
-mainInterface	apps/imdb/vmts-rpc.cc	/^  Capability::Client mainInterface;$/;"	m	struct:capnp::final	file:
 main_thread	core/reactor.hh	/^    static bool main_thread() { return std::this_thread::get_id() == _tmain; }$/;"	f	class:smp
 make	core/shared_ptr.hh	/^    static shared_ptr<T> make(A&&... a) {$/;"	f	struct:shared_ptr_make_helper
 makeChain	apps/imdb/imdb-async-test.cc	/^Promise<void> makeChain(uint i) {$/;"	f
@@ -3574,7 +3510,7 @@ match	http/matcher.cc	/^size_t str_matcher::match(const sstring& url, size_t ind
 match_rule	http/matchrules.hh	/^    explicit match_rule(handler_base* handler)$/;"	f	class:httpd::match_rule
 match_rule	http/matchrules.hh	/^class match_rule {$/;"	c	namespace:httpd
 matcher	http/matcher.hh	/^class matcher {$/;"	c	namespace:httpd
-maxReadable	apps/imdb/event_port.hh	/^  inline size_t maxReadable() {$/;"	f	struct:kj::ZeroCopyScratchspace
+maxReadable	apps/imdb/vmts-rpc.hh	/^  inline size_t maxReadable() {$/;"	f	struct:kj::ZeroCopyScratchspace
 max_aio	core/reactor.hh	/^    static constexpr size_t max_aio = 128;$/;"	m	class:reactor
 max_count	core/app-template.hh	/^        int max_count;$/;"	m	struct:app_template::positional_option
 max_cpus	core/memory.cc	/^static constexpr unsigned max_cpus = 256;$/;"	m	namespace:memory	file:
@@ -3684,7 +3620,6 @@ mymap	apps/imdb/hash-server.c++	/^	std::map<int,int> mymap;$/;"	m	class:final	fi
 mymap	apps/imdb/main.cc	/^    std::map<int, int> mymap;$/;"	m	class:final	file:
 n	tests/allocator_test.cc	/^    size_t n;$/;"	m	struct:allocation	file:
 n_buckets	core/timer-set.hh	/^    static constexpr int n_buckets = timestamp_bits + 1;$/;"	m	class:seastar::timer_set
-name	apps/imdb/vmts-rpc.cc	/^    kj::String name;$/;"	m	struct:capnp::final::ExportedCap	file:
 name	core/app-template.hh	/^        const char* name;$/;"	m	struct:app_template::positional_option
 name	core/file.hh	/^    sstring name;$/;"	m	struct:directory_entry
 name_servers	net/dhcp.hh	/^        std::vector<ipv4_address> name_servers;$/;"	m	struct:net::dhcp::lease
@@ -3748,8 +3683,6 @@ netif_tx_request	net/xenfront.hh	/^struct netif_tx_request {$/;"	s	namespace:xen
 netif_tx_response	net/xenfront.hh	/^struct netif_tx_response {$/;"	s	namespace:xen
 netmask	net/dhcp.hh	/^        ipv4_address netmask;$/;"	m	struct:net::dhcp::lease
 netmask_address	net/ip.cc	/^ipv4_address ipv4::netmask_address() const {$/;"	f	class:net::ipv4
-network	apps/imdb/vmts-rpc.cc	/^    SeastarNetwork network;$/;"	m	struct:capnp::final::ServerContext	file:
-network	apps/imdb/vmts-rpc.cc	/^    TwoPartyVatNetwork network;$/;"	m	struct:capnp::VmtsRpcClient::Impl::ClientContext	file:
 network	apps/imdb/vmts-rpc.cc	/^  SeastarNetwork network;$/;"	m	struct:capnp::SeastarServer::AcceptedConnection	file:
 network	apps/imdb/vmts-rpc.cc	/^  SeastarNetwork& network;$/;"	m	class:capnp::final	file:
 network_stack	core/reactor.hh	/^class network_stack {$/;"	c
@@ -3782,11 +3715,8 @@ no_notify	net/virtio.cc	/^            no_notify = 1$/;"	e	enum:virtio::vring::us
 no_wait	rpc/rpc.cc	/^  no_wait_type no_wait;$/;"	m	namespace:rpc	file:
 no_wait_type	rpc/rpc.hh	/^struct no_wait_type {};$/;"	s	namespace:rpc
 nodeid	core/resource.hh	/^    unsigned nodeid;$/;"	m	struct:resource::memory
-noexcept	apps/imdb/event_port.hh	/^  virtual ~UvIoStream() noexcept(false) {}$/;"	f	class:kj::UvIoStream
-noexcept	apps/imdb/vmts-rpc.cc	/^  ~SeastarAsyncMessageReader() noexcept(false) {}$/;"	f	class:capnp::SeastarAsyncMessageReader
-noexcept	apps/imdb/vmts-rpc.cc	/^  ~VmtsRpcContext() noexcept(false) {$/;"	f	class:capnp::VmtsRpcContext
-noexcept	apps/imdb/vmts-rpc.cc	/^VmtsRpcClient::~VmtsRpcClient() noexcept(false) {}$/;"	f	namespace:capnp
-noexcept	apps/imdb/vmts-rpc.cc	/^VmtsRpcServer::~VmtsRpcServer() noexcept(false) {$/;"	f	namespace:capnp
+noexcept	apps/imdb/vmts-rpc.cc	/^  ~SeastarAsyncMessageReader() noexcept(false) {$/;"	f	class:capnp::SeastarAsyncMessageReader
+noexcept	apps/imdb/vmts-rpc.hh	/^  ~UvIoStream() noexcept(false) {$/;"	f	struct:kj::UvIoStream
 noexcept	core/file.hh	/^    file& operator=(file&& x) noexcept = default;$/;"	m	class:file
 noexcept	core/future.hh	/^    friend future<U...> make_exception_future(Exception&& ex) noexcept;$/;"	m	class:future
 noexcept	core/future.hh	/^    friend future<U...> make_exception_future(std::exception_ptr ex) noexcept;$/;"	m	class:future
@@ -3900,7 +3830,7 @@ offset_in_span	core/memory.cc	/^    uint8_t offset_in_span;$/;"	m	struct:memory:
 offset_shift	net/ip.hh	/^    enum class frag_bits : uint8_t { mf = 13, df = 14, reserved = 15, offset_shift = 3 };$/;"	m	class:net::ip_hdr::frag_bits
 ok	http/reply.cc	/^const sstring ok = " 200 OK\\r\\n";$/;"	m	namespace:httpd::status_strings	file:
 ok	http/reply.hh	/^        ok = 200, \/\/!< ok$/;"	m	class:httpd::reply::status_type
-onDisconnect	apps/imdb/event_port.hh	/^kj::Promise<void> onDisconnect() { return disconnectPromise.addBranch(); }$/;"	f	class:capnp::final
+onDisconnect	apps/imdb/vmts-rpc.hh	/^  kj::Promise<void> onDisconnect() { return disconnectPromise.addBranch(); }$/;"	f	class:capnp::final
 on_delete	core/scattered_message.hh	/^    void on_delete(Callback callback) {$/;"	f	class:scattered_message
 on_dhcp	net/native-stack.cc	/^void native_network_stack::on_dhcp(bool success, const dhcp::lease & res, bool is_renew) {$/;"	f	class:net::native_network_stack
 on_origin	core/distributed.hh	/^    bool on_origin() {$/;"	f	class:foreign_ptr
@@ -4162,15 +4092,15 @@ output_one	net/tcp.hh	/^void tcp<InetTraits>::tcb::output_one(bool data_retransm
 output_stream	core/iostream.hh	/^    output_stream(data_sink fd, size_t size, bool trim_to_size = false)$/;"	f	class:final
 overflow	core/scollectd.cc	/^        bool overflow() const {$/;"	f	struct:scollectd::impl::cpwriter
 override	apps/imdb/adder.capnp.hh	/^      override;$/;"	m	class:Adder::Server
-override	apps/imdb/event_port.hh	/^      rpc::twoparty::VatId::Reader ref) override;$/;"	m	class:capnp::final
-override	apps/imdb/event_port.hh	/^    void disposeImpl(void* pointer) const override;$/;"	m	class:capnp::final::FulfillerDisposer
-override	apps/imdb/event_port.hh	/^  kj::Own<OutgoingRpcMessage> newOutgoingMessage(uint firstSegmentWordSize) override;$/;"	m	class:capnp::final
-override	apps/imdb/event_port.hh	/^  kj::Promise<kj::Maybe<kj::Own<IncomingRpcMessage>>> receiveIncomingMessage() override;$/;"	m	class:capnp::final
-override	apps/imdb/event_port.hh	/^  kj::Promise<kj::Own<TwoPartyVatNetworkBase::Connection>> accept() override;$/;"	m	class:capnp::final
-override	apps/imdb/event_port.hh	/^  kj::Promise<void> shutdown() override;$/;"	m	class:capnp::final
-override	apps/imdb/event_port.hh	/^  rpc::twoparty::VatId::Reader getPeerVatId() override;$/;"	m	class:capnp::final
-override	apps/imdb/event_port.hh	/^  void taskFailed(kj::Exception&& exception) override;$/;"	m	class:capnp::SeastarServer
 override	apps/imdb/hashprotocol.capnp.hh	/^      override;$/;"	m	class:HashProtocol::Server
+override	apps/imdb/vmts-rpc.hh	/^        rpc::twoparty::VatId::Reader ref) override;$/;"	m	class:capnp::final
+override	apps/imdb/vmts-rpc.hh	/^    void disposeImpl(void* pointer) const override;$/;"	m	class:capnp::final::FulfillerDisposer
+override	apps/imdb/vmts-rpc.hh	/^  kj::Own<OutgoingRpcMessage> newOutgoingMessage(uint firstSegmentWordSize) override;$/;"	m	class:capnp::final
+override	apps/imdb/vmts-rpc.hh	/^  kj::Promise<kj::Maybe<kj::Own<IncomingRpcMessage>>> receiveIncomingMessage() override;$/;"	m	class:capnp::final
+override	apps/imdb/vmts-rpc.hh	/^  kj::Promise<kj::Own<TwoPartyVatNetworkBase::Connection>> accept() override;$/;"	m	class:capnp::final
+override	apps/imdb/vmts-rpc.hh	/^  kj::Promise<void> shutdown() override;$/;"	m	class:capnp::final
+override	apps/imdb/vmts-rpc.hh	/^  rpc::twoparty::VatId::Reader getPeerVatId() override;$/;"	m	class:capnp::final
+override	apps/imdb/vmts-rpc.hh	/^  void taskFailed(kj::Exception&& exception) override;$/;"	m	class:capnp::SeastarServer
 override	core/file.hh	/^    future<> discard(uint64_t offset, uint64_t length) override;$/;"	m	class:blockdev_file_impl
 override	core/file.hh	/^    future<> truncate(uint64_t length) override;$/;"	m	class:blockdev_file_impl
 override	core/file.hh	/^    future<size_t> size(void) override;$/;"	m	class:blockdev_file_impl
@@ -4262,6 +4192,7 @@ override	net/xenfront.cc	/^    virtual future<> send(packet p) override;$/;"	m	c
 override	net/xenfront.cc	/^    virtual std::unique_ptr<qp> init_local_queue(boost::program_options::variables_map opts, uint16_t qid) override;$/;"	m	class:xen::xenfront_device	file:
 override	net/xenfront.cc	/^    virtual void rx_start() override;$/;"	m	class:xen::xenfront_qp	file:
 ownedSpace	apps/imdb/vmts-rpc.cc	/^  kj::Array<word> ownedSpace;$/;"	m	class:capnp::SeastarAsyncMessageReader	file:
+ownership	apps/imdb/vmts-rpc.cc	/^  bool ownership = false;$/;"	m	class:capnp::SeastarAsyncMessageReader	file:
 p	net/ip.hh	/^        packet p;$/;"	m	struct:net::ipv4_traits::l4packet
 p	net/net.hh	/^        packet p;$/;"	m	struct:net::l3_protocol::l3packet
 p	net/tcp.hh	/^            packet p;$/;"	m	struct:net::tcp_state::tcp_option::option_kind::tcp::tcb::unacked_segment
@@ -4313,6 +4244,7 @@ param_matcher	http/matcher.hh	/^class param_matcher : public matcher {$/;"	c	nam
 parameters	http/common.hh	/^class parameters {$/;"	c	namespace:httpd
 params	http/common.hh	/^    std::unordered_map<sstring, sstring> params;$/;"	m	class:httpd::parameters
 params	http/json_path.hh	/^    std::vector<std::pair<sstring, bool>> params;$/;"	m	struct:httpd::path_description
+parent	apps/imdb/vmts-rpc.hh	/^    kj::Maybe<ZeroCopyScratchspace&> parent;$/;"	m	class:kj::ZeroCopyScratchspace::ArrDisposer
 parse	net/tcp.cc	/^void tcp_option::parse(uint8_t* beg, uint8_t* end) {$/;"	f	class:net::tcp_option
 parse	tests/memcached/test_ascii_parser.cc	/^static auto parse(packet&& p) {$/;"	f	file:
 parse_args	json/argparse.py	/^    def parse_args(self, args=None, namespace=None):$/;"	m	class:ArgumentParser
@@ -4337,7 +4269,7 @@ pause_xoff	net/dpdk.cc	/^            uint64_t pause_xoff;  \/\/ number of sent P
 pause_xon	net/dpdk.cc	/^            uint64_t pause_xon;    \/\/ number of received PAUSE XON frames$/;"	m	struct:dpdk::port_stats::__anon9::__anon10	file:
 pause_xon	net/dpdk.cc	/^            uint64_t pause_xon;   \/\/ number of sent PAUSE XON frames$/;"	m	struct:dpdk::port_stats::__anon12::__anon13	file:
 payload_size	core/scollectd.cc	/^    static const size_t payload_size = 1024;$/;"	m	class:scollectd::impl	file:
-peerVatId	apps/imdb/event_port.hh	/^  MallocMessageBuilder peerVatId;$/;"	m	class:capnp::final
+peerVatId	apps/imdb/vmts-rpc.hh	/^  MallocMessageBuilder peerVatId;$/;"	m	class:capnp::final
 pending	core/xen/evtchn.cc	/^future<> port::pending() {$/;"	f	class:xen::port
 pending	rpc/rpc.hh	/^            counter_type pending = 0;$/;"	m	struct:rpc::protocol::client::stats
 pending_fifo	core/reactor.hh	/^            std::deque<work_item*> pending_fifo;$/;"	m	struct:smp_message_queue::tx_side::aa
@@ -4381,19 +4313,18 @@ pollfn	core/reactor.hh	/^    struct pollfn {$/;"	s	class:reactor
 pollin	core/reactor.hh	/^    promise<> pollin;$/;"	m	class:pollable_fd_state
 pollout	core/reactor.hh	/^    promise<> pollout;$/;"	m	class:pollable_fd_state
 pool	core/memory.cc	/^    small_pool* pool;  \/\/ if used in a small_pool$/;"	m	struct:memory::page	file:
+pools	apps/imdb/vmts-rpc.hh	/^  std::vector< kj::Own<ZeroCopyScratchspace> > pools;$/;"	m	struct:kj::UvIoStream
 pop	core/queue.hh	/^T queue<T>::pop() {$/;"	f	class:queue
 pop_back	core/circular_buffer.hh	/^circular_buffer<T, Alloc>::pop_back() {$/;"	f	class:circular_buffer
 pop_eventually	core/queue.hh	/^future<T> queue<T>::pop_eventually() {$/;"	f	class:queue
 pop_front	core/circular_buffer.hh	/^circular_buffer<T, Alloc>::pop_front() {$/;"	f	class:circular_buffer
 pop_front	core/memory.cc	/^    void pop_front(page* ary) {$/;"	f	class:memory::page_list
-port	apps/imdb/event_port.hh	/^  uint port;$/;"	m	class:kj::final
 port	core/xen/evtchn.cc	/^port::port(int p)$/;"	f	class:xen::port
 port	core/xen/evtchn.cc	/^port::port(port&& other)$/;"	f	class:xen::port
 port	core/xen/evtchn.hh	/^class port {$/;"	c	namespace:xen
 port	net/api.hh	/^    uint16_t port;$/;"	m	struct:ipv4_addr
 port	net/dpdk.cc	/^    dpdk_device& port() const { return *_dev; }$/;"	f	class:dpdk::dpdk_qp
 port	net/ip.hh	/^        uint16_t port() const {$/;"	f	class:net::ipv4_udp::registration
-portPromise	apps/imdb/vmts-rpc.cc	/^  kj::ForkedPromise<uint> portPromise;$/;"	m	struct:capnp::final	file:
 port_deleted	core/xen/evtchn.cc	/^void evtchn::port_deleted(int prt, port* obj) {$/;"	f	class:xen::evtchn
 port_idx	net/dpdk.cc	/^    uint8_t port_idx() { return _port_idx; }$/;"	f	class:dpdk::dpdk_device
 port_moved	core/xen/evtchn.cc	/^void evtchn::port_moved(int prt, port* old, port* now) {$/;"	f	class:xen::evtchn
@@ -4463,7 +4394,7 @@ prepare_insertion	apps/memcached/memcache.cc	/^    void prepare_insertion() {$/;
 prepend_header	net/packet.hh	/^packet::prepend_header(size_t extra_size) {$/;"	f	class:net::packet
 prepend_uninitialized_header	net/packet.hh	/^char* packet::prepend_uninitialized_header(size_t size) {$/;"	f	class:net::packet
 prepush	core/ragel.hh	/^    void prepush() {$/;"	f	class:ragel_parser_base
-previousWrite	apps/imdb/event_port.hh	/^  kj::Maybe<kj::Promise<void>> previousWrite;$/;"	m	class:capnp::final
+previousWrite	apps/imdb/vmts-rpc.hh	/^  kj::Maybe<kj::Promise<void>> previousWrite;$/;"	m	class:capnp::final
 print	core/print.hh	/^print(boost::format& fmt, A&&... a) {$/;"	f
 print	core/print.hh	/^print(const char* fmt, A&&... a) {$/;"	f
 print_comment	json/json2code.py	/^def print_comment(f, *params):$/;"	f
@@ -4592,10 +4523,10 @@ reactor_notifier	core/reactor.hh	/^class reactor_notifier {$/;"	c
 reactor_notifier_epoll	core/reactor.cc	/^    reactor_notifier_epoll()$/;"	f	class:reactor_notifier_epoll
 reactor_notifier_epoll	core/reactor.cc	/^class reactor_notifier_epoll : public reactor_notifier {$/;"	c	file:
 reactor_notifier_osv	core/reactor.cc	/^class reactor_notifier_osv :$/;"	c	file:
-read	apps/imdb/event_port.hh	/^  Promise<void> read(void* buffer, size_t bytes) {$/;"	f	class:kj::UvIoStream
-read	apps/imdb/event_port.hh	/^  inline void read(size_t cnt) {$/;"	f	struct:kj::ZeroCopyScratchspace
-read	apps/imdb/event_port.hh	/^  kj::Promise<size_t> read() {$/;"	f	class:kj::UvIoStream
-read	apps/imdb/vmts-rpc.cc	/^kj::Promise<bool> SeastarAsyncMessageReader::read() {$/;"	f	class:capnp::SeastarAsyncMessageReader
+read	apps/imdb/vmts-rpc.cc	/^kj::Promise<bool> SeastarAsyncMessageReader::read() {  $/;"	f	class:capnp::SeastarAsyncMessageReader
+read	apps/imdb/vmts-rpc.hh	/^  Promise<void> read(void* buffer, size_t bytes) {  $/;"	f	struct:kj::UvIoStream
+read	apps/imdb/vmts-rpc.hh	/^  inline void read(size_t cnt) {$/;"	f	struct:kj::ZeroCopyScratchspace
+read	apps/imdb/vmts-rpc.hh	/^  kj::Promise<size_t> read(size_t minBytes) {$/;"	f	struct:kj::UvIoStream
 read	core/posix.hh	/^    boost::optional<size_t> read(void* buffer, size_t len) {$/;"	f	class:file_desc
 read	core/xen/xenstore.cc	/^std::string xenstore::read(std::string path, xenstore_transaction &t)$/;"	f	class:xenstore
 read	core/xen/xenstore.hh	/^    T read(std::string path, xenstore_transaction &t = _xs_null) { return boost::lexical_cast<T>(read(path, t)); }$/;"	f	class:xenstore
@@ -4604,7 +4535,7 @@ read	http/httpd.hh	/^        future<> read() {$/;"	f	class:httpd::http_server::c
 read	net/tcp.hh	/^packet tcp<InetTraits>::tcb::read() {$/;"	f	class:net::tcp_state::tcp_option::option_kind::tcp::tcb::tcp::tcb
 read	tests/tcp_server.cc	/^        future<> read() {$/;"	f	class:tcp_server::connection
 readAfterFirstWord	apps/imdb/vmts-rpc.cc	/^kj::Promise<void> SeastarAsyncMessageReader::readAfterFirstWord() {$/;"	f	class:capnp::SeastarAsyncMessageReader
-readCouter	apps/imdb/event_port.hh	/^  size_t readCouter = 0;$/;"	m	struct:kj::ZeroCopyScratchspace
+readCounter	apps/imdb/vmts-rpc.hh	/^  size_t readCounter;$/;"	m	struct:kj::ZeroCopyScratchspace
 readSegments	apps/imdb/vmts-rpc.cc	/^kj::Promise<void> SeastarAsyncMessageReader::readSegments() {$/;"	f	class:capnp::SeastarAsyncMessageReader
 read_dma	core/reactor.cc	/^posix_file_impl::read_dma(uint64_t pos, std::vector<iovec> iov) {$/;"	f	class:posix_file_impl
 read_dma	core/reactor.cc	/^posix_file_impl::read_dma(uint64_t pos, void* buffer, size_t len) {$/;"	f	class:posix_file_impl
@@ -4655,7 +4586,7 @@ receive	net/net.cc	/^subscription<packet, ethernet_address> l3_protocol::receive
 receive	net/posix-stack.cc	/^posix_udp_channel::receive() {$/;"	f	class:net::posix_udp_channel
 receive	net/tcp.hh	/^        struct receive {$/;"	s	class:net::tcp_state::tcp_option::option_kind::tcp::tcb
 receiveIncomingMessage	apps/imdb/vmts-rpc.cc	/^kj::Promise<kj::Maybe<kj::Own<IncomingRpcMessage>>> SeastarNetwork::receiveIncomingMessage() {$/;"	f	class:capnp::SeastarNetwork
-receiveOptions	apps/imdb/event_port.hh	/^  ReaderOptions receiveOptions;$/;"	m	class:capnp::final
+receiveOptions	apps/imdb/vmts-rpc.hh	/^  ReaderOptions receiveOptions;$/;"	m	class:capnp::final
 received	net/arp.hh	/^arp_for<L3>::received(packet p) {$/;"	f	class:net::arp_for
 received	net/ip.cc	/^void icmp::received(packet p, ipaddr from, ipaddr to) {$/;"	f	class:net::icmp
 received	net/ip.hh	/^    virtual void received(packet p, ipv4_address from, ipv4_address to) {$/;"	f	class:net::final
@@ -4688,7 +4619,7 @@ ref	net/xenfront.hh	/^    int32_t  ref = -1;$/;"	m	class:xen::front_ring
 ref_tuple	rpc/rpc_impl.hh	/^inline std::tuple<T&...> ref_tuple(std::tuple<T...>& t) {$/;"	f	namespace:rpc
 ref_tuple_impl	rpc/rpc_impl.hh	/^inline std::tuple<T&...> ref_tuple_impl(std::tuple<T...>& t, std::index_sequence<I...>) {$/;"	f	namespace:rpc
 refcnt	core/slab.hh	/^    uint32_t& refcnt() {$/;"	f	struct:slab_page_desc
-refcount	apps/imdb/event_port.hh	/^    mutable uint refcount = 0;$/;"	m	class:capnp::final::FulfillerDisposer
+refcount	apps/imdb/vmts-rpc.hh	/^    mutable uint refcount = 0;$/;"	m	class:capnp::final::FulfillerDisposer
 refill_one_cluster	net/dpdk.cc	/^inline bool dpdk_qp<HugetlbfsMemBackend>::refill_one_cluster(rte_mbuf* head)$/;"	f	class:dpdk::dpdk_qp
 refill_rx_mbuf	net/dpdk.cc	/^    static bool refill_rx_mbuf(rte_mbuf* m, size_t size = mbuf_data_size) {$/;"	f	class:dpdk::dpdk_qp	file:
 refs	core/deleter.hh	/^    unsigned refs = 1;$/;"	m	struct:deleter::impl
@@ -4722,6 +4653,7 @@ registrations	core/scollectd.hh	/^    registrations(vector_type&& v) : vector_ty
 registrations	core/scollectd.hh	/^class registrations$/;"	c	namespace:scollectd
 regs	core/reactor.cc	/^    scollectd::registrations regs;$/;"	m	struct:reactor::collectd_registrations	file:
 regular	core/file.hh	/^    regular,$/;"	m	class:directory_entry_type
+release	apps/imdb/vmts-rpc.hh	/^  inline void release(size_t amount) {$/;"	f	struct:kj::ZeroCopyScratchspace
 release	core/scattered_message.hh	/^    packet release() && {$/;"	f	class:scattered_message
 release	core/sstring.hh	/^    temporary_buffer<char_type> release() && {$/;"	f	class:basic_sstring
 release	core/temporary_buffer.hh	/^    deleter release() {$/;"	f	class:temporary_buffer
@@ -4773,13 +4705,13 @@ requested_option	net/dhcp.cc	/^    struct requested_option: public option {$/;"	
 requested_options	net/dhcp.cc	/^    static const req_opt_type requested_options;$/;"	m	class:net::dhcp::impl::m_type::htype::opt_type::msg_type	file:
 requested_options	net/dhcp.cc	/^const net::dhcp::impl::req_opt_type net::dhcp::impl::requested_options = { {$/;"	m	class:net::dhcp::impl::m_type::htype::opt_type::net::dhcp::impl	file:
 requests_served	http/httpd.hh	/^    uint64_t requests_served() const {$/;"	f	class:httpd::http_server
-reserve	apps/imdb/event_port.hh	/^  inline void reserve(size_t sz) {$/;"	f	struct:kj::ZeroCopyScratchspace
+reserve	apps/imdb/vmts-rpc.hh	/^  inline void reserve(size_t sz) {$/;"	f	struct:kj::ZeroCopyScratchspace
 reserve	core/scattered_message.hh	/^    void reserve(int n_frags) {$/;"	f	class:scattered_message
 reserve	net/packet.hh	/^    void reserve(int n_frags) {$/;"	f	class:net::final
 reserve_memory	core/resource.hh	/^    optional<size_t> reserve_memory;  \/\/ if total_memory not specified$/;"	m	struct:resource::configuration
 reserved	net/ip.hh	/^    enum class frag_bits : uint8_t { mf = 13, df = 14, reserved = 15, offset_shift = 3 };$/;"	m	class:net::ip_hdr::frag_bits
-reset	apps/imdb/event_port.hh	/^  inline void reset() {$/;"	f	struct:kj::ZeroCopyScratchspace
 reset	apps/imdb/kj_iostream.hh	/^    void reset() { _buf = {}; }$/;"	f	class:final
+reset	apps/imdb/vmts-rpc.hh	/^  inline void reset() {$/;"	f	struct:kj::ZeroCopyScratchspace
 reset	core/deleter.hh	/^    void reset(impl* i) {$/;"	f	class:final
 reset	core/iostream.hh	/^    void reset() { _buf = {}; }$/;"	f	class:final
 reset	core/ragel.hh	/^    void reset() {$/;"	f	class:sstring_builder
@@ -4798,7 +4730,6 @@ respond_with_reset	net/tcp.hh	/^void tcp<InetTraits>::respond_with_reset(tcp_hdr
 respond_with_reset	net/tcp.hh	/^void tcp<InetTraits>::tcb::respond_with_reset(tcp_hdr* rth) {$/;"	f	class:net::tcp_state::tcp_option::option_kind::tcp::tcb::tcp::tcb
 response_line	http/reply.cc	/^sstring reply::response_line() {$/;"	f	class:httpd::reply
 rest	net/ip.hh	/^    packed<uint32_t> rest;$/;"	m	struct:net::icmp_hdr
-restore	apps/imdb/vmts-rpc.cc	/^    Capability::Client restore(kj::StringPtr name) {$/;"	f	struct:capnp::VmtsRpcClient::Impl::ClientContext
 result	core/future.hh	/^         result = 2,$/;"	m	class:future_state::state
 result	core/future.hh	/^         result,$/;"	m	class:future_state::state
 result	core/reactor.cc	/^    T result;$/;"	m	struct:syscall_result	file:
@@ -4816,8 +4747,6 @@ routes	http/routes.hh	/^class routes {$/;"	c	namespace:httpd
 rpc	rpc/rpc.cc	/^namespace rpc {$/;"	n	file:
 rpc	rpc/rpc.hh	/^namespace rpc {$/;"	n
 rpc	rpc/rpc_impl.hh	/^namespace rpc {$/;"	n
-rpcSystem	apps/imdb/vmts-rpc.cc	/^    RpcSystem<rpc::twoparty::VatId> rpcSystem;$/;"	m	struct:capnp::VmtsRpcClient::Impl::ClientContext	file:
-rpcSystem	apps/imdb/vmts-rpc.cc	/^    RpcSystem<rpc::twoparty::VatId> rpcSystem;$/;"	m	struct:capnp::final::ServerContext	file:
 rpcSystem	apps/imdb/vmts-rpc.cc	/^  RpcSystem<rpc::twoparty::VatId> rpcSystem;$/;"	m	struct:capnp::SeastarServer::AcceptedConnection	file:
 rsp	net/xenfront.hh	/^    struct netif_rx_response rsp;$/;"	m	union:xen::rx	typeref:struct:xen::rx::netif_rx_response
 rsp	net/xenfront.hh	/^    struct netif_tx_response rsp;$/;"	m	union:xen::tx	typeref:struct:xen::tx::netif_tx_response
@@ -4929,7 +4858,7 @@ scollectd	core/reactor.hh	/^namespace scollectd { class registration; }$/;"	n
 scollectd	core/scollectd.cc	/^namespace scollectd {$/;"	n	file:
 scollectd	core/scollectd.hh	/^namespace scollectd {$/;"	n
 scollectd	core/scollectd_api.hh	/^namespace scollectd {$/;"	n
-scratchSpace	apps/imdb/event_port.hh	/^  kj::ArrayPtr<char> scratchSpace;$/;"	m	struct:kj::ZeroCopyScratchspace
+scratchSpace	apps/imdb/vmts-rpc.hh	/^  kj::ArrayPtr<char> scratchSpace;$/;"	m	struct:kj::ZeroCopyScratchspace
 seastar	core/future.hh	/^namespace seastar {$/;"	n
 seastar	core/thread.cc	/^namespace seastar {$/;"	n	file:
 seastar	core/thread.hh	/^namespace seastar {$/;"	n
@@ -4988,9 +4917,8 @@ sent_messages	rpc/rpc.hh	/^            counter_type sent_messages = 0;$/;"	m	str
 seq	net/tcp.hh	/^    packed<tcp_seq> seq;$/;"	m	struct:net::tcp_state::tcp_option::option_kind::tcp_hdr
 serializer	rpc/rpc.hh	/^        auto& serializer() { return _proto._serializer; }$/;"	f	class:rpc::protocol::connection
 serializer	tests/rpc.cc	/^struct serializer {$/;"	s	file:
-server	apps/imdb/event_port.hh	/^  kj::Own<server_socket> server;$/;"	m	class:capnp::SeastarServer
 server	apps/imdb/main.cc	/^    capnp::SeastarServer server;$/;"	m	class:tcp_server	file:
-server	apps/imdb/vmts-rpc.cc	/^  kj::Own<ServerContext> server;$/;"	m	struct:capnp::final	file:
+server	apps/imdb/vmts-rpc.hh	/^  kj::Own<server_socket> server;$/;"	m	class:capnp::SeastarServer
 server	http/httpd.hh	/^    distributed<http_server>& server() {$/;"	f	class:httpd::http_server_control
 server	rpc/rpc.hh	/^    class server {$/;"	c	class:rpc::protocol
 server	rpc/rpc_impl.hh	/^protocol<Serializer, MsgType>::server::server(protocol<Serializer, MsgType>& proto, ipv4_addr addr) : _proto(proto) {$/;"	f	class:rpc::protocol::server
@@ -5006,7 +4934,6 @@ server_port	net/dhcp.cc	/^const uint16_t net::dhcp::impl::server_port;$/;"	m	cla
 server_socket	core/reactor.hh	/^    explicit server_socket(std::unique_ptr<server_socket_impl> ssi)$/;"	f	class:server_socket
 server_socket	core/reactor.hh	/^class server_socket {$/;"	c
 server_socket_impl	core/reactor.hh	/^class server_socket_impl {$/;"	c
-servers	apps/imdb/main.cc	/^    std::vector<kj::Own<capnp::VmtsRpcServer> > servers;$/;"	m	class:tcp_server	file:
 service_unavailable	http/reply.cc	/^const sstring service_unavailable = " 503 Service Unavailable\\r\\n";$/;"	m	namespace:httpd::status_strings	file:
 service_unavailable	http/reply.hh	/^        service_unavailable = 503  \/\/!< service_unavailable$/;"	m	class:httpd::reply::status_type
 set	apps/imdb/hashprotocol.capnp.cc	/^::kj::Promise<void> HashProtocol::Server::set(SetContext) {$/;"	f	class:HashProtocol::Server
@@ -5085,7 +5012,6 @@ setsockopt	core/posix.hh	/^    int setsockopt(int level, int optname, X&& data) 
 setsockopt	core/posix.hh	/^    int setsockopt(int level, int optname, const char* data) {$/;"	f	class:file_desc
 setup	core/thread.cc	/^thread_context::setup() {$/;"	f	class:seastar::thread_context
 setup	net/virtio.cc	/^void vring<BufferChain, Completion>::setup() {$/;"	f	class:virtio::vring
-setupPromise	apps/imdb/vmts-rpc.cc	/^  kj::ForkedPromise<void> setupPromise;$/;"	m	struct:capnp::VmtsRpcClient::Impl	file:
 setup_features	net/virtio.cc	/^    uint64_t setup_features() {$/;"	f	class:virtio::device	file:
 sharded_cache	apps/memcached/memcache.cc	/^    sharded_cache(distributed<cache>& peers) : _peers(peers) {}$/;"	f	class:memcache::sharded_cache
 sharded_cache	apps/memcached/memcache.cc	/^class sharded_cache {$/;"	c	namespace:memcache	file:
@@ -5113,10 +5039,10 @@ shared_ptr_no_esft	core/shared_ptr.hh	/^struct shared_ptr_no_esft {$/;"	s
 shared_ptr_value_hash	core/shared_ptr.hh	/^struct shared_ptr_value_hash {$/;"	s
 shift	net/tcp.hh	/^        uint8_t shift;$/;"	m	struct:net::tcp_state::tcp_option::option_kind::option_len::win_scale
 should_send_ack	net/tcp.hh	/^bool tcp<InetTraits>::tcb::should_send_ack(uint16_t seg_len) {$/;"	f	class:net::tcp_state::tcp_option::option_kind::tcp::tcb::tcp::tcb
-shrink_to_fit	apps/imdb/event_port.hh	/^  inline shrink_to_fit(size_t sz = DEFAUlT_SCRACH_SPACE_SIZE) {$/;"	f	struct:kj::ZeroCopyScratchspace
+shrink_to_fit	apps/imdb/vmts-rpc.hh	/^  inline shrink_to_fit(size_t sz = DEFAUlT_SCRATCH_SPACE_SIZE) {$/;"	f	struct:kj::ZeroCopyScratchspace
 shutdown	apps/imdb/vmts-rpc.cc	/^kj::Promise<void> SeastarNetwork::shutdown() {$/;"	f	class:capnp::SeastarNetwork
 siaddr	net/dhcp.cc	/^        ipv4_address siaddr;  \/\/ IP address of next server to use in bootstrap$/;"	m	struct:net::dhcp::impl::m_type::htype::opt_type::msg_type::dhcp_header	file:
-side	apps/imdb/event_port.hh	/^  rpc::twoparty::Side side;$/;"	m	class:capnp::final
+side	apps/imdb/vmts-rpc.hh	/^  rpc::twoparty::Side side;$/;"	m	class:capnp::final
 signal	core/reactor.cc	/^void writeable_eventfd::signal(size_t count) {$/;"	f	class:writeable_eventfd
 signal	core/semaphore.hh	/^    void signal(size_t nr = 1) {$/;"	f	class:semaphore
 signal_data_received	net/tcp.hh	/^        void signal_data_received() {$/;"	f	class:net::tcp_state::tcp_option::option_kind::tcp::tcb
@@ -5124,7 +5050,7 @@ signal_handler	core/reactor.cc	/^reactor::signals::signal_handler::signal_handle
 signal_handler	core/reactor.hh	/^        struct signal_handler {$/;"	s	class:reactor::signals
 signals	core/reactor.cc	/^reactor::signals::signals() : _pending_signals(0) {$/;"	f	class:reactor::signals
 signals	core/reactor.hh	/^    class signals {$/;"	c	class:reactor
-size	apps/imdb/event_port.hh	/^  inline size_t size() {$/;"	f	struct:kj::ZeroCopyScratchspace
+size	apps/imdb/vmts-rpc.hh	/^  inline size_t size() {$/;"	f	struct:kj::ZeroCopyScratchspace
 size	apps/memcached/memcache.cc	/^    size_t size() {$/;"	f	class:memcache::cache
 size	core/circular_buffer.hh	/^circular_buffer<T, Alloc>::size() const {$/;"	f	class:circular_buffer
 size	core/file.hh	/^    future<size_t> size() {$/;"	f	class:file
@@ -5223,7 +5149,7 @@ start	tests/test_runner.cc	/^test_runner::start(int ac, char** av) {$/;"	f	class
 start	tests/udp_client.cc	/^    void start(ipv4_addr server_addr) {$/;"	f	class:client
 start	tests/udp_server.cc	/^    void start(uint16_t port) {$/;"	f	class:udp_server
 start	tests/udp_zero_copy.cc	/^    void start(int chunk_size, bool copy, size_t mem_size) {$/;"	f	class:server
-startRead	apps/imdb/event_port.hh	/^  inline char* startRead() {$/;"	f	struct:kj::ZeroCopyScratchspace
+startRead	apps/imdb/vmts-rpc.hh	/^  inline char* startRead() {$/;"	f	struct:kj::ZeroCopyScratchspace
 start_accept	tests/test-reactor.cc	/^    void start_accept() {$/;"	f	struct:test
 start_all_queues	core/reactor.cc	/^void smp::start_all_queues()$/;"	f	class:smp
 start_epoll	core/reactor.hh	/^    void start_epoll() {        $/;"	f	class:reactor
@@ -5299,9 +5225,7 @@ str_len	core/sstring.hh	/^size_t str_len(const char(&s)[N]) { return N - 1; }$/;
 str_len	core/sstring.hh	/^size_type str_len(const basic_sstring<char_type, size_type, max_size>& s) { return s.size(); }$/;"	f
 str_matcher	http/matcher.hh	/^    explicit str_matcher(const sstring& cmp)$/;"	f	class:httpd::str_matcher
 str_matcher	http/matcher.hh	/^class str_matcher : public matcher {$/;"	c	namespace:httpd
-stream	apps/imdb/event_port.hh	/^  kj::AsyncIoStream& stream;$/;"	m	class:capnp::final
-stream	apps/imdb/vmts-rpc.cc	/^    kj::Own<kj::AsyncIoStream> stream;$/;"	m	struct:capnp::VmtsRpcClient::Impl::ClientContext	file:
-stream	apps/imdb/vmts-rpc.cc	/^    kj::Own<kj::UvIoStream> stream;$/;"	m	struct:capnp::final::ServerContext	file:
+stream	apps/imdb/vmts-rpc.hh	/^  kj::UvIoStream& stream;$/;"	m	class:capnp::final
 stream	core/stream.hh	/^class stream {$/;"	c
 stream_maker	tests/output_stream_test.cc	/^struct stream_maker {$/;"	s	file:
 string2vector	util/conversions.hh	/^static inline std::vector<char> string2vector(std::string str) {$/;"	f
@@ -5360,9 +5284,8 @@ task	core/future.hh	/^class task {$/;"	c
 taskFailed	apps/imdb/main.cc	/^    void taskFailed(kj::Exception&& exception) {$/;"	f	class:tcp_server
 taskFailed	apps/imdb/vmts-rpc.cc	/^void SeastarServer::taskFailed(kj::Exception&& exception) {$/;"	f	class:capnp::SeastarServer
 task_quota	core/reactor.cc	/^__thread size_t task_quota = 0;$/;"	v
-tasks	apps/imdb/event_port.hh	/^  kj::TaskSet tasks;$/;"	m	class:capnp::SeastarServer
 tasks	apps/imdb/main.cc	/^    kj::TaskSet tasks;$/;"	m	class:tcp_server	file:
-tasks	apps/imdb/vmts-rpc.cc	/^  kj::TaskSet tasks;  $/;"	m	struct:capnp::final	file:
+tasks	apps/imdb/vmts-rpc.hh	/^  kj::TaskSet tasks;$/;"	m	class:capnp::SeastarServer
 tcb	net/tcp.hh	/^    class tcb : public enable_lw_shared_from_this<tcb> {$/;"	c	class:net::tcp_state::tcp_option::option_kind::tcp
 tcb	net/tcp.hh	/^tcp<InetTraits>::tcb::tcb(tcp& t, connid id)$/;"	f	class:net::tcp_state::tcp_option::option_kind::tcp::tcb::tcp::tcb
 tcp	net/const.hh	/^    icmp = 1, tcp = 6, udp = 17, unused = 255$/;"	m	class:net::ip_protocol_num
@@ -5455,7 +5378,6 @@ tests	tests/tcp_client.cc	/^const std::map<std::string, client::test_fn> client:
 tests	tests/test-utils.cc	/^static std::vector<seastar_test*>* tests;$/;"	v	file:
 thread	core/thread.hh	/^class thread {$/;"	c	namespace:seastar
 thread	core/thread.hh	/^thread::thread(Func func)$/;"	f	class:seastar::thread
-threadVmtsContext	apps/imdb/vmts-rpc.cc	/^KJ_THREADLOCAL_PTR(VmtsRpcContext) threadVmtsContext = nullptr;$/;"	m	namespace:capnp	file:
 thread_context	core/thread.cc	/^thread_context::thread_context(std::function<void ()> func)$/;"	f	class:seastar::thread_context
 thread_context	core/thread.hh	/^class thread_context {$/;"	c	namespace:seastar
 thread_impl	core/future.hh	/^namespace thread_impl {$/;"	n	namespace:seastar
@@ -5499,6 +5421,7 @@ toString	apps/imdb/hashprotocol.capnp.hh	/^  inline ::kj::StringTree toString() 
 toString	apps/imdb/hashprotocol.capnp.hh	/^  inline ::kj::StringTree toString() const {$/;"	f	class:HashProtocol::GetResults::Reader
 toString	apps/imdb/hashprotocol.capnp.hh	/^  inline ::kj::StringTree toString() const {$/;"	f	class:HashProtocol::SetParams::Reader
 toString	apps/imdb/hashprotocol.capnp.hh	/^  inline ::kj::StringTree toString() const {$/;"	f	class:HashProtocol::SetResults::Reader
+toString	apps/imdb/vmts-rpc.hh	/^  kj::String toString() {$/;"	f	struct:kj::UvIoStream
 to_internal_object	core/shared_ptr.hh	/^    T* to_internal_object() { return static_cast<T*>(this); }$/;"	f	class:enable_lw_shared_from_this
 to_internal_object	core/shared_ptr.hh	/^    shared_ptr_no_esft* to_internal_object() { return this; }$/;"	f	struct:shared_ptr_no_esft
 to_iovec	net/posix-stack.cc	/^std::vector<iovec> to_iovec(std::vector<temporary_buffer<char>>& buf_vec) {$/;"	f	namespace:net
@@ -5590,7 +5513,6 @@ truncate	core/reactor.cc	/^blockdev_file_impl::truncate(uint64_t length) {$/;"	f
 truncate	core/reactor.cc	/^posix_file_impl::truncate(uint64_t length) {$/;"	f	class:posix_file_impl
 truncate	core/reactor.hh	/^    truncate = O_TRUNC,$/;"	m	class:open_flags
 tryReadInternal	core/iostream.hh	/^    kj::Promise<size_t> tryReadInternal(void* buffer, size_t minBytes, size_t maxBytes,$/;"	f	class:final
-tryReadMessage	apps/imdb/vmts-rpc.cc	/^kj::Promise<kj::Maybe<kj::Own<MessageReader>>> tryReadMessage($/;"	f	namespace:capnp
 try_compile	configure.py	/^def try_compile(compiler, source = '', flags = []):$/;"	f
 try_create_eventfd	core/reactor.cc	/^file_desc readable_eventfd::try_create_eventfd(size_t initial) {$/;"	f	class:readable_eventfd
 try_create_eventfd	core/reactor.cc	/^file_desc writeable_eventfd::try_create_eventfd(size_t initial) {$/;"	f	class:writeable_eventfd
@@ -5672,7 +5594,7 @@ udp_server	apps/memcached/memcache.cc	/^    udp_server(sharded_cache& c, distrib
 udp_server	apps/memcached/memcache.cc	/^class udp_server {$/;"	c	namespace:memcache	file:
 udp_server	tests/udp_server.cc	/^    udp_server(): waitScope(engine()), done(false) {};$/;"	f	class:udp_server
 udp_server	tests/udp_server.cc	/^class udp_server {$/;"	c	file:
-uint	apps/imdb/event_port.hh	/^typedef unsigned int uint;$/;"	t	namespace:kj
+uint	apps/imdb/vmts-rpc.hh	/^typedef unsigned int uint;$/;"	t	namespace:kj
 uintptr_t	core/slab.hh	/^typedef uint64_t uintptr_t;$/;"	t
 ulong_bits	core/bitset-iter.hh	/^static constexpr int ulong_bits = std::numeric_limits<unsigned long>::digits;$/;"	m	namespace:bitsets
 umask	core/xen/evtchn.cc	/^void port::umask() {$/;"	f	class:xen::port
@@ -5773,8 +5695,7 @@ vring_storage_size	net/virtio.cc	/^size_t qp::vring_storage_size(size_t ring_siz
 wait	core/future.hh	/^    void wait() {$/;"	f	class:future
 wait	core/reactor.cc	/^future<size_t> readable_eventfd::wait() {$/;"	f	class:readable_eventfd
 wait	core/semaphore.hh	/^    future<> wait(size_t nr = 1) {$/;"	f	class:semaphore
-waitScope	apps/imdb/main.cc	/^    kj::WaitScope waitScope;$/;"	m	class:tcp_server	file:
-waitScope	apps/imdb/vmts-rpc.cc	/^  kj::WaitScope * waitScope;$/;"	m	class:capnp::VmtsRpcContext	file:
+waitScope	apps/imdb/main.cc	/^    kj::WaitScope waitScope;    $/;"	m	class:tcp_server	file:
 waitScope	tests/udp_server.cc	/^    kj::WaitScope waitScope;$/;"	m	class:udp_server	file:
 wait_and_process	core/reactor.cc	/^reactor_backend_epoll::wait_and_process() {$/;"	f	class:reactor_backend_epoll
 wait_and_process	core/reactor.cc	/^reactor_backend_osv::wait_and_process() {$/;"	f	class:reactor_backend_osv
@@ -5872,7 +5793,7 @@ writeable_eventfd	core/reactor.hh	/^    explicit writeable_eventfd(size_t initia
 writeable_eventfd	core/reactor.hh	/^class writeable_eventfd {$/;"	c
 writer	tests/fstream_test.cc	/^    writer(file f) : out(make_file_output_stream($/;"	f	struct:writer
 writer	tests/fstream_test.cc	/^struct writer {$/;"	s	file:
-writerCounter	apps/imdb/event_port.hh	/^  size_t writerCounter = 0;$/;"	m	struct:kj::ZeroCopyScratchspace
+writerCounter	apps/imdb/vmts-rpc.hh	/^  size_t writerCounter;$/;"	m	struct:kj::ZeroCopyScratchspace
 writev	core/posix.hh	/^    boost::optional<size_t> writev(const iovec *iov, int iovcnt) {$/;"	f	class:file_desc
 x	apps/imdb/kj_iostream.hh	/^    kj_data_sink& operator=(kj_data_sink&& x) = default;$/;"	m	class:kj_data_sink
 x	apps/imdb/kj_iostream.hh	/^    kj_data_sink(kj_data_sink&& x) = default;$/;"	m	class:kj_data_sink
@@ -5907,8 +5828,6 @@ xid	net/dhcp.cc	/^        packed<uint32_t> xid = 0;           \/\/ Client sets T
 yiaddr	net/dhcp.cc	/^        ipv4_address yiaddr;  \/\/ 'your' (client) IP address.$/;"	m	struct:net::dhcp::impl::m_type::htype::opt_type::msg_type::dhcp_header	file:
 ~A	tests/shared_ptr_test.cc	/^    virtual ~A() {$/;"	f	struct:A
 ~DestructorDetector	apps/imdb/imdb-async-test.cc	/^  ~DestructorDetector() { setTrue = true; }$/;"	f	class:DestructorDetector
-~Impl	apps/imdb/vmts-rpc.cc	/^  ~Impl(){$/;"	f	struct:capnp::final
-~ServerContext	apps/imdb/vmts-rpc.cc	/^        ~ServerContext(){$/;"	f	struct:capnp::final::ServerContext
 ~U	rpc/rpc_impl.hh	/^        ~U() {}$/;"	f	union:rpc::in_message::U
 ~U	rpc/rpc_impl.hh	/^        ~U() {}$/;"	f	union:rpc::reply_payload::U
 ~allocation	tests/allocator_test.cc	/^    ~allocation() {$/;"	f	struct:allocation

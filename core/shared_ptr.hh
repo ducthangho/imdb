@@ -22,6 +22,7 @@
 #ifndef SHARED_PTR_HH_
 #define SHARED_PTR_HH_
 
+#include "shared_ptr_debug_helper.hh"
 #include <utility>
 #include <type_traits>
 #include <functional>
@@ -46,6 +47,11 @@
 // and lw_enable_shared_from_this<>().
 //
 
+#ifndef DEBUG_SHARED_PTR
+using shared_ptr_counter_type = long;
+#else
+using shared_ptr_counter_type = debug_shared_ptr_counter_type;
+#endif
 template <typename T>
 class lw_shared_ptr;
 
@@ -103,13 +109,16 @@ shared_ptr<T> const_pointer_cast(const shared_ptr<U>& p);
 // CRTP from this to enable shared_from_this:
 template <typename T>
 class enable_lw_shared_from_this {
-    long _count = 0;
+    shared_ptr_counter_type _count = 0;
     using ctor = T;
     T* to_value() { return static_cast<T*>(this); }
     T* to_internal_object() { return static_cast<T*>(this); }
 protected:
-    enable_lw_shared_from_this& operator=(const enable_lw_shared_from_this&) { return *this; }
-    enable_lw_shared_from_this& operator=(enable_lw_shared_from_this&&) { return *this; }
+    enable_lw_shared_from_this() noexcept {}
+    enable_lw_shared_from_this(enable_lw_shared_from_this&&) noexcept {}
+    enable_lw_shared_from_this(const enable_lw_shared_from_this&) noexcept {}
+    enable_lw_shared_from_this& operator=(const enable_lw_shared_from_this&) noexcept { return *this; }
+    enable_lw_shared_from_this& operator=(enable_lw_shared_from_this&&) noexcept { return *this; }
 public:
     lw_shared_ptr<T> shared_from_this();
     lw_shared_ptr<const T> shared_from_this() const;
@@ -119,7 +128,7 @@ public:
 
 template <typename T>
 struct shared_ptr_no_esft {
-    long _count = 0;
+    shared_ptr_counter_type _count = 0;
     T _value;
     using ctor = shared_ptr_no_esft;
 
@@ -281,7 +290,7 @@ template <typename T>
 inline
 lw_shared_ptr<const T>
 enable_lw_shared_from_this<T>::shared_from_this() const {
-    return lw_shared_ptr<const T>(this);
+    return lw_shared_ptr<const T>(const_cast<enable_lw_shared_from_this*>(this));
 }
 
 template <typename T>
@@ -298,7 +307,7 @@ std::ostream& operator<<(std::ostream& out, const lw_shared_ptr<T>& p) {
 struct shared_ptr_count_base {
     // destructor is responsible for fully-typed deletion
     virtual ~shared_ptr_count_base() {}
-    long count = 0;
+    shared_ptr_counter_type count = 0;
 };
 
 template <typename T>

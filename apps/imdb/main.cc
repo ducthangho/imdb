@@ -112,12 +112,15 @@ class HashProtocolImpl final: public HashProtocol::Server {
     kj::Promise<void> set(SetContext context) override {
         auto request = context.getParams();
         int key = request.getKey();
-        // std::cout<<"Client set key "<<key<<endl;
+        
 
         int value = request.getValue();
+        // KJ_DBG(key,value);
+        // KJ_DBG(request);
         // std::cout<<"Client set value "<<value<<endl;
         mymap[key] = value;
         // auto response = context.getResults();
+        // KJ_DBG(response);
         return kj::READY_NOW;
     }
 };
@@ -131,7 +134,9 @@ class tcp_server : private kj::TaskSet::ErrorHandler {
     capnp::SeastarServer server;
     kj::TaskSet tasks;
 public:
-    tcp_server(): waitScope(engine()), done(false), serverImpl(kj::heap<HashProtocolImpl>()), server(serverImpl), tasks(*this) {};
+    tcp_server(): waitScope(engine()), done(false), serverImpl(kj::heap<HashProtocolImpl>()), server(serverImpl), tasks(*this) {       
+        
+    };
     ~tcp_server(){
         printf("Tcp Server destroyed\n");
     }
@@ -143,6 +148,7 @@ public:
     void acceptLoop(ipv4_addr addr){        
         tasks.add(
             server.listen(addr).then([this,addr](){
+                printf("Connection accepted\n");
                 acceptLoop(addr);
             })
         );    

@@ -66,7 +66,7 @@
 #include <cxxabi.h>
 
 
-namespace kj { 
+namespace kj {
 typedef unsigned char byte;
 typedef unsigned int uint;
 
@@ -88,30 +88,53 @@ struct connection {
   connection& operator=(connection&&) = default;
 };
 
-#define DEFAUlT_SCRACH_SPACE_SIZE 8192
+#define DEFAUlT_SCRATCH_SPACE_SIZE 8192
 #define DEFAUlT_RELOCATE_THREADSHOLD 512
 
 struct ZeroCopyScratchspace {
-  kj::ArrayPtr<char> scratchSpace;
-  size_t readCouter = 0;
-  size_t writerCounter = 0;
+  class ArrDisposer : public kj::ArrayDisposer {
+  public:
+    ArrDisposer() : parent(nullptr) {};
+    ArrDisposer(ZeroCopyScratchspace* parent) : parent(parent) {};
 
-  ZeroCopyScratchspace(size_t sz = DEFAUlT_SCRACH_SPACE_SIZE) : scratchSpace(kj::heapArray<char>(sz)) {};
+    virtual void disposeImpl(void* firstElement, size_t elementSize, size_t elementCount,
+                             size_t capacity, void (*destroyElement)(void*)) const {
+      KJ_IF_MAYBE(v, parent) {
+        // KJ_DBG("Free ",elementCount,v);
+        v->release(elementCount);
+        KJ_DBG("Freed  ",v->freed,v->readCounter,v->writerCounter);
+      }
+    };
+
+    kj::Maybe<ZeroCopyScratchspace&> parent;
+  };
+  kj::ArrayPtr<char> scratchSpace;
+  size_t readCounter;
+  size_t writerCounter;
+  size_t freed;
+  kj::Maybe<ArrDisposer> disposer;
+
+  ZeroCopyScratchspace(size_t sz = DEFAUlT_SCRATCH_SPACE_SIZE) : scratchSpace(kj::heapArray<char>(sz)), readCounter(0), writerCounter(0), freed(0), disposer(this) { };
 
   ZeroCopyScratchspace(ZeroCopyScratchspace&&) = default;
   ZeroCopyScratchspace& operator=(ZeroCopyScratchspace&&) = default;
 
   inline void read(size_t cnt) {
-    readCouter += cnt;
+    readCounter += cnt;
+    // freeMem -= cnt;
+  }
+
+  inline char operator[](size_t i){
+    return scratchSpace[writerCounter+i];
   }
 
   inline char* startRead() {
     char* start = scratchSpace.begin();
-    return start + readCouter;
+    return start + readCounter;
   }
 
   inline size_t maxReadable() {
-    return scratchSpace.size() - readCouter;
+    return scratchSpace.size() - readCounter;
   }
 
   inline size_t size() {
@@ -123,12 +146,27 @@ struct ZeroCopyScratchspace {
   }
 
   inline size_t consumable() {
-    return readCouter - writerCounter;
+    return readCounter - writerCounter;
   }
 
-  inline kj::ArrayPtr<capnp::word> consuming(size_t cnt) {
+  inline void release(size_t amount) {
+    freed += amount;    
+    // if (freed > writerCounter) freed = writerCounter;
+        
+    if (freed == writerCounter && writerCounter == readCounter ) {
+      printf("reset consumed\n");
+      readCounter = 0;
+      writerCounter = 0;
+      freed = 0;
+    }
+  }
+
+  inline kj::Array<char> consuming(size_t cnt) {
     char* start = scratchSpace.begin() + writerCounter;
-    return kj::ArrayPtr<capnp::word>(reinterpret_cast<capnp::word*>(start), reinterpret_cast<capnp::word*>(start + cnt));
+    KJ_IF_MAYBE(d, disposer) {
+      return kj::Array<char>(start, cnt, *d );
+    }
+    return kj::Array<char>();
   }
 
   inline void copy(void* buffer, size_t len) {
@@ -138,12 +176,7 @@ struct ZeroCopyScratchspace {
 
   inline void consumed(size_t cnt) {
     writerCounter += cnt;
-    if (writerCounter == readCouter) {
-      // printf("reset consumed\n");
-      readCouter = 0;
-      writerCounter = 0;
-    }
-    // KJ_DBG(readCouter,writerCounter);
+    // KJ_DBG(readCounter,writerCounter);
   }
 
 
@@ -151,36 +184,39 @@ struct ZeroCopyScratchspace {
     printf("reserve\n");
     if (scratchSpace.size() < sz) {
       auto ownedSpace =  kj::heapArray<char>(sz);
-      if (readCouter > writerCounter) {
+      if (readCounter > writerCounter) {
         char* start = scratchSpace.begin();
-        std::copy(start + writerCounter, start + readCouter, ownedSpace.begin()  );
+        std::copy(start + writerCounter, start + readCounter, ownedSpace.begin()  );
       }
       scratchSpace = ownedSpace;
 
     }
   }
 
-  inline shrink_to_fit(size_t sz = DEFAUlT_SCRACH_SPACE_SIZE) {
+  inline shrink_to_fit(size_t sz = DEFAUlT_SCRATCH_SPACE_SIZE) {
     if (sz < scratchSpace.size()) {
-      sz = std::max(sz, readCouter - writerCounter);
+      sz = std::max(sz, readCounter - writerCounter);
       auto ownedSpace =  kj::heapArray<char>(sz);
-      if (readCouter > writerCounter) {
+      if (readCounter > writerCounter) {
         char* start = scratchSpace.begin();
-        std::copy(start + writerCounter, start + readCouter, ownedSpace.begin()  );
+        std::copy(start + writerCounter, start + readCounter, ownedSpace.begin()  );
       }
       scratchSpace = ownedSpace;
     }
   }
 
   inline void reset() {
-    printf("reset\n");
-    if (readCouter > writerCounter) {
-      char* start = scratchSpace.begin();
-      std::copy(start + writerCounter, start + readCouter, start  );
-    }
+    if (freed == writerCounter) {
+      printf("reset\n");
+      if (readCounter > writerCounter ) {
+        char* start = scratchSpace.begin();
+        std::copy(start + writerCounter, start + readCounter, start  );
+      }
 
-    readCouter = readCouter - writerCounter;
-    writerCounter = 0;
+      readCounter = readCounter - writerCounter;
+      writerCounter = 0;
+      freed = 0;
+    }
   }
 
 };
@@ -194,27 +230,48 @@ struct UvIoStream: public kj::AsyncIoStream {
   // TODO(cleanup): Allow better code sharing between the two.
 
 
-  UvIoStream(kj::connection&& _conn, size_t buffer_size = DEFAUlT_SCRACH_SPACE_SIZE ): conn(kj::mv(_conn) ), buffer(buffer_size) {};
+  UvIoStream(kj::connection&& _conn, size_t buffer_size = DEFAUlT_SCRATCH_SPACE_SIZE ): conn(kj::mv(_conn) ),buffer( kj::heap<ZeroCopyScratchspace>(buffer_size) ) {    
+  };
 
-  ~UvIoStream() noexcept(false) {}
+  ~UvIoStream() noexcept(false) {
+  
+    // if (buffer) delete buffer;
+    // for (auto pool : pools){
+    //   if (pool) delete pool;
+    // }
+  }
 
   UvIoStream(UvIoStream&&) = default;
   UvIoStream& operator=(UvIoStream&&) = default;
 
 
   kj::Promise<size_t> read(size_t minBytes) {
-    size_t maxReadable = buffer.maxReadable();
-    size_t consumable = buffer.consumable();
-    return read(reinterpret_cast<void*>(buffer.startRead()), minBytes, maxReadable).then([consumable, this](auto n) {
-      buffer.read(n);
-      return n + consumable;
+    // KJ_DBG(freed,readCounter,writerCounter,amount);    
+    
+    size_t consumable = buffer->consumable();    
+    
+    // if (buffer->freed == buffer->writerCounter && consumable==0 ) {
+    //   printf("reset consumed\n");
+    //   buffer->readCounter = 0;
+    //   buffer->writerCounter = 0;
+    //   buffer->freed = 0;
+    // }
+
+    minBytes -= consumable;
+    size_t maxReadable = buffer->maxReadable();
+
+    if (minBytes<=0) return kj::Promise<size_t>(consumable);
+    return read(reinterpret_cast<void*>(buffer->startRead()), minBytes, maxReadable).then([consumable, this](auto n) {
+      buffer->read(n);
+      return n+consumable;
     });
   }
 
   kj::Promise<size_t> read(void* buffer, size_t minBytes, size_t maxBytes) override {
     return conn._read_buf.read(buffer, minBytes, maxBytes);
   }
-  Promise<void> read(void* buffer, size_t bytes) {
+
+  Promise<void> read(void* buffer, size_t bytes) {  
     return read(buffer, bytes, bytes).then([](size_t) {});
   }
 
@@ -236,30 +293,212 @@ struct UvIoStream: public kj::AsyncIoStream {
     conn._write_buf.close();
   }
 
+  kj::String toString() {
+    return kj::str("ReadCounter ", buffer->readCounter,"   WriteCounter ", buffer->writerCounter, "    Freed memory = ", buffer->freed);
+  }
+
+  void createNewSegment(size_t size) {
+
+    // int currentIdx = 0;
+    // for (currentIdx = 0; currentIdx < pools.size(); ++currentIdx) {
+    //   auto& pool = pools[currentIdx];
+    //   if (&pool == &buffer) break;//Ignore current buffer
+    // }
+
+    // if (currentIdx == pools.size() )//Not found
+    //   currentIdx = -1;
+
+    if (size < DEFAUlT_SCRATCH_SPACE_SIZE) {
+      for (int i = 0; i < pools.size(); ++i) {
+        auto& pool = pools[i];
+
+        // if (i == currentIdx) continue;//Ignore current buffer
+        if (pool->readCounter == 0 && pool->writerCounter == 0) {
+          //Found an empty pool
+          auto sz = buffer->consumable();
+          if (sz > 0) {
+            buffer->copy(pool->scratchSpace.begin(), sz );
+            pool->read(sz);
+          }
+
+          //Swap place
+          buffer->readCounter = buffer->writerCounter;
+          auto tmp = kj::mv(buffer);
+          buffer = kj::mv(pool);
+          pool = kj::mv(tmp);
+          return;
+        }
+      }
+    }
+
+    //Need to create a new segment.
+    size_t sz = kj::max(DEFAUlT_SCRATCH_SPACE_SIZE, size);
+    pools.emplace_back(  kj::heap<ZeroCopyScratchspace>(sz)  );
+    auto& pool = pools.back();
+    sz = buffer->consumable();
+    if (sz > 0) {
+      buffer->copy(pool->scratchSpace.begin(), sz );
+      pool->read(sz);
+    }
+
+    buffer->readCounter = buffer->writerCounter;
+    auto tmp = kj::mv(buffer);
+    buffer = kj::mv(pool);
+    pool = kj::mv(tmp);
+
+  }
+
   kj::connection conn;
-  ZeroCopyScratchspace buffer;
-  
+
+  std::vector< kj::Own<ZeroCopyScratchspace> > pools;
+  kj::Own<ZeroCopyScratchspace> buffer;
+
 };
+
 
 
 }//end of namespace kj
 
 namespace capnp {
+
+/*namespace rpc {
+inline kj::String KJ_STRINGIFY(Message::Which which) {
+  return kj::str(static_cast<uint16_t>(which));
+}
+}  // namespace rpc
+
+
+class RpcDumper {
+  // Class which stringifies RPC messages for debugging purposes, including decoding params and
+  // results based on the call's interface and method IDs and extracting cap descriptors.
+  //
+  // TODO(cleanup):  Clean this code up and move it to someplace reusable, so it can be used as
+  //   a packet inspector / debugging tool for Cap'n Proto network traffic.
+
+public:
+  void addSchema(InterfaceSchema schema) {
+    schemas[schema.getProto().getId()] = schema;
+  }
+
+  enum Sender {
+    CLIENT,
+    SERVER
+  };
+
+  kj::String dump(rpc::Message::Reader message, Sender sender) {
+    const char* senderName = sender == CLIENT ? "client" : "server";
+
+    switch (message.which()) {
+    case rpc::Message::CALL: {
+      auto call = message.getCall();
+      auto iter = schemas.find(call.getInterfaceId());
+      if (iter == schemas.end()) {
+        break;
+      }
+      InterfaceSchema schema = iter->second;
+      auto methods = schema.getMethods();
+      if (call.getMethodId() >= methods.size()) {
+        break;
+      }
+      InterfaceSchema::Method method = methods[call.getMethodId()];
+
+      auto schemaProto = schema.getProto();
+      auto interfaceName =
+        schemaProto.getDisplayName().slice(schemaProto.getDisplayNamePrefixLength());
+
+      auto methodProto = method.getProto();
+      auto paramType = method.getParamType();
+      auto resultType = method.getResultType();
+
+      if (call.getSendResultsTo().isCaller()) {
+        returnTypes[std::make_pair(sender, call.getQuestionId())] = resultType;
+      }
+
+      auto payload = call.getParams();
+      auto params = kj::str(payload.getContent().getAs<DynamicStruct>(paramType));
+
+      auto sendResultsTo = call.getSendResultsTo();
+
+      return kj::str(senderName, "(", call.getQuestionId(), "): call ",
+                     call.getTarget(), " <- ", interfaceName, ".",
+                     methodProto.getName(), params,
+                     " caps:[", kj::strArray(payload.getCapTable(), ", "), "]",
+                     sendResultsTo.isCaller() ? kj::str()
+                     : kj::str(" sendResultsTo:", sendResultsTo));
+    }
+
+    case rpc::Message::RETURN: {
+      auto ret = message.getReturn();
+
+      auto iter = returnTypes.find(
+                    std::make_pair(sender == CLIENT ? SERVER : CLIENT, ret.getAnswerId()));
+      if (iter == returnTypes.end()) {
+        break;
+      }
+
+      auto schema = iter->second;
+      returnTypes.erase(iter);
+      if (ret.which() != rpc::Return::RESULTS) {
+        // Oops, no results returned.  We don't check this earlier because we want to make sure
+        // returnTypes.erase() gets a chance to happen.
+        break;
+      }
+
+      auto payload = ret.getResults();
+
+      if (schema.getProto().isStruct()) {
+        auto results = kj::str(payload.getContent().getAs<DynamicStruct>(schema.asStruct()));
+
+        return kj::str(senderName, "(", ret.getAnswerId(), "): return ", results,
+                       " caps:[", kj::strArray(payload.getCapTable(), ", "), "]");
+      } else if (schema.getProto().isInterface()) {
+        payload.getContent().getAs<DynamicCapability>(schema.asInterface());
+        return kj::str(senderName, "(", ret.getAnswerId(), "): return cap ",
+                       kj::strArray(payload.getCapTable(), ", "));
+      } else {
+        break;
+      }
+    }
+
+    case rpc::Message::BOOTSTRAP: {
+      auto restore = message.getBootstrap();
+
+      returnTypes[std::make_pair(sender, restore.getQuestionId())] = InterfaceSchema();
+
+      return kj::str(senderName, "(", restore.getQuestionId(), "): bootstrap ");
+    }
+
+    default:
+      break;
+    }
+
+    return kj::str(senderName, ": ", message);
+  }
+
+private:
+  std::map<uint64_t, InterfaceSchema> schemas;
+  std::map<std::pair<Sender, uint32_t>, Schema> returnTypes;
+};
+
+//*/
+
 class SeastarNetwork final : public TwoPartyVatNetworkBase,
-                          private TwoPartyVatNetworkBase::Connection{
+  private TwoPartyVatNetworkBase::Connection {
 
 public:
   SeastarNetwork(kj::UvIoStream& stream, rpc::twoparty::Side side,
-                     ReaderOptions receiveOptions = ReaderOptions());
+                 ReaderOptions receiveOptions = ReaderOptions());
 
-kj::Promise<void> onDisconnect() { return disconnectPromise.addBranch(); }
+  kj::Promise<void> onDisconnect() { return disconnectPromise.addBranch(); }
   // Returns a promise that resolves when the peer disconnects.
 
   // implements VatNetwork -----------------------------------------------------
 
   kj::Maybe<kj::Own<TwoPartyVatNetworkBase::Connection>> connect(
-      rpc::twoparty::VatId::Reader ref) override;
+        rpc::twoparty::VatId::Reader ref) override;
   kj::Promise<kj::Own<TwoPartyVatNetworkBase::Connection>> accept() override;
+
+  // RpcDumper dumper;
 
 private:
   class OutgoingMessageImpl;
@@ -269,6 +508,7 @@ private:
   rpc::twoparty::Side side;
   MallocMessageBuilder peerVatId;
   ReaderOptions receiveOptions;
+
   bool accepted = false;
 
   kj::Maybe<kj::Promise<void>> previousWrite;
@@ -327,6 +567,8 @@ private:
 
   void taskFailed(kj::Exception&& exception) override;
 };
+
+
 
 
 }  // namespace capnp

@@ -86,6 +86,9 @@ class posix_ap_server_socket_impl : public server_socket_impl {
 public:
     explicit posix_ap_server_socket_impl(socket_address sa) : _sa(sa) {}
     virtual future<connected_socket, socket_address> accept();
+
+    virtual void abort_accept() override;
+
 #ifdef __USE_KJ__
     virtual kj::Promise<std::pair<connected_socket, socket_address> > kj_accept();
 #endif    
@@ -98,6 +101,7 @@ class posix_server_socket_impl : public server_socket_impl {
 public:
     explicit posix_server_socket_impl(socket_address sa, pollable_fd lfd) : _sa(sa), _lfd(std::move(lfd)) {}
     virtual future<connected_socket, socket_address> accept();
+    virtual void abort_accept() override;
 #ifdef __USE_KJ__
     virtual kj::Promise<std::pair<connected_socket, socket_address>> kj_accept();
 #endif    
@@ -109,6 +113,7 @@ class posix_reuseport_server_socket_impl : public server_socket_impl {
 public:
     explicit posix_reuseport_server_socket_impl(socket_address sa, pollable_fd lfd) : _sa(sa), _lfd(std::move(lfd)) {}
     virtual future<connected_socket, socket_address> accept();
+    virtual void abort_accept() override;
 #ifdef __USE_KJ__
     virtual kj::Promise< std::pair<connected_socket, socket_address> > kj_accept();
 #endif        

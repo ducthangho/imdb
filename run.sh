@@ -10,4 +10,4 @@
 # fi
 
 
-ninja -j 2 release && sudo build/release/apps/imdb/imdb -c 1 -m 256M --hugepages /mnt/huge  $@
+ninja -j 2 release && sudo build/release/apps/imdb/imdb -c 1 -m 512M --hugepages /mnt/huge  $@

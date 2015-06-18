@@ -46,6 +46,7 @@ class native_server_socket_impl : public server_socket_impl {
 public:
     native_server_socket_impl(Protocol& proto, uint16_t port, listen_options opt);
     virtual future<connected_socket, socket_address> accept() override;
+    virtual void abort_accept() override;
 
 #ifdef __USE_KJ__
     virtual kj::Promise<std::pair<connected_socket, socket_address>> kj_accept() override;
@@ -66,6 +67,12 @@ native_server_socket_impl<Protocol>::accept() {
                 connected_socket(std::make_unique<native_connected_socket_impl<Protocol>>(std::move(conn))),
                 socket_address()); // FIXME: don't fake it
     });
+}
+
+template <typename Protocol>
+void
+native_server_socket_impl<Protocol>::abort_accept() {
+    _listener.abort_accept();
 }
 
 #ifdef __USE_KJ__
@@ -91,6 +98,8 @@ public:
         : _conn(std::move(conn)) {}
     virtual input_stream<char> input() override;
     virtual output_stream<char> output() override;
+    virtual void shutdown_input() override;
+    virtual void shutdown_output() override;
 };
 
 template <typename Protocol>
@@ -183,6 +192,17 @@ output_stream<char>
 native_connected_socket_impl<Protocol>::output() {
     data_sink ds(std::make_unique<native_data_sink_impl>(_conn));
     return output_stream<char>(std::move(ds), 8192);
+}
+template <typename Protocol>
+void
+native_connected_socket_impl<Protocol>::shutdown_input() {
+    _conn.close_read();
+}
+
+template <typename Protocol>
+void
+native_connected_socket_impl<Protocol>::shutdown_output() {
+    _conn.close_write();
 }
 
 }

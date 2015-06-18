@@ -10,4 +10,4 @@
 # fi
 
 
-ninja -j 2 release && sudo gdb --args build/release/apps/imdb/imdb -c 2 -m 256M $@
+ninja -j 2 release && sudo gdb --args build/release/apps/imdb/imdb -c 1 -m 256M $@

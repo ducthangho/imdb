@@ -3,6 +3,11 @@
 #include <capnp/ez-rpc.h>
 #include <capnp/message.h>
 #include <iostream>
+#include <capnp/rpc-twoparty.h>
+#include "capnp/rpc.h"
+#include <capnp/dynamic.h>
+#include <capnp/schema-parser.h>
+#include <capnp/schema.h>
 #include <map>
 
 using namespace std;
@@ -47,6 +52,7 @@ int main(int argc, const char* argv[]) {
  	// Set up a server.
  	capnp::EzRpcServer server(kj::heap<HashProtocolImpl>(), argv[1]);
 
+  capnp::dumper.addSchema(capnp::Schema::from<HashProtocol>());
  	// Write the port number to stdout, in case it was chosen automatically.
  	auto& waitScope = server.getWaitScope();
  	uint port = server.getPort().wait(waitScope);
