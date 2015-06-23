@@ -35,14 +35,6 @@ B	tests/shared_ptr_test.cc	/^struct B {$/;"	s	file:
 BITOPS_HH_	core/bitops.hh	23;"	d
 BOOST_AUTO_TEST_CASE	tests/foreign_ptr_test.cc	/^BOOST_AUTO_TEST_CASE(make_foreign_ptr_from_lw_shared_ptr) {$/;"	f
 BOOST_AUTO_TEST_CASE	tests/foreign_ptr_test.cc	/^BOOST_AUTO_TEST_CASE(make_foreign_ptr_from_shared_ptr) {$/;"	f
-BOOST_AUTO_TEST_CASE	tests/httpd.cc	/^BOOST_AUTO_TEST_CASE(test_decode_url) {$/;"	f
-BOOST_AUTO_TEST_CASE	tests/httpd.cc	/^BOOST_AUTO_TEST_CASE(test_formatter)$/;"	f
-BOOST_AUTO_TEST_CASE	tests/httpd.cc	/^BOOST_AUTO_TEST_CASE(test_match_rule)$/;"	f
-BOOST_AUTO_TEST_CASE	tests/httpd.cc	/^BOOST_AUTO_TEST_CASE(test_param_matcher)$/;"	f
-BOOST_AUTO_TEST_CASE	tests/httpd.cc	/^BOOST_AUTO_TEST_CASE(test_reply)$/;"	f
-BOOST_AUTO_TEST_CASE	tests/httpd.cc	/^BOOST_AUTO_TEST_CASE(test_routes) {$/;"	f
-BOOST_AUTO_TEST_CASE	tests/httpd.cc	/^BOOST_AUTO_TEST_CASE(test_str_matcher)$/;"	f
-BOOST_AUTO_TEST_CASE	tests/httpd.cc	/^BOOST_AUTO_TEST_CASE(test_transformer) {$/;"	f
 BOOST_AUTO_TEST_CASE	tests/shared_ptr_test.cc	/^BOOST_AUTO_TEST_CASE(explot_dynamic_cast_use_after_free_problem) {$/;"	f
 BOOST_AUTO_TEST_CASE	tests/shared_ptr_test.cc	/^BOOST_AUTO_TEST_CASE(test_const_ptr) {$/;"	f
 BOOST_AUTO_TEST_CASE	tests/shared_ptr_test.cc	/^BOOST_AUTO_TEST_CASE(test_lw_const_ptr_1) {$/;"	f
@@ -63,11 +55,9 @@ BOOST_AUTO_TEST_CASE	tests/sstring_test.cc	/^BOOST_AUTO_TEST_CASE(test_str_not_f
 BOOST_AUTO_TEST_CASE	tests/sstring_test.cc	/^BOOST_AUTO_TEST_CASE(test_substr_eor_sstring) {$/;"	f
 BOOST_AUTO_TEST_CASE	tests/sstring_test.cc	/^BOOST_AUTO_TEST_CASE(test_substr_sstring) {$/;"	f
 BOOST_AUTO_TEST_CASE	tests/sstring_test.cc	/^BOOST_AUTO_TEST_CASE(test_to_sstring) {$/;"	f
-BOOST_TEST_DYN_LINK	tests/httpd.cc	5;"	d	file:
 BOOST_TEST_DYN_LINK	tests/shared_ptr_test.cc	23;"	d	file:
 BOOST_TEST_DYN_LINK	tests/sstring_test.cc	22;"	d	file:
 BOOST_TEST_DYN_LINK	tests/test-utils.hh	25;"	d
-BOOST_TEST_MODULE	tests/httpd.cc	6;"	d	file:
 BOOST_TEST_MODULE	tests/shared_ptr_test.cc	24;"	d	file:
 BOOST_TEST_MODULE	tests/sstring_test.cc	23;"	d	file:
 BOOTREPLY	net/dhcp.cc	/^        BOOTREPLY = 2$/;"	m	class:net::dhcp::impl::m_type	file:
@@ -197,13 +187,13 @@ INVALID	net/dhcp.cc	/^        INVALID = 255$/;"	m	class:net::dhcp::impl::m_type:
 IOV_MAX	core/iostream.hh	50;"	d
 IP_CHECKSUM_HH_	net/ip_checksum.hh	23;"	d
 IP_HH_	net/ip.hh	24;"	d
-IncomingMessageImpl	apps/imdb/vmts-rpc.cc	/^  IncomingMessageImpl(kj::Own<MessageReader> message): message(kj::mv(message)) {    $/;"	f	class:capnp::final
+IncomingMessageImpl	apps/imdb/vmts-rpc.cc	/^  IncomingMessageImpl(kj::Own<SeastarAsyncMessageReader> message): message(kj::mv(message)) {    $/;"	f	class:capnp::final
 Interval	core/scollectd.cc	/^        Interval = 0x0007, \/\/ Interval Numeric Interval used to set the "step" when creating new RRDs unless rrdtool plugin forces StepSize. Also used to detect values that have timed out.$/;"	m	class:scollectd::impl::part_type	file:
 IntervalHr	core/scollectd.cc	/^        IntervalHr = 0x0009, \/\/	Interval (high resolution) 	Numeric 	The interval in which subsequent data values are collected. The interval is given in 2–30 seconds. New in Version 5.0.$/;"	m	class:scollectd::impl::part_type	file:
 JSON_ELEMENTS_HH_	json/json_elements.hh	23;"	d
 JSON_PATH_HH_	http/json_path.hh	23;"	d
 KB	core/units.hh	/^static constexpr size_t KB = 1 << 10;$/;"	v
-KJ_DETACH	core/future.hh	719;"	d
+KJ_DETACH	core/future.hh	946;"	d
 LAST_ACK	net/tcp.hh	/^        static constexpr tcp_state LAST_ACK       = tcp_state::LAST_ACK;$/;"	m	class:net::tcp_state::tcp_option::option_kind::tcp::tcb
 LAST_ACK	net/tcp.hh	/^    LAST_ACK        = (1 << 9),$/;"	m	class:net::tcp_state
 LEASEACTIVE	net/dhcp.cc	/^        LEASEACTIVE = 13,$/;"	m	class:net::dhcp::impl::m_type::htype::opt_type::msg_type	file:
@@ -330,6 +320,14 @@ SEASTAR_TEST_CASE	tests/futures_test.cc	/^SEASTAR_TEST_CASE(test_future_forwardi
 SEASTAR_TEST_CASE	tests/futures_test.cc	/^SEASTAR_TEST_CASE(test_map_reduce) {$/;"	f
 SEASTAR_TEST_CASE	tests/futures_test.cc	/^SEASTAR_TEST_CASE(test_sleep) {$/;"	f
 SEASTAR_TEST_CASE	tests/futures_test.cc	/^SEASTAR_TEST_CASE(test_when_all_iterator_range) {$/;"	f
+SEASTAR_TEST_CASE	tests/httpd.cc	/^SEASTAR_TEST_CASE(test_decode_url) {$/;"	f
+SEASTAR_TEST_CASE	tests/httpd.cc	/^SEASTAR_TEST_CASE(test_formatter)$/;"	f
+SEASTAR_TEST_CASE	tests/httpd.cc	/^SEASTAR_TEST_CASE(test_match_rule)$/;"	f
+SEASTAR_TEST_CASE	tests/httpd.cc	/^SEASTAR_TEST_CASE(test_param_matcher)$/;"	f
+SEASTAR_TEST_CASE	tests/httpd.cc	/^SEASTAR_TEST_CASE(test_reply)$/;"	f
+SEASTAR_TEST_CASE	tests/httpd.cc	/^SEASTAR_TEST_CASE(test_routes) {$/;"	f
+SEASTAR_TEST_CASE	tests/httpd.cc	/^SEASTAR_TEST_CASE(test_str_matcher)$/;"	f
+SEASTAR_TEST_CASE	tests/httpd.cc	/^SEASTAR_TEST_CASE(test_transformer) {$/;"	f
 SEASTAR_TEST_CASE	tests/memcached/test_ascii_parser.cc	/^SEASTAR_TEST_CASE(test_catches_errors_in_get) {$/;"	f
 SEASTAR_TEST_CASE	tests/memcached/test_ascii_parser.cc	/^SEASTAR_TEST_CASE(test_empty_data_is_parsed) {$/;"	f
 SEASTAR_TEST_CASE	tests/memcached/test_ascii_parser.cc	/^SEASTAR_TEST_CASE(test_get_parsing) {$/;"	f
@@ -344,6 +342,10 @@ SEASTAR_TEST_CASE	tests/memcached/test_ascii_parser.cc	/^SEASTAR_TEST_CASE(test_
 SEASTAR_TEST_CASE	tests/output_stream_test.cc	/^SEASTAR_TEST_CASE(test_flush_on_empty_buffer_does_not_push_empty_packet_down_stream) {$/;"	f
 SEASTAR_TEST_CASE	tests/output_stream_test.cc	/^SEASTAR_TEST_CASE(test_splitting) {$/;"	f
 SEASTAR_TEST_CASE	tests/output_stream_test.cc	/^SEASTAR_TEST_CASE(test_splitting_with_trimming) {$/;"	f
+SEASTAR_TEST_CASE	tests/semaphore_test.cc	/^SEASTAR_TEST_CASE(test_semaphore_1) {$/;"	f
+SEASTAR_TEST_CASE	tests/semaphore_test.cc	/^SEASTAR_TEST_CASE(test_semaphore_2) {$/;"	f
+SEASTAR_TEST_CASE	tests/semaphore_test.cc	/^SEASTAR_TEST_CASE(test_semaphore_timeout_1) {$/;"	f
+SEASTAR_TEST_CASE	tests/semaphore_test.cc	/^SEASTAR_TEST_CASE(test_semaphore_timeout_2) {$/;"	f
 SEASTAR_TEST_CASE	tests/test-utils.hh	42;"	d
 SEASTAR_TEST_CASE	tests/thread_test.cc	/^SEASTAR_TEST_CASE(test_thread_1) {$/;"	f
 SEASTAR_TEST_CASE	tests/thread_test.cc	/^SEASTAR_TEST_CASE(test_thread_2) {$/;"	f
@@ -556,9 +558,10 @@ _aio_threaded_fallbacks	core/reactor.hh	/^    uint64_t _aio_threaded_fallbacks =
 _aio_writes	core/reactor.hh	/^    uint64_t _aio_writes = 0;$/;"	m	class:reactor
 _align	core/memory.hh	/^    size_t _align;$/;"	m	class:with_alignment
 _alive	apps/memcached/memcache.cc	/^    seastar::timer_set<item, &item::_timer_link> _alive;$/;"	m	class:memcache::cache	file:
+_all_connections_stopped	http/httpd.hh	/^    promise<> _all_connections_stopped;$/;"	m	class:httpd::http_server
 _all_data_acked_promise	net/tcp.hh	/^            std::experimental::optional<promise<>> _all_data_acked_promise;$/;"	m	struct:net::tcp_state::tcp_option::option_kind::tcp::tcb::send
 _allocated_frags	net/packet.hh	/^        uint16_t _allocated_frags;$/;"	m	struct:net::final::impl
-_armed	core/reactor.hh	/^    bool _armed = false;$/;"	m	class:timer
+_armed	core/timer.hh	/^    bool _armed = false;$/;"	m	class:timer
 _arp	net/arp.hh	/^    arp& _arp;$/;"	m	class:net::arp_for_protocol
 _arp	net/ip.hh	/^    arp_for<ipv4> _arp;$/;"	m	class:net::ipv4
 _arp_for_protocol	net/arp.hh	/^    std::unordered_map<uint16_t, arp_for_protocol*> _arp_for_protocol;$/;"	m	class:net::arp
@@ -618,7 +621,7 @@ _cache	apps/memcached/memcache.cc	/^    sharded_cache& _cache;$/;"	m	class:memca
 _cache	core/scollectd.cc	/^        std::unordered_map<uint16_t, sstring> _cache;$/;"	m	struct:scollectd::impl::cpwriter	file:
 _cache_link	apps/memcached/memcache.cc	/^    hook_type _cache_link;$/;"	m	class:memcache::item	file:
 _cache_link	tests/slab_test.cc	/^    bi::list_member_hook<> _cache_link;$/;"	m	class:item	file:
-_callback	core/reactor.hh	/^    callback_t _callback;$/;"	m	class:timer
+_callback	core/timer.hh	/^    callback_t _callback;$/;"	m	class:timer
 _cancelled	util/defer.hh	/^    bool _cancelled = false;$/;"	m	class:deferred_action
 _capnpPrivate	apps/imdb/adder.capnp.hh	/^  struct _capnpPrivate {$/;"	s	struct:Adder
 _capnpPrivate	apps/imdb/adder.capnp.hh	/^  struct _capnpPrivate {$/;"	s	struct:Adder::AddParams
@@ -660,14 +663,18 @@ _conn	net/tcp.hh	/^        connection* _conn = nullptr;$/;"	m	class:net::tcp_sta
 _conn_per_core	apps/seawreck/seawreck.cc	/^    unsigned _conn_per_core;$/;"	m	class:http_client	file:
 _connect_done	net/tcp.hh	/^        promise<> _connect_done;$/;"	m	class:net::tcp_state::tcp_option::option_kind::tcp::tcb
 _connected	rpc/rpc.hh	/^        promise<> _connected;$/;"	m	class:rpc::protocol::client
+_connections	http/httpd.hh	/^    boost::intrusive::list<connection> _connections;$/;"	m	class:httpd::http_server
+_connections_being_accepted	http/httpd.hh	/^    uint64_t _connections_being_accepted = 0;$/;"	m	class:httpd::http_server
 _content	http/reply.hh	/^    sstring _content;$/;"	m	class:httpd::reply::status_type
-_context	core/thread.hh	/^    jmp_buf _context;$/;"	m	class:seastar::thread_context
+_context	core/thread.hh	/^    jmp_buf_link _context;$/;"	m	class:seastar::thread_context
 _context	core/thread.hh	/^    std::unique_ptr<thread_context> _context;$/;"	m	class:seastar::thread
 _copy	tests/udp_zero_copy.cc	/^    bool _copy;$/;"	m	class:server	file:
 _count	core/semaphore.hh	/^    size_t _count;$/;"	m	class:semaphore
-_count	core/shared_ptr.hh	/^    long _count = 0;$/;"	m	class:enable_lw_shared_from_this
-_count	core/shared_ptr.hh	/^    long _count = 0;$/;"	m	struct:shared_ptr_no_esft
+_count	core/shared_ptr.hh	/^    shared_ptr_counter_type _count = 0;$/;"	m	class:enable_lw_shared_from_this
+_count	core/shared_ptr.hh	/^    shared_ptr_counter_type _count = 0;$/;"	m	struct:shared_ptr_no_esft
+_counter	core/shared_ptr_debug_helper.hh	/^    long _counter = 0;$/;"	m	class:debug_shared_ptr_counter_type
 _cpu	core/distributed.hh	/^    unsigned _cpu;$/;"	m	class:foreign_ptr
+_cpu	core/shared_ptr_debug_helper.hh	/^    std::thread::id _cpu = std::this_thread::get_id();$/;"	m	class:debug_shared_ptr_counter_type
 _cpu	net/proxy.cc	/^    unsigned _cpu;$/;"	m	class:net::proxy_net_device	file:
 _cpu_started	core/reactor.hh	/^    semaphore _cpu_started;$/;"	m	class:reactor
 _cross_cpu_frees	core/memory.hh	/^    uint64_t _cross_cpu_frees;$/;"	m	class:memory::statistics
@@ -740,11 +747,12 @@ _exception	tests/exchanger.hh	/^    std::exception_ptr _exception;$/;"	m	class:e
 _exit_future	core/reactor.hh	/^    future<> _exit_future;$/;"	m	class:reactor
 _exit_promise	core/reactor.hh	/^    promise<> _exit_promise;$/;"	m	class:reactor
 _expand_help	json/argparse.py	/^    def _expand_help(self, action):$/;"	m	class:HelpFormatter
-_expired	core/reactor.hh	/^    bool _expired = false;$/;"	m	class:timer
+_expired	core/timer.hh	/^            _armed(t._armed), _queued(t._queued), _expired(t._expired) {$/;"	f	class:timer
+_expired	core/timer.hh	/^    bool _expired = false;$/;"	m	class:timer
 _expired_lowres_timers	core/reactor.hh	/^    seastar::timer_set<timer<lowres_clock>, &timer<lowres_clock>::_link>::timer_list_t _expired_lowres_timers;$/;"	m	class:reactor
 _expired_timers	core/reactor.hh	/^    seastar::timer_set<timer<>, &timer<>::_link>::timer_list_t _expired_timers;$/;"	m	class:reactor
 _expiry	apps/memcached/memcache.cc	/^    expiration _expiry;$/;"	m	class:memcache::item	file:
-_expiry	core/reactor.hh	/^    time_point _expiry;$/;"	m	class:timer
+_expiry	core/timer.hh	/^    time_point _expiry;$/;"	m	class:timer
 _f	util/transform_iterator.hh	/^    Func _f;$/;"	m	class:transform_iterator
 _f_handle	http/function_handlers.hh	/^                    std::unique_ptr<reply> rep)> _f_handle;$/;"	m	class:httpd::function_handler
 _fc	net/dpdk.cc	/^        tx_buf_factory& _fc;$/;"	m	class:dpdk::dpdk_qp::tx_buf	file:
@@ -816,11 +824,11 @@ _fsm_te	core/ragel.hh	/^    char* _fsm_te;$/;"	m	class:ragel_parser_base
 _fsm_top	core/ragel.hh	/^    int _fsm_top;$/;"	m	class:ragel_parser_base
 _fsm_ts	core/ragel.hh	/^    char* _fsm_ts;$/;"	m	class:ragel_parser_base
 _fsyncs	core/reactor.hh	/^    uint64_t _fsyncs = 0;$/;"	m	class:reactor
-_func	core/future.hh	/^    Func _func;$/;"	m	class:final
 _func	core/future.hh	/^    Func _func;$/;"	m	struct:final
 _func	core/posix.hh	/^    std::unique_ptr<std::function<void ()>> _func;$/;"	m	class:posix_thread
 _func	core/reactor.hh	/^        Func _func;$/;"	m	struct:smp_message_queue::async_work_item
 _func	core/reactor.hh	/^        Func _func;$/;"	m	struct:syscall_work_queue::work_item_returning
+_func	core/task.hh	/^    Func _func;$/;"	m	class:final
 _func	core/thread.hh	/^    std::function<void ()> _func;$/;"	m	class:seastar::thread_context
 _func	util/defer.hh	/^    Func _func;$/;"	m	class:deferred_action
 _func	util/function_input_iterator.hh	/^    Function _func;$/;"	m	struct:function_input_iterator
@@ -1072,10 +1080,11 @@ _parser	apps/memcached/memcache.cc	/^    memcache_ascii_parser _parser;$/;"	m	cl
 _parser	apps/seawreck/seawreck.cc	/^        http_response_parser _parser;$/;"	m	class:http_client::connection	file:
 _path	http/routes.hh	/^    sstring _path;$/;"	m	class:httpd::url
 _peers	apps/memcached/memcache.cc	/^    distributed<cache>& _peers;$/;"	m	class:memcache::sharded_cache	file:
+_pending_aio	core/reactor.hh	/^    std::vector<struct ::iocb> _pending_aio;$/;"	m	class:reactor
 _pending_signals	core/reactor.hh	/^        std::atomic<uint64_t> _pending_signals;$/;"	m	class:reactor::signals
 _pending_tasks	core/reactor.hh	/^    circular_buffer<std::unique_ptr<task>> _pending_tasks;$/;"	m	class:reactor
-_period	core/reactor.hh	/^    std::experimental::optional<duration> _period;$/;"	m	class:timer
 _period	core/scollectd.cc	/^    clock_type::duration _period = default_period;$/;"	m	class:scollectd::impl	file:
+_period	core/timer.hh	/^    std::experimental::optional<duration> _period;$/;"	m	class:timer
 _persist	net/tcp.hh	/^        timer<lowres_clock> _persist;$/;"	m	class:net::tcp_state::tcp_option::option_kind::tcp::tcb
 _pings_per_connection	tests/tcp_client.cc	/^    static constexpr unsigned _pings_per_connection = 1000;$/;"	m	class:client	file:
 _pkt_provider_idx	net/ip.hh	/^    unsigned _pkt_provider_idx = 0;$/;"	m	class:net::ipv4
@@ -1133,7 +1142,7 @@ _queue_has_room	core/reactor.hh	/^    semaphore _queue_has_room = { queue_length
 _queue_name	net/net.hh	/^    const std::string _queue_name;$/;"	m	class:net::qp
 _queue_size	net/ip.hh	/^    int _queue_size = default_queue_size;$/;"	m	class:net::ipv4_udp
 _queue_space	net/ip.hh	/^    semaphore _queue_space = {212992};$/;"	m	class:net::icmp
-_queued	core/reactor.hh	/^    bool _queued = false;$/;"	m	class:timer
+_queued	core/timer.hh	/^    bool _queued = false;$/;"	m	class:timer
 _queues	net/net.hh	/^    std::unique_ptr<qp*[]> _queues;$/;"	m	class:net::device
 _queues_ready	net/dpdk.cc	/^    uint8_t _queues_ready = 0;$/;"	m	class:dpdk::dpdk_device	file:
 _randem_dev	tests/udp_zero_copy.cc	/^    std::random_device _randem_dev;$/;"	m	class:server	file:
@@ -1309,6 +1318,8 @@ _stats_timer	tests/udp_zero_copy.cc	/^    timer<> _stats_timer;$/;"	m	class:serv
 _status	http/exception.hh	/^    reply::status_type _status;$/;"	m	class:httpd::base_exception
 _stopped	core/reactor.hh	/^    bool _stopped = false;$/;"	m	class:reactor
 _stopped	core/reactor.hh	/^    std::atomic<bool> _stopped = { false };$/;"	m	class:thread_pool
+_stopped	http/httpd.hh	/^    future<> _stopped = _all_connections_stopped.get_future();$/;"	m	class:httpd::http_server
+_stopping	http/httpd.hh	/^    bool _stopping = false;$/;"	m	class:httpd::http_server
 _stream	core/stream.hh	/^    stream<T...>* _stream;$/;"	m	class:subscription
 _sub	core/stream.hh	/^    subscription<T...>* _sub = nullptr;$/;"	m	class:stream
 _supported_features	net/xenfront.cc	/^    static std::unordered_map<std::string, std::string> _supported_features;$/;"	m	class:xen::xenfront_qp	file:
@@ -1413,7 +1424,7 @@ _version	http/request.hh	/^    sstring _version;$/;"	m	struct:httpd::request
 _vhost_fd	net/virtio.cc	/^    file_desc _vhost_fd;$/;"	m	class:virtio::qp_vhost	file:
 _virtio	net/virtio.cc	/^    osv::assigned_virtio &_virtio;$/;"	m	class:virtio::notifier_osv	file:
 _virtio	net/virtio.cc	/^    osv::assigned_virtio &_virtio;$/;"	m	class:virtio::qp_osv	file:
-_wait_list	core/semaphore.hh	/^    circular_buffer<std::pair<promise<>, size_t>> _wait_list;$/;"	m	class:semaphore
+_wait_list	core/semaphore.hh	/^    circular_buffer<entry> _wait_list;$/;"	m	class:semaphore
 _waiters	net/arp.hh	/^        std::vector<promise<l2addr>> _waiters;$/;"	m	struct:net::arp_for::resolution
 _win_scale_received	net/tcp.hh	/^    bool _win_scale_received = false;$/;"	m	class:net::tcp_state::tcp_option::option_kind::option_len
 _window_opened	net/tcp.hh	/^            promise<> _window_opened;$/;"	m	struct:net::tcp_state::tcp_option::option_kind::tcp::tcb::send
@@ -1435,6 +1446,20 @@ a	core/reactor.hh	/^        } a;$/;"	m	union:smp_message_queue::tx_side	typeref:
 a	core/scollectd.hh	/^    values_impl(const values_impl<Args...>& a) = default;$/;"	m	class:scollectd::values_impl
 a	core/scollectd.hh	/^    values_impl(values_impl<Args...>&& a) = default;$/;"	m	class:scollectd::values_impl
 aa	core/reactor.hh	/^        struct aa {$/;"	s	union:smp_message_queue::tx_side
+abort	core/queue.hh	/^    void abort(std::exception_ptr ex) {$/;"	f	class:queue
+abort_accept	core/reactor.hh	/^    void abort_accept() {$/;"	f	class:server_socket
+abort_accept	net/native-stack-impl.hh	/^native_server_socket_impl<Protocol>::abort_accept() {$/;"	f	class:net::native_server_socket_impl
+abort_accept	net/posix-stack.cc	/^posix_ap_server_socket_impl::abort_accept() {$/;"	f	class:net::posix_ap_server_socket_impl
+abort_accept	net/posix-stack.cc	/^posix_reuseport_server_socket_impl::abort_accept() {$/;"	f	class:net::posix_reuseport_server_socket_impl
+abort_accept	net/posix-stack.cc	/^posix_server_socket_impl::abort_accept() {$/;"	f	class:net::posix_server_socket_impl
+abort_fd	core/reactor.cc	/^void reactor_backend_epoll::abort_fd(pollable_fd_state& pfd, std::exception_ptr ex,$/;"	f	class:reactor_backend_epoll
+abort_reader	core/reactor.cc	/^void reactor_backend_epoll::abort_reader(pollable_fd_state& fd, std::exception_ptr ex) {$/;"	f	class:reactor_backend_epoll
+abort_reader	core/reactor.hh	/^	void abort_reader(pollable_fd_state& fd, std::exception_ptr ex) {$/;"	f	class:reactor
+abort_reader	core/reactor.hh	/^pollable_fd::abort_reader(std::exception_ptr ex) {$/;"	f	class:pollable_fd
+abort_reader	net/tcp.hh	/^tcp<InetTraits>::tcb::abort_reader() {$/;"	f	class:net::tcp_state::tcp_option::option_kind::tcp::tcb::tcp::tcb
+abort_writer	core/reactor.cc	/^void reactor_backend_epoll::abort_writer(pollable_fd_state& fd, std::exception_ptr ex) {$/;"	f	class:reactor_backend_epoll
+abort_writer	core/reactor.hh	/^    void abort_writer(pollable_fd_state& fd, std::exception_ptr ex) {$/;"	f	class:reactor
+abort_writer	core/reactor.hh	/^pollable_fd::abort_writer(std::exception_ptr ex) {$/;"	f	class:pollable_fd
 accept	apps/imdb/vmts-rpc.cc	/^kj::Promise<kj::Own<TwoPartyVatNetworkBase::Connection>> SeastarNetwork::accept() {$/;"	f	class:capnp::SeastarNetwork
 accept	core/posix.hh	/^    file_desc accept(sockaddr& sa, socklen_t& sl, int flags = 0) {$/;"	f	class:file_desc
 accept	core/reactor.hh	/^    future<connected_socket, socket_address> accept() {$/;"	f	class:server_socket
@@ -1538,9 +1563,12 @@ alloc_ref	core/xen/gntalloc.cc	/^gntref userspace_gntalloc::alloc_ref() {$/;"	f	
 alloc_ref	core/xen/gntalloc.cc	/^grant_head *kernel_gntalloc::alloc_ref(unsigned nr_ents) {$/;"	f	class:xen::kernel_gntalloc
 alloc_ref	core/xen/gntalloc.cc	/^grant_head *userspace_gntalloc::alloc_ref(unsigned nr_ents) {$/;"	f	class:xen::userspace_gntalloc
 alloc_rx_references	net/xenfront.cc	/^future<> xenfront_qp::alloc_rx_references() {$/;"	f	class:xen::xenfront_qp
+allocate	core/file.hh	/^    future<> allocate(uint64_t position, uint64_t length) {$/;"	f	class:file
 allocate	core/memory.cc	/^small_pool::allocate() {$/;"	f	class:memory::small_pool
 allocate	core/memory.cc	/^void* allocate(size_t size) {$/;"	f	namespace:memory
 allocate	core/memory.hh	/^    T* allocate(size_t n) const {$/;"	f	class:aligned_allocator
+allocate	core/reactor.cc	/^blockdev_file_impl::allocate(uint64_t position, uint64_t length) {$/;"	f	class:blockdev_file_impl
+allocate	core/reactor.cc	/^posix_file_impl::allocate(uint64_t position, uint64_t length) {$/;"	f	class:posix_file_impl
 allocate	core/resource.cc	/^std::vector<cpu> allocate(configuration c) {$/;"	f	namespace:resource
 allocate	net/packet.hh	/^        static std::unique_ptr<impl> allocate(size_t nr_frags) {$/;"	f	struct:net::final::impl
 allocate_aligned	core/memory.cc	/^void* allocate_aligned(size_t align, size_t size) {$/;"	f	namespace:memory
@@ -1624,7 +1652,7 @@ arm	core/reactor.hh	/^void timer<Clock>::arm(time_point until, std::experimental
 arm	core/scollectd.cc	/^    void arm() {$/;"	f	class:scollectd::impl	file:
 arm_periodic	core/reactor.hh	/^void timer<Clock>::arm_periodic(duration delta) {$/;"	f	class:timer
 arm_state	core/reactor.hh	/^void timer<Clock>::arm_state(time_point until, std::experimental::optional<duration> period) {$/;"	f	class:timer
-armed	core/reactor.hh	/^    bool armed() const { return _armed; }$/;"	f	class:timer
+armed	core/timer.hh	/^    bool armed() const { return _armed; }$/;"	f	class:timer
 arp	net/arp.cc	/^arp::arp(interface* netif) : _netif(netif), _proto(netif, eth_protocol_num::arp, [this] { return get_packet(); })$/;"	f	class:net::arp
 arp	net/arp.hh	/^class arp {$/;"	c	namespace:net
 arp	net/const.hh	/^    ipv4 = 0x0800, arp = 0x0806, ipv6 = 0x86dd$/;"	m	class:net::ip_protocol_num::eth_protocol_num
@@ -1654,6 +1682,7 @@ asReader	apps/imdb/hashprotocol.capnp.hh	/^  inline Reader asReader() const { re
 asReader	apps/imdb/hashprotocol.capnp.hh	/^  inline Reader asReader() const { return *this; }$/;"	f	class:HashProtocol::GetResults::Builder
 asReader	apps/imdb/hashprotocol.capnp.hh	/^  inline Reader asReader() const { return *this; }$/;"	f	class:HashProtocol::SetParams::Builder
 asReader	apps/imdb/hashprotocol.capnp.hh	/^  inline Reader asReader() const { return *this; }$/;"	f	class:HashProtocol::SetResults::Builder
+as_cookie	net/dpdk.cc	/^void* as_cookie(struct rte_pktmbuf_pool_private& p) {$/;"	f
 as_input_stream	net/packet-data-source.hh	/^input_stream<char> as_input_stream(packet&& p) {$/;"	f	namespace:net
 as_json	json/json_elements.cc	/^    string as_json() {$/;"	f	class:json::json_builder
 as_posix_sockaddr	net/api.hh	/^    ::sockaddr& as_posix_sockaddr() { return u.sa; }$/;"	f	class:socket_address
@@ -1670,6 +1699,7 @@ assertHasKey	tests/memcached/test_memcached.py	/^    def assertHasKey(self, key)
 assertNoKey	tests/memcached/test_memcached.py	/^    def assertNoKey(self, key):$/;"	m	class:MemcacheTest
 assert_split	tests/output_stream_test.cc	/^future<> assert_split(StreamConstructor stream_maker, std::initializer_list<T> write_calls,$/;"	f
 assert_type	rpc/rpc_impl.hh	/^inline void assert_type() {$/;"	f	namespace:rpc
+async	core/thread.hh	/^async(Func&& func, Args&&... args) {$/;"	f	namespace:seastar
 async_work_item	core/reactor.hh	/^        async_work_item(Func&& func) : _func(std::move(func)) {}$/;"	f	struct:smp_message_queue::async_work_item
 async_work_item	core/reactor.hh	/^    struct async_work_item : work_item {$/;"	s	class:smp_message_queue
 at	core/array_map.hh	/^    Value& at(size_t key) {$/;"	f	class:array_map
@@ -1702,7 +1732,7 @@ back	core/circular_buffer.hh	/^circular_buffer<T, Alloc>::back() {$/;"	f	class:c
 back	core/memory.cc	/^    page& back(page* ary) { return ary[_back]; }$/;"	f	class:memory::page_list
 bad	net/dpdk.cc	/^        } bad;$/;"	m	struct:dpdk::port_stats::__anon12	typeref:struct:dpdk::port_stats::__anon12::__anon14	file:
 bad	net/dpdk.cc	/^        } bad;$/;"	m	struct:dpdk::port_stats::__anon9	typeref:struct:dpdk::port_stats::__anon9::__anon11	file:
-bad	net/net.hh	/^        } bad;$/;"	m	struct:net::qp_stats::__anon5	typeref:struct:net::qp_stats::__anon5::__anon6
+bad	net/net.hh	/^        } bad;$/;"	m	struct:net::qp_stats::__anon2	typeref:struct:net::qp_stats::__anon2::__anon3
 bad_gateway	http/reply.cc	/^const sstring bad_gateway = " 502 Bad Gateway\\r\\n";$/;"	m	namespace:httpd::status_strings	file:
 bad_gateway	http/reply.hh	/^        bad_gateway = 502, \/\/!< bad_gateway$/;"	m	class:httpd::reply::status_type
 bad_param_exception	http/exception.hh	/^    bad_param_exception(const std::string& msg)$/;"	f	class:httpd::bad_param_exception
@@ -1840,6 +1870,7 @@ cfree	core/memory.cc	/^void cfree(void* obj) {$/;"	f
 chaddr	net/dhcp.cc	/^        uint8_t chaddr[16] = { 0, };     \/\/ Client hardware address.$/;"	m	struct:net::dhcp::impl::m_type::htype::opt_type::msg_type::dhcp_header	file:
 char_device	core/file.hh	/^    char_device,$/;"	m	class:directory_entry_type
 check	core/scollectd.cc	/^        cpwriter& check(size_t sz) {$/;"	f	struct:scollectd::impl::cpwriter
+check	core/shared_ptr_debug_helper.hh	/^    void check() const {$/;"	f	class:debug_shared_ptr_counter_type
 check_frag0	net/dpdk.cc	/^        static bool check_frag0(packet& p)$/;"	f	class:dpdk::dpdk_qp::tx_buf	file:
 check_port_link_status	net/dpdk.cc	/^void dpdk_device::check_port_link_status()$/;"	f	class:dpdk::dpdk_device
 checksum	net/tcp.hh	/^    packed<uint16_t> checksum;$/;"	m	struct:net::tcp_state::tcp_option::option_kind::tcp_hdr
@@ -1871,7 +1902,7 @@ client_type_helper	rpc/rpc_impl.hh	/^struct client_type_helper<Ret, client_info,
 client_type_helper	rpc/rpc_impl.hh	/^struct client_type_helper<Ret, const client_info&, Args...> {$/;"	s	namespace:rpc
 client_type_impl	rpc/rpc_impl.hh	/^struct client_type_impl<F, std::integer_sequence<std::size_t, I...>> {$/;"	s	namespace:rpc
 clients	tests/tcp_client.cc	/^distributed<client> clients;$/;"	v
-clock	core/reactor.hh	/^    typedef Clock clock;$/;"	t	class:timer
+clock	core/timer.hh	/^    typedef Clock clock;$/;"	t	class:timer
 close	apps/imdb/kj_iostream.hh	/^    future<> close() { return _dsi->close(); }$/;"	f	class:kj_data_sink
 close	apps/imdb/kj_iostream.hh	/^    future<> close() { return _fd.close(); }$/;"	f	class:final
 close	core/fstream.cc	/^    future<> close() { return _file->flush(); }$/;"	f	class:file_data_sink_impl
@@ -1947,7 +1978,7 @@ connection	apps/memcached/memcache.cc	/^    struct connection {$/;"	s	class:memc
 connection	apps/seawreck/seawreck.cc	/^        connection(connected_socket&& fd, http_client* client)$/;"	f	class:http_client::connection
 connection	apps/seawreck/seawreck.cc	/^    class connection {$/;"	c	class:http_client	file:
 connection	http/httpd.hh	/^        connection(http_server& server, connected_socket&& fd,$/;"	f	class:httpd::http_server::connection
-connection	http/httpd.hh	/^    class connection {$/;"	c	class:httpd::http_server
+connection	http/httpd.hh	/^    class connection : public boost::intrusive::list_base_hook<> {$/;"	c	class:httpd::http_server
 connection	net/posix-stack.hh	/^        connection(pollable_fd xfd, socket_address xaddr) : fd(std::move(xfd)), addr(xaddr) {}$/;"	f	struct:net::posix_ap_server_socket_impl::connection
 connection	net/posix-stack.hh	/^    struct connection {$/;"	s	class:net::posix_ap_server_socket_impl
 connection	rpc/rpc.hh	/^        class connection : public protocol::connection, public enable_lw_shared_from_this<connection> {$/;"	c	class:rpc::protocol::server
@@ -2007,7 +2038,7 @@ copy_str_to	core/sstring.hh	/^char* copy_str_to(char* dst, const Head& head, con
 core	configure.py	/^core = [$/;"	v
 count	core/reactor.cc	/^unsigned smp::count = 1;$/;"	m	class:smp	file:
 count	core/reactor.hh	/^    static unsigned count;$/;"	m	class:smp
-count	core/shared_ptr.hh	/^    long count = 0;$/;"	m	struct:shared_ptr_count_base
+count	core/shared_ptr.hh	/^    shared_ptr_counter_type count = 0;$/;"	m	struct:shared_ptr_count_base
 count	tests/linecount.cc	/^    size_t count = 0;$/;"	m	struct:reader	file:
 count_leading_zeros	core/bitops.hh	/^constexpr unsigned count_leading_zeros(unsigned long long x) {$/;"	f
 count_leading_zeros	core/bitops.hh	/^constexpr unsigned count_leading_zeros(unsigned long x) {$/;"	f
@@ -2029,8 +2060,10 @@ cpu_id_shift	core/memory.cc	/^static constexpr unsigned cpu_id_shift = 36; \/\/ 
 cpu_id_squared	tests/distributed_test.cc	/^    int cpu_id_squared() const {$/;"	f	struct:X
 cpu_mem	core/memory.cc	/^static thread_local cpu_pages cpu_mem;$/;"	m	namespace:memory	file:
 cpu_pages	core/memory.cc	/^struct cpu_pages {$/;"	s	namespace:memory	file:
+cpu_set	core/resource.hh	/^    optional<cpuset> cpu_set;$/;"	m	struct:resource::configuration
 cpuid_to_cpuset	core/resource.cc	/^cpu_set_t cpuid_to_cpuset(unsigned cpuid) {$/;"	f
 cpus	core/resource.hh	/^    optional<size_t> cpus;$/;"	m	struct:resource::configuration
+cpuset_wrapper	core/reactor.cc	/^struct cpuset_wrapper {$/;"	s	file:
 cpwriter	core/scollectd.cc	/^        cpwriter()$/;"	f	struct:scollectd::impl::cpwriter
 cpwriter	core/scollectd.cc	/^    struct cpwriter {$/;"	s	class:scollectd::impl	file:
 crc	net/dpdk.cc	/^            uint64_t crc;          \/\/ packets with CRC error$/;"	m	struct:dpdk::port_stats::__anon9::__anon11	file:
@@ -2065,8 +2098,8 @@ cs	core/reactor.hh	/^    connected_socket(connected_socket&& cs) = default;$/;"	
 csum	net/ip.hh	/^    packed<uint16_t> csum;$/;"	m	class:net::ip_hdr::frag_bits
 csum	net/ip.hh	/^    packed<uint16_t> csum;$/;"	m	struct:net::icmp_hdr
 csum	net/ip_checksum.hh	/^    __int128 csum = 0;$/;"	m	struct:net::checksummer
-csum	net/net.hh	/^            uint64_t csum;         \/\/ packets with bad checksum$/;"	m	struct:net::qp_stats::__anon5::__anon6
-csum_blank	net/xenfront.hh	/^        uint16_t csum_blank : 1;$/;"	m	struct:xen::netif_tx_request::__anon4
+csum	net/net.hh	/^            uint64_t csum;         \/\/ packets with bad checksum$/;"	m	struct:net::qp_stats::__anon2::__anon3
+csum_blank	net/xenfront.hh	/^        uint16_t csum_blank : 1;$/;"	m	struct:xen::netif_tx_request::__anon8
 csum_offset	net/virtio.cc	/^        uint16_t csum_offset;$/;"	m	struct:virtio::qp::net_hdr	file:
 csum_start	net/virtio.cc	/^        uint16_t csum_start;$/;"	m	struct:virtio::qp::net_hdr	file:
 ctclass	http/request.hh	/^    enum class ctclass$/;"	c	struct:httpd::request
@@ -2106,13 +2139,15 @@ data_source_impl	core/iostream.hh	/^class data_source_impl {$/;"	c
 data_type	core/scollectd.hh	/^enum class data_type : uint8_t {$/;"	c	namespace:scollectd
 data_type_for	core/scollectd.hh	/^struct data_type_for<T,$/;"	s	namespace:scollectd
 data_type_for	core/scollectd.hh	/^struct data_type_for<typed<T>> : public data_type_for<T> {$/;"	s	namespace:scollectd
-data_validated	net/xenfront.hh	/^        uint16_t data_validated : 1;$/;"	m	struct:xen::netif_tx_request::__anon4
+data_validated	net/xenfront.hh	/^        uint16_t data_validated : 1;$/;"	m	struct:xen::netif_tx_request::__anon8
 date_time	json/formatter.hh	/^typedef struct tm date_time;$/;"	t	namespace:json	typeref:struct:json::tm
 dbgflag	configure.py	/^dbgflag = debug_flag(args.cxx) if args.debuginfo else ''$/;"	v
 deallocate	core/memory.cc	/^small_pool::deallocate(void* object) {$/;"	f	class:memory::small_pool
 deallocate	core/memory.hh	/^    void deallocate(T* ptr) const {$/;"	f	class:aligned_allocator
 debug_flag	configure.py	/^def debug_flag(compiler):$/;"	f
 debug_mode_adjust_fragments	net/virtio.cc	/^qp::rxq::debug_mode_adjust_fragments() {$/;"	f	class:virtio::qp::rxq
+debug_shared_ptr_counter_type	core/shared_ptr_debug_helper.hh	/^    debug_shared_ptr_counter_type(long x) : _counter(x) {}$/;"	f	class:debug_shared_ptr_counter_type
+debug_shared_ptr_counter_type	core/shared_ptr_debug_helper.hh	/^class debug_shared_ptr_counter_type {$/;"	c
 decltype	apps/imdb/adder.capnp.hh	/^  inline Builder(decltype(nullptr)) {}$/;"	f	class:Adder::AddParams::Builder
 decltype	apps/imdb/adder.capnp.hh	/^  inline Builder(decltype(nullptr)) {}$/;"	f	class:Adder::AddResults::Builder
 decltype	apps/imdb/adder.capnp.hh	/^  inline Pipeline(decltype(nullptr)): _typeless(nullptr) {}$/;"	f	class:Adder::AddParams::Pipeline
@@ -2215,7 +2250,7 @@ dma_read_bulk	core/file.hh	/^file::dma_read_bulk(uint64_t offset, size_t range_s
 dma_read_exactly	core/file.hh	/^    dma_read_exactly(uint64_t pos, size_t len) {$/;"	f	class:file
 dma_write	core/file.hh	/^    future<size_t> dma_write(uint64_t pos, const CharType* buffer, size_t len) {$/;"	f	class:file
 dma_write	core/file.hh	/^    future<size_t> dma_write(uint64_t pos, std::vector<iovec> iov) {$/;"	f	class:file
-do_accepts	http/httpd.hh	/^    void do_accepts(int which) {$/;"	f	class:httpd::http_server
+do_accepts	http/httpd.hh	/^    future<> do_accepts(int which) {$/;"	f	class:httpd::http_server
 do_accepts	tests/tcp_server.cc	/^    void do_accepts(int which) {$/;"	f	class:tcp_server
 do_accepts	tests/udp_server.cc	/^    kj::Promise<void> do_accepts() {$/;"	f	class:udp_server
 do_complete	net/virtio.cc	/^bool vring<BufferChain, Completion>::do_complete() {$/;"	f	class:virtio::vring
@@ -2273,12 +2308,11 @@ dump	net/xenfront.hh	/^    void dump(const char *str, netif_rx_response &r) {$/;
 dump	net/xenfront.hh	/^    void dump(const char *str, netif_tx_response &r) {$/;"	f	class:xen::front_ring
 dump_arp_packets	tests/l3_test.cc	/^void dump_arp_packets(l3_protocol& proto) {$/;"	f
 dump_packet	tests/echotest.cc	/^void dump_packet(const packet& p) {$/;"	f
-dumper	apps/imdb/vmts-rpc.hh	/^  RpcDumper dumper;$/;"	m	class:capnp::final
 dup	core/posix.hh	/^    file_desc dup() const {$/;"	f	class:file_desc
 dup	tests/shared_ptr_test.cc	/^    shared_ptr<C> dup() { return shared_from_this(); }$/;"	f	class:C
 dupacks	net/tcp.hh	/^            uint16_t dupacks = 0;$/;"	m	struct:net::tcp_state::tcp_option::option_kind::tcp::tcb::send
 duration	core/reactor.hh	/^    typedef std::chrono::duration<rep, period> duration;$/;"	t	class:lowres_clock
-duration	core/reactor.hh	/^    typedef typename Clock::duration duration;$/;"	t	class:timer
+duration	core/timer.hh	/^    typedef typename Clock::duration duration;$/;"	t	class:timer
 dynamic_pointer_cast	core/shared_ptr.hh	/^dynamic_pointer_cast(const shared_ptr<U>& p) {$/;"	f
 e_dst	net/ip.hh	/^        ethernet_address e_dst;$/;"	m	struct:net::ipv4_traits::l4packet
 eal	core/dpdk_rte.hh	/^class eal {$/;"	c	namespace:dpdk
@@ -2320,6 +2354,8 @@ engine_exit	core/reactor.cc	/^void engine_exit(std::exception_ptr eptr) {$/;"	f
 entries	net/xenfront.hh	/^        entries(front_ring<T> *ring) : _ring(ring) {}$/;"	f	class:xen::front_ring::entries
 entries	net/xenfront.hh	/^    class entries {$/;"	c	class:xen::front_ring
 entries	net/xenfront.hh	/^    entries entries;$/;"	m	class:xen::front_ring
+entry	core/semaphore.hh	/^        entry(promise<>&& pr_, size_t nr_) : pr(std::move(pr_)), nr(nr_) {}$/;"	f	struct:semaphore::entry
+entry	core/semaphore.hh	/^    struct entry {$/;"	s	class:semaphore
 enum_hash	core/enum.hh	/^class enum_hash {$/;"	c
 eof	apps/imdb/kj_iostream.hh	/^    bool eof() { return _eof; }$/;"	f	class:final
 eof	core/file.hh	/^        bool         eof      = false;$/;"	m	struct:file::read_state
@@ -2386,7 +2422,7 @@ extension_to_type	http/mime_types.cc	/^const char* extension_to_type(const sstri
 external	core/sstring.hh	/^        } external;$/;"	m	union:basic_sstring::contents	typeref:struct:basic_sstring::contents::external_type
 external_type	core/sstring.hh	/^        struct external_type {$/;"	s	union:basic_sstring::contents
 extra	core/reactor.cc	/^    Extra extra;$/;"	m	struct:syscall_result_extra	file:
-extra_info	net/xenfront.hh	/^        uint16_t extra_info : 1;$/;"	m	struct:xen::netif_tx_request::__anon4
+extra_info	net/xenfront.hh	/^        uint16_t extra_info : 1;$/;"	m	struct:xen::netif_tx_request::__anon8
 f	tests/blkdiscard_test.cc	/^    file f;$/;"	m	struct:file_test	file:
 f	tests/fileiotest.cc	/^    file f;$/;"	m	struct:file_test	file:
 f_ack	net/tcp.hh	/^    uint8_t f_ack : 1;$/;"	m	struct:net::tcp_state::tcp_option::option_kind::tcp_hdr
@@ -2447,10 +2483,10 @@ final	core/deleter.hh	/^class deleter final {$/;"	c
 final	core/deleter.hh	/^struct free_deleter_impl final : deleter::impl {$/;"	s
 final	core/deleter.hh	/^struct lambda_deleter_impl final : deleter::impl {$/;"	s
 final	core/deleter.hh	/^struct object_deleter_impl final : deleter::impl {$/;"	s
-final	core/future.hh	/^class lambda_task final : public task {$/;"	c
 final	core/future.hh	/^struct continuation final : task {$/;"	s
 final	core/iostream.hh	/^class input_stream final : public kj::AsyncInputStream {$/;"	c
 final	core/iostream.hh	/^class output_stream final : public kj::AsyncOutputStream {$/;"	c
+final	core/task.hh	/^class lambda_task final : public task {$/;"	c
 final	core/vector-data-sink.hh	/^class vector_data_sink final : public data_sink_impl {$/;"	c
 final	net/api.hh	/^class udp_datagram final {$/;"	c	namespace:net
 final	net/ip.hh	/^class ipv4_icmp final : public ip_protocol {$/;"	c	namespace:net
@@ -2472,7 +2508,7 @@ flags	net/dhcp.cc	/^        packed<uint16_t> flags = 0;         \/\/ Flags$/;"	m
 flags	net/virtio.cc	/^        struct flags {$/;"	s	class:virtio::vring::desc	file:
 flags	net/virtio.cc	/^        struct flags {$/;"	s	struct:virtio::vring::avail_layout	file:
 flags	net/xenfront.hh	/^    uint16_t flags;        \/* NETRXF_* *\/$/;"	m	struct:xen::netif_rx_response
-flags	net/xenfront.hh	/^    } flags;$/;"	m	struct:xen::netif_tx_request	typeref:struct:xen::netif_tx_request::__anon4
+flags	net/xenfront.hh	/^    } flags;$/;"	m	struct:xen::netif_tx_request	typeref:struct:xen::netif_tx_request::__anon8
 flags_reserved	net/virtio.cc	/^        uint8_t flags_reserved : 7;$/;"	m	struct:virtio::qp::net_hdr	file:
 flight_size	net/tcp.hh	/^        uint32_t flight_size() {$/;"	f	class:net::tcp_state::tcp_option::option_kind::tcp::tcb
 flush	apps/imdb/kj_iostream-impl.hh	/^kj_output_stream<CharType>::flush() {$/;"	f	class:kj_output_stream
@@ -2484,6 +2520,7 @@ flush_all	apps/memcached/memcache.cc	/^    future<> flush_all() {$/;"	f	class:me
 flush_all	apps/memcached/memcache.cc	/^    void flush_all() {$/;"	f	class:memcache::cache
 flush_at	apps/memcached/memcache.cc	/^    future<> flush_at(clock_type::time_point time_point) {$/;"	f	class:memcache::sharded_cache
 flush_at	apps/memcached/memcache.cc	/^    void flush_at(clock_type::time_point time_point) {$/;"	f	class:memcache::cache
+flush_pending_aio	core/reactor.cc	/^reactor::flush_pending_aio() {$/;"	f	class:reactor
 flush_request_batch	core/reactor.cc	/^void smp_message_queue::flush_request_batch() {$/;"	f	class:smp_message_queue
 flush_response_batch	core/reactor.cc	/^void smp_message_queue::flush_response_batch() {$/;"	f	class:smp_message_queue
 for_each	core/circular_buffer.hh	/^circular_buffer<T, Alloc>::for_each(Func func) {$/;"	f	class:circular_buffer
@@ -2607,10 +2644,9 @@ futurize	core/future.hh	/^struct futurize<future<Args...>> {$/;"	s
 futurize	core/future.hh	/^struct futurize<void> {$/;"	s
 g_allocs	core/memory.cc	/^static thread_local uint64_t g_allocs;$/;"	m	namespace:memory	file:
 g_cross_cpu_frees	core/memory.cc	/^static thread_local uint64_t g_cross_cpu_frees;$/;"	m	namespace:memory	file:
-g_current_context	core/thread.cc	/^thread_local jmp_buf* g_current_context;$/;"	m	namespace:seastar	file:
-g_current_thread	core/thread.cc	/^thread_local thread_context* g_current_thread;$/;"	m	namespace:seastar	file:
+g_current_context	core/thread.cc	/^thread_local jmp_buf_link* g_current_context;$/;"	m	namespace:seastar	file:
 g_frees	core/memory.cc	/^static thread_local uint64_t g_frees;$/;"	m	namespace:memory	file:
-g_unthreaded_context	core/thread.cc	/^thread_local jmp_buf g_unthreaded_context;$/;"	m	namespace:seastar	file:
+g_unthreaded_context	core/thread.cc	/^thread_local jmp_buf_link g_unthreaded_context;$/;"	m	namespace:seastar	file:
 gateway	net/dhcp.hh	/^        ipv4_address gateway;$/;"	m	struct:net::dhcp::lease
 gc	net/dpdk.cc	/^        bool gc() {$/;"	f	class:dpdk::dpdk_qp::tx_buf_factory
 gc_count	net/dpdk.cc	/^        static constexpr int gc_count = 1;$/;"	m	class:dpdk::dpdk_qp::tx_buf_factory	file:
@@ -2634,6 +2670,9 @@ get	net/dpdk.cc	/^        tx_buf* get() {$/;"	f	class:dpdk::dpdk_qp::tx_buf_fact
 get	net/ip_checksum.cc	/^uint16_t checksummer::get() const {$/;"	f	class:net::checksummer
 get	net/posix-stack.cc	/^posix_data_source_impl::get() {$/;"	f	class:net::posix_data_source_impl
 get	tests/shared_ptr_test.cc	/^    shared_ptr<const C> get() const { return shared_from_this(); }$/;"	f	class:C
+get0	core/future.hh	/^    static get0_return_type get0(std::tuple<>&&) {$/;"	f	struct:future_state
+get0	core/future.hh	/^    static get0_return_type get0(std::tuple<T...>&& x) {$/;"	f	struct:future_state
+get0	core/future.hh	/^    typename future_state<T...>::get0_return_type get0() {$/;"	f	class:future
 getItemVersion	tests/memcached/test_memcached.py	/^    def getItemVersion(self, key):$/;"	m	class:MemcacheTest
 getKey	apps/imdb/hashprotocol.capnp.hh	/^inline  ::int32_t HashProtocol::GetParams::Builder::getKey() {$/;"	f	class:HashProtocol::GetParams::Builder
 getKey	apps/imdb/hashprotocol.capnp.hh	/^inline  ::int32_t HashProtocol::GetParams::Reader::getKey() const {$/;"	f	class:HashProtocol::GetParams::Reader
@@ -2656,6 +2695,7 @@ getValue	apps/imdb/hashprotocol.capnp.hh	/^inline  ::int32_t HashProtocol::SetPa
 getValue	apps/imdb/hashprotocol.capnp.hh	/^inline  ::int32_t HashProtocol::SetParams::Reader::getValue() const {$/;"	f	class:HashProtocol::SetParams::Reader
 get_address	core/posix.hh	/^    socket_address get_address() {$/;"	f	class:file_desc
 get_assembled_packet	net/ip.cc	/^packet ipv4::frag::get_assembled_packet(ethernet_address from, ethernet_address to) {$/;"	f	class:net::ipv4::frag
+get_available_state	core/future.hh	/^    future_state<T...> get_available_state() {$/;"	f	class:future
 get_base_name	json/json2code.py	/^def get_base_name(param):$/;"	f
 get_collectd_ids	core/scollectd.cc	/^std::vector<scollectd::type_instance_id> get_collectd_ids() {$/;"	f	namespace:scollectd
 get_collectd_types	core/scollectd.cc	/^std::vector<data_type> get_collectd_types($/;"	f	namespace:scollectd
@@ -2748,18 +2788,18 @@ gntref	core/xen/gntalloc.hh	/^    gntref(int id, void *page) : xen_id(id), page(
 gntref	core/xen/gntalloc.hh	/^class gntref {$/;"	c	namespace:xen
 good	net/dpdk.cc	/^        } good;$/;"	m	struct:dpdk::port_stats::__anon12	typeref:struct:dpdk::port_stats::__anon12::__anon13	file:
 good	net/dpdk.cc	/^        } good;$/;"	m	struct:dpdk::port_stats::__anon9	typeref:struct:dpdk::port_stats::__anon9::__anon10	file:
-good	net/net.hh	/^        struct qp_stats_good good;$/;"	m	struct:net::qp_stats::__anon5	typeref:struct:net::qp_stats::__anon5::qp_stats_good
-good	net/net.hh	/^        struct qp_stats_good good;$/;"	m	struct:net::qp_stats::__anon7	typeref:struct:net::qp_stats::__anon7::qp_stats_good
+good	net/net.hh	/^        struct qp_stats_good good;$/;"	m	struct:net::qp_stats::__anon2	typeref:struct:net::qp_stats::__anon2::qp_stats_good
+good	net/net.hh	/^        struct qp_stats_good good;$/;"	m	struct:net::qp_stats::__anon4	typeref:struct:net::qp_stats::__anon4::qp_stats_good
 grant_head	core/xen/gntalloc.hh	/^class grant_head {$/;"	c	namespace:xen
 gref	net/xenfront.hh	/^    uint32_t gref;$/;"	m	struct:xen::netif_rx_request
 gref	net/xenfront.hh	/^    uint32_t gref;$/;"	m	struct:xen::netif_tx_request
-gso_ecn	net/virtio.cc	/^        enum { gso_none = 0, gso_tcpv4 = 1, gso_udp = 3, gso_tcpv6 = 4, gso_ecn = 0x80 };$/;"	e	enum:virtio::qp::net_hdr::__anon3	file:
-gso_none	net/virtio.cc	/^        enum { gso_none = 0, gso_tcpv4 = 1, gso_udp = 3, gso_tcpv6 = 4, gso_ecn = 0x80 };$/;"	e	enum:virtio::qp::net_hdr::__anon3	file:
+gso_ecn	net/virtio.cc	/^        enum { gso_none = 0, gso_tcpv4 = 1, gso_udp = 3, gso_tcpv6 = 4, gso_ecn = 0x80 };$/;"	e	enum:virtio::qp::net_hdr::__anon7	file:
+gso_none	net/virtio.cc	/^        enum { gso_none = 0, gso_tcpv4 = 1, gso_udp = 3, gso_tcpv6 = 4, gso_ecn = 0x80 };$/;"	e	enum:virtio::qp::net_hdr::__anon7	file:
 gso_size	net/virtio.cc	/^        uint16_t gso_size;$/;"	m	struct:virtio::qp::net_hdr	file:
-gso_tcpv4	net/virtio.cc	/^        enum { gso_none = 0, gso_tcpv4 = 1, gso_udp = 3, gso_tcpv6 = 4, gso_ecn = 0x80 };$/;"	e	enum:virtio::qp::net_hdr::__anon3	file:
-gso_tcpv6	net/virtio.cc	/^        enum { gso_none = 0, gso_tcpv4 = 1, gso_udp = 3, gso_tcpv6 = 4, gso_ecn = 0x80 };$/;"	e	enum:virtio::qp::net_hdr::__anon3	file:
+gso_tcpv4	net/virtio.cc	/^        enum { gso_none = 0, gso_tcpv4 = 1, gso_udp = 3, gso_tcpv6 = 4, gso_ecn = 0x80 };$/;"	e	enum:virtio::qp::net_hdr::__anon7	file:
+gso_tcpv6	net/virtio.cc	/^        enum { gso_none = 0, gso_tcpv4 = 1, gso_udp = 3, gso_tcpv6 = 4, gso_ecn = 0x80 };$/;"	e	enum:virtio::qp::net_hdr::__anon7	file:
 gso_type	net/virtio.cc	/^        uint8_t gso_type;$/;"	m	struct:virtio::qp::net_hdr	file:
-gso_udp	net/virtio.cc	/^        enum { gso_none = 0, gso_tcpv4 = 1, gso_udp = 3, gso_tcpv6 = 4, gso_ecn = 0x80 };$/;"	e	enum:virtio::qp::net_hdr::__anon3	file:
+gso_udp	net/virtio.cc	/^        enum { gso_none = 0, gso_tcpv4 = 1, gso_udp = 3, gso_tcpv6 = 4, gso_ecn = 0x80 };$/;"	e	enum:virtio::qp::net_hdr::__anon7	file:
 guard	core/ragel.hh	/^    guard(sstring_builder& builder, const char* block_start, const char* block_end)$/;"	f	class:sstring_builder::guard
 guard	core/ragel.hh	/^class sstring_builder::guard {$/;"	c	class:sstring_builder
 gw_address	net/ip.cc	/^ipv4_address ipv4::gw_address() const {$/;"	f	class:net::ipv4
@@ -2919,13 +2959,13 @@ impl	net/dhcp.cc	/^class net::dhcp::impl : public ip_packet_filter {$/;"	c	class
 impl	net/packet.hh	/^    struct impl {$/;"	s	class:net::final
 impl	net/packet.hh	/^packet::impl::impl(fragment frag, size_t nr_frags)$/;"	f	class:net::packet::impl
 impl	net/packet.hh	/^packet::impl::impl(size_t nr_frags)$/;"	f	class:net::packet::impl
-in	net/api.hh	/^        ::sockaddr_in in;$/;"	m	union:socket_address::__anon8
+in	net/api.hh	/^        ::sockaddr_in in;$/;"	m	union:socket_address::__anon5
 in	rpc/rpc.hh	/^        auto& in() { return _read_buf; }$/;"	f	class:rpc::protocol::connection
 in	tests/fstream_test.cc	/^    input_stream<char> in;$/;"	m	struct:reader	file:
 in_message	rpc/rpc_impl.hh	/^struct in_message {$/;"	s	namespace:rpc
 in_my_netmask	net/ip.cc	/^bool ipv4::in_my_netmask(ipv4_address a) const {$/;"	f	class:net::ipv4
-inc_csum_err	net/net.hh	/^            void inc_csum_err() {$/;"	f	struct:net::qp_stats::__anon5::__anon6
-inc_no_mem	net/net.hh	/^            void inc_no_mem() {$/;"	f	struct:net::qp_stats::__anon5::__anon6
+inc_csum_err	net/net.hh	/^            void inc_csum_err() {$/;"	f	struct:net::qp_stats::__anon2::__anon3
+inc_no_mem	net/net.hh	/^            void inc_no_mem() {$/;"	f	struct:net::qp_stats::__anon2::__anon3
 inc_rx_error_count	net/xenfront.cc	/^    void inc_rx_error_count() { ++_stats.rx.bad.total; }$/;"	f	class:xen::xenfront_qp
 incr	apps/memcached/memcache.cc	/^    future<std::pair<item_ptr, bool>> incr(item_key& key, uint64_t delta) {$/;"	f	class:memcache::sharded_cache
 incr	apps/memcached/memcache.cc	/^    std::pair<item_ptr, bool> incr(item_key& key, uint64_t delta) {$/;"	f	class:memcache::cache
@@ -3090,6 +3130,8 @@ item_key_cmp	apps/memcached/memcache.cc	/^struct item_key_cmp$/;"	s	namespace:me
 item_size	apps/memcached/memcache.cc	/^    size_t item_size(item& item_ref) {$/;"	f	class:memcache::cache	file:
 item_size	apps/memcached/memcache.cc	/^    size_t item_size(item_insertion_data& insertion) {$/;"	f	class:memcache::cache	file:
 iterator	core/circular_buffer.hh	/^    typedef cbiterator<circular_buffer, T> iterator;$/;"	t	class:circular_buffer
+jmp_buf_link	core/thread.hh	/^struct jmp_buf_link {$/;"	s	namespace:seastar
+jmpbuf	core/thread.hh	/^    jmp_buf jmpbuf;$/;"	m	struct:seastar::jmp_buf_link
 join	core/posix.cc	/^void posix_thread::join() {$/;"	f	class:posix_thread
 join	core/thread.hh	/^thread::join() {$/;"	f	class:seastar::thread
 join_all	core/reactor.cc	/^void smp::join_all()$/;"	f	class:smp
@@ -3149,9 +3191,12 @@ kj_accept	core/reactor.hh	/^    virtual kj::Promise<std::pair<connected_socket, 
 kj_accept	core/reactor.hh	/^kj::Promise<std::pair<pollable_fd, socket_address>> pollable_fd::kj_accept() {$/;"	f	class:pollable_fd
 kj_accept	core/reactor.hh	/^reactor::kj_accept(pollable_fd_state& listenfd) {        $/;"	f	class:reactor
 kj_accept	net/native-stack-impl.hh	/^native_server_socket_impl<Protocol>::kj_accept() {$/;"	f	class:net::native_server_socket_impl
-kj_accept	net/posix-stack.cc	/^kj::Promise<  std::pair<connected_socket, socket_address> > posix_ap_server_socket_impl::kj_accept() {    $/;"	f	class:net::posix_ap_server_socket_impl
-kj_accept	net/posix-stack.cc	/^posix_reuseport_server_socket_impl::kj_accept() {        $/;"	f	class:net::posix_reuseport_server_socket_impl
-kj_accept	net/posix-stack.cc	/^posix_server_socket_impl::kj_accept() {    $/;"	f	class:net::posix_server_socket_impl
+kj_accept	net/posix-stack.cc	/^kj::Promise<  std::pair<connected_socket, socket_address> > posix_ap_server_socket_impl::kj_accept() {$/;"	f	class:net::posix_ap_server_socket_impl
+kj_accept	net/posix-stack.cc	/^posix_reuseport_server_socket_impl::kj_accept() {$/;"	f	class:net::posix_reuseport_server_socket_impl
+kj_accept	net/posix-stack.cc	/^posix_server_socket_impl::kj_accept() {$/;"	f	class:net::posix_server_socket_impl
+kj_allocate	core/file.hh	/^    kj::Promise<void> kj_allocate(uint64_t position, uint64_t length) {$/;"	f	class:file
+kj_allocate	core/reactor.cc	/^blockdev_file_impl::kj_allocate(uint64_t position, uint64_t length) {$/;"	f	class:blockdev_file_impl
+kj_allocate	core/reactor.cc	/^posix_file_impl::kj_allocate(uint64_t position, uint64_t length) {$/;"	f	class:posix_file_impl
 kj_close	core/fstream.cc	/^    kj::Promise<void> kj_close() { return _file->kj_flush(); }$/;"	f	class:file_data_sink_impl
 kj_close	core/iostream.hh	/^    kj::Promise<void> kj_close() { return _dsi->kj_close(); }$/;"	f	class:data_sink
 kj_close	core/iostream.hh	/^    kj::Promise<void> kj_close() { return kj_flush().then([this] { return _fd.kj_close(); }); }$/;"	f	class:final
@@ -3190,7 +3235,7 @@ kj_flush	core/iostream-impl.hh	/^output_stream<CharType>::kj_flush() {    $/;"	f
 kj_flush	core/reactor.cc	/^posix_file_impl::kj_flush(void) {    $/;"	f	class:posix_file_impl
 kj_get	core/iostream.hh	/^    kj::Promise<temporary_buffer<char>> kj_get(size_t maxBytes = 8192) {$/;"	f	class:data_source
 kj_get	net/packet-data-source.hh	/^    virtual kj::Promise<temporary_buffer<char>> kj_get(size_t maxBytes = 8192){$/;"	f	class:net::final
-kj_get	net/posix-stack.cc	/^posix_data_source_impl::kj_get(size_t maxBytes) {        $/;"	f	class:net::posix_data_source_impl
+kj_get	net/posix-stack.cc	/^posix_data_source_impl::kj_get(size_t maxBytes) {$/;"	f	class:net::posix_data_source_impl
 kj_get_epoll_future	core/reactor.cc	/^kj::Promise<void> reactor_backend_epoll::kj_get_epoll_future(pollable_fd_state& pfd,$/;"	f	class:reactor_backend_epoll
 kj_input_stream	apps/imdb/kj_iostream.hh	/^    explicit kj_input_stream(data_source fd) : _fd(std::move(fd)), _buf(0) {}$/;"	f	class:final
 kj_keep_doing	core/future-util.hh	/^kj::Promise<void> kj_keep_doing(AsyncAction&& action) {$/;"	f
@@ -3298,8 +3343,8 @@ l3packet	net/net.hh	/^    struct l3packet {$/;"	s	class:net::l3_protocol
 l4connid	net/ip.hh	/^struct l4connid {$/;"	s	namespace:net
 l4packet	net/ip.hh	/^    struct l4packet {$/;"	s	struct:net::ipv4_traits
 lambda_deleter_impl	core/deleter.hh	/^    lambda_deleter_impl(deleter next, Deleter&& del)$/;"	f	struct:final
-lambda_task	core/future.hh	/^    lambda_task(Func&& func) : _func(std::move(func)) {}$/;"	f	class:final
-lambda_task	core/future.hh	/^    lambda_task(const Func& func) : _func(func) {}$/;"	f	class:final
+lambda_task	core/task.hh	/^    lambda_task(Func&& func) : _func(std::move(func)) {}$/;"	f	class:final
+lambda_task	core/task.hh	/^    lambda_task(const Func& func) : _func(func) {}$/;"	f	class:final
 last_bunch	net/net.hh	/^    uint64_t last_bunch; \/\/ number of packets in the last sent\/received bunch$/;"	m	struct:net::qp_stats_good
 last_frag_received	net/ip.hh	/^        bool last_frag_received = false;$/;"	m	struct:net::ipv4::frag
 last_len	test.py	/^last_len = 0$/;"	v
@@ -3328,6 +3373,7 @@ linearize	net/packet.hh	/^    void linearize() { return linearize(0, len()); }$/
 link	core/file.hh	/^    link,$/;"	m	class:directory_entry_type
 link	core/memory.cc	/^    page_list_link link;$/;"	m	struct:memory::page	file:
 link	core/memory.cc	/^cpu_pages::link(page_list& list, page* span) {$/;"	f	class:memory::cpu_pages
+link	core/thread.hh	/^    jmp_buf_link* link;$/;"	m	struct:seastar::jmp_buf_link
 link_pool_depth	configure.py	/^link_pool_depth = max(int(total_memory \/ 7e9), 1)$/;"	v
 link_ready	net/dpdk.cc	/^    virtual future<> link_ready() { return _link_ready_promise.get_future(); }$/;"	f	class:dpdk::dpdk_device
 link_ready	net/net.hh	/^    virtual future<> link_ready() { return make_ready_future<>(); }$/;"	f	class:net::device
@@ -3355,6 +3401,7 @@ loader	tests/memcached/test_memcached.py	/^    loader = unittest.TestLoader()$/;
 local	core/distributed.hh	/^Service& distributed<Service>::local() {$/;"	f	class:distributed
 local_engine	core/reactor.cc	/^__thread reactor* local_engine;$/;"	v
 local_ip	net/ip.hh	/^    ipaddr local_ip;$/;"	m	struct:net::l4connid
+local_is_initialized	core/distributed.hh	/^inline bool distributed<Service>::local_is_initialized() {$/;"	f	class:distributed
 local_mss	net/tcp.hh	/^        uint16_t local_mss() {$/;"	f	class:net::tcp_state::tcp_option::option_kind::tcp::tcb
 local_origin_tag	apps/memcached/memcache.cc	/^struct local_origin_tag {$/;"	s	namespace:memcache	file:
 local_port	net/ip.hh	/^    uint16_t local_port;$/;"	m	struct:net::l4connid
@@ -3430,8 +3477,8 @@ make_channel	net/udp.cc	/^ipv4_udp::make_channel(ipv4_addr addr) {$/;"	f	class:n
 make_client	rpc/rpc_impl.hh	/^auto protocol<Serializer, MsgType>::make_client(MsgType t) {$/;"	f	class:rpc::protocol
 make_copyable_function	rpc/rpc_impl.hh	/^auto make_copyable_function(Func&& func, std::enable_if_t<!std::is_copy_constructible<std::decay_t<Func>>::value, void*> = nullptr) {$/;"	f	namespace:rpc
 make_copyable_function	rpc/rpc_impl.hh	/^auto make_copyable_function(Func&& func, std::enable_if_t<std::is_copy_constructible<std::decay_t<Func>>::value, void*> = nullptr) {$/;"	f	namespace:rpc
-make_deleter	core/deleter.hh	/^make_deleter(Deleter d) {$/;"	f
-make_deleter	core/deleter.hh	/^make_deleter(deleter next, Deleter d) {$/;"	f
+make_deleter	core/deleter.hh	/^make_deleter(Object o) {$/;"	f
+make_deleter	core/deleter.hh	/^make_deleter(deleter next, Object o) {$/;"	f
 make_directory	core/reactor.cc	/^future<> make_directory(sstring name) {$/;"	f
 make_directory	core/reactor.cc	/^reactor::make_directory(sstring name) {$/;"	f	class:reactor
 make_empty_sigset_mask	core/posix.hh	/^sigset_t make_empty_sigset_mask() {$/;"	f
@@ -3449,6 +3496,7 @@ make_ipv4_address	net/api.hh	/^socket_address make_ipv4_address(ipv4_addr addr) 
 make_kj_promise	core/future.hh	/^inline kj::Promise< std::pair<T,V> > make_kj_promise(future<T,V>&& pm) {$/;"	f
 make_kj_promise	core/future.hh	/^inline kj::Promise<T> make_kj_promise(future<T>&& pm) {$/;"	f
 make_kj_promise	core/future.hh	/^inline kj::Promise<void> make_kj_promise(future<>&& pm) {$/;"	f
+make_local_and_release	core/distributed.hh	/^    element_type make_local_and_release() {$/;"	f	class:foreign_ptr
 make_lw_shared	core/shared_ptr.hh	/^lw_shared_ptr<T> make_lw_shared(A&&... a) {$/;"	f
 make_lw_shared	core/shared_ptr.hh	/^lw_shared_ptr<T> make_lw_shared(T& a) {$/;"	f
 make_lw_shared	core/shared_ptr.hh	/^lw_shared_ptr<T> make_lw_shared(T&& a) {$/;"	f
@@ -3475,7 +3523,7 @@ make_shared	core/shared_ptr.hh	/^make_shared(T&& a) {$/;"	f
 make_sigset_mask	core/posix.hh	/^sigset_t make_sigset_mask(int signo) {$/;"	f
 make_sstring	core/sstring.hh	/^static String make_sstring(Args&&... args)$/;"	f
 make_struct_with_vla	core/vla.hh	/^make_struct_with_vla(E S::*last, size_t nr) {$/;"	f
-make_task	core/future.hh	/^make_task(Func&& func) {$/;"	f
+make_task	core/task.hh	/^make_task(Func&& func) {$/;"	f
 make_transform_iterator	util/transform_iterator.hh	/^make_transform_iterator(Iterator i, Func f) {$/;"	f
 make_typed	core/scollectd.hh	/^static inline typed<T> make_typed(data_type type, T&& t) {$/;"	f	namespace:scollectd
 make_udp_channel	net/native-stack.cc	/^native_network_stack::make_udp_channel(ipv4_addr addr) {$/;"	f	class:net::native_network_stack
@@ -3515,6 +3563,8 @@ max_aio	core/reactor.hh	/^    static constexpr size_t max_aio = 128;$/;"	m	class
 max_count	core/app-template.hh	/^        int max_count;$/;"	m	struct:app_template::positional_option
 max_cpus	core/memory.cc	/^static constexpr unsigned max_cpus = 256;$/;"	m	namespace:memory	file:
 max_frags	net/dpdk.cc	/^static constexpr uint8_t  max_frags              = 32 + 1;$/;"	m	namespace:dpdk	file:
+max_inlined_continuations	core/future.hh	/^static constexpr unsigned max_inlined_continuations = 1;$/;"	v
+max_inlined_continuations	core/future.hh	/^static constexpr unsigned max_inlined_continuations = 256;$/;"	v
 max_object_size	tests/slab_test.cc	/^static constexpr size_t max_object_size = 1024*1024;$/;"	v	file:
 max_ops	core/rwlock.hh	/^    static const size_t max_ops = std::numeric_limits<size_t>::max();$/;"	m	class:rwlock
 max_packet_len	net/net.hh	/^    uint16_t max_packet_len = net::ip_packet_len_max - net::eth_hdr_len;$/;"	m	struct:net::hw_features
@@ -3524,6 +3574,7 @@ max_waiters	net/arp.hh	/^    static constexpr auto max_waiters = 512;$/;"	m	clas
 maybe_call_get	core/future-util.hh	/^    static future_type maybe_call_get(future<> f, lw_shared_ptr<T> r) {$/;"	f	struct:reducer_traits
 maybe_call_get	core/future-util.hh	/^    static future_type maybe_call_get(future<> f, lw_shared_ptr<T> r) {$/;"	f	struct:reducer_with_get_traits
 maybe_expand	core/circular_buffer.hh	/^circular_buffer<T, Alloc>::maybe_expand(size_t nr) {$/;"	f	class:circular_buffer
+maybe_idle	http/httpd.hh	/^    void maybe_idle() {$/;"	f	class:httpd::http_server
 maybe_rehash	apps/memcached/memcache.cc	/^    void maybe_rehash() {$/;"	f	class:memcache::cache	file:
 mbuf_cache_size	net/dpdk.cc	/^static constexpr uint16_t mbuf_cache_size        = 512;$/;"	m	namespace:dpdk	file:
 mbuf_data_size	net/dpdk.cc	/^static constexpr size_t   mbuf_data_size         = 2048;$/;"	m	namespace:dpdk	file:
@@ -3552,7 +3603,7 @@ merge	net/ip.cc	/^int32_t ipv4::frag::merge(ip_hdr &h, uint16_t offset, packet p
 merge	net/packet-util.hh	/^    void merge(Offset offset, packet p) {$/;"	f	class:net::packet_merger
 merge_out_of_order	net/tcp.hh	/^bool tcp<InetTraits>::tcb::merge_out_of_order() {$/;"	f	class:net::tcp_state::tcp_option::option_kind::tcp::tcb::tcp::tcb
 message	apps/imdb/vmts-rpc.cc	/^  MallocMessageBuilder message;$/;"	m	class:capnp::final	file:
-message	apps/imdb/vmts-rpc.cc	/^  kj::Own<MessageReader> message;$/;"	m	class:capnp::final	file:
+message	apps/imdb/vmts-rpc.cc	/^  kj::Own<SeastarAsyncMessageReader> message;$/;"	m	class:capnp::final	file:
 method	http/json_path.hh	/^    operation_type method;$/;"	m	struct:httpd::json_operation
 mf	net/ip.hh	/^    bool mf() { return frag & (1 << uint8_t(frag_bits::mf)); }$/;"	f	class:net::ip_hdr::frag_bits
 mf	net/ip.hh	/^    enum class frag_bits : uint8_t { mf = 13, df = 14, reserved = 15, offset_shift = 3 };$/;"	m	class:net::ip_hdr::frag_bits
@@ -3570,7 +3621,7 @@ mmap_deleter	core/posix.hh	/^struct mmap_deleter {$/;"	s
 modes	configure.py	/^modes = {$/;"	v
 modeval	configure.py	/^        modeval = modes[mode]$/;"	v
 moreSizes	apps/imdb/vmts-rpc.cc	/^  kj::Array<_::WireValue<uint32_t>> moreSizes;$/;"	m	class:capnp::SeastarAsyncMessageReader	file:
-more_data	net/xenfront.hh	/^        uint16_t more_data : 1;$/;"	m	struct:xen::netif_tx_request::__anon4
+more_data	net/xenfront.hh	/^        uint16_t more_data : 1;$/;"	m	struct:xen::netif_tx_request::__anon8
 move	core/future.hh	/^            : _promise(nullptr), _local_state(std::move(state)) {$/;"	f	class:future
 move	net/packet.hh	/^    : _impl(std::move(x._impl)) {$/;"	f	namespace:net
 move_connected_socket	net/posix-stack.cc	/^void  posix_ap_server_socket_impl::move_connected_socket(socket_address sa, pollable_fd fd, socket_address addr) {$/;"	f	class:net::posix_ap_server_socket_impl
@@ -3710,8 +3761,8 @@ nns_options	net/native-stack.cc	/^boost::program_options::options_description nn
 no_content	http/reply.cc	/^const sstring no_content = " 204 No Content\\r\\n";$/;"	m	namespace:httpd::status_strings	file:
 no_content	http/reply.hh	/^        no_content = 204, \/\/!< no_content$/;"	m	class:httpd::reply::status_type
 no_interrupts	net/virtio.cc	/^            uint16_t no_interrupts : 1;$/;"	m	struct:virtio::vring::avail_layout::flags	file:
-no_mem	net/net.hh	/^            uint64_t no_mem;       \/\/ Packets dropped due to allocation failure$/;"	m	struct:net::qp_stats::__anon5::__anon6
-no_notify	net/virtio.cc	/^            no_notify = 1$/;"	e	enum:virtio::vring::used_layout::__anon2	file:
+no_mem	net/net.hh	/^            uint64_t no_mem;       \/\/ Packets dropped due to allocation failure$/;"	m	struct:net::qp_stats::__anon2::__anon3
+no_notify	net/virtio.cc	/^            no_notify = 1$/;"	e	enum:virtio::vring::used_layout::__anon6	file:
 no_wait	rpc/rpc.cc	/^  no_wait_type no_wait;$/;"	m	namespace:rpc	file:
 no_wait_type	rpc/rpc.hh	/^struct no_wait_type {};$/;"	s	namespace:rpc
 nodeid	core/resource.hh	/^    unsigned nodeid;$/;"	m	struct:resource::memory
@@ -3726,7 +3777,6 @@ noexcept	core/future.hh	/^    future_state& operator=(future_state&& x) noexcept
 noexcept	core/future.hh	/^    future_state(future_state&& x) noexcept(move_noexcept)$/;"	f	struct:future_state
 noexcept	core/future.hh	/^    promise& operator=(promise&& x) noexcept(move_noexcept) {$/;"	f	class:promise
 noexcept	core/future.hh	/^    promise(promise&& x) noexcept(move_noexcept) : _future(x._future), _state(x._state), _task(std::move(x._task)) {$/;"	f	class:promise
-noexcept	core/future.hh	/^    virtual void run() noexcept = 0;$/;"	m	class:task
 noexcept	core/future.hh	/^    void forward_to(promise<>& pr) noexcept;$/;"	m	struct:future_state
 noexcept	core/future.hh	/^    void make_ready() noexcept;$/;"	m	class:promise
 noexcept	core/future.hh	/^    void migrated() noexcept;$/;"	m	class:promise
@@ -3738,6 +3788,7 @@ noexcept	core/future.hh	/^void promise<T...>::abandoned() noexcept(move_noexcept
 noexcept	core/memory.cc	/^    explicit small_pool(unsigned object_size) noexcept;$/;"	m	class:memory::small_pool	file:
 noexcept	core/shared_ptr.hh	/^    lw_shared_ptr() noexcept = default;$/;"	m	class:lw_shared_ptr
 noexcept	core/shared_ptr.hh	/^    shared_ptr() noexcept = default;$/;"	m	class:shared_ptr
+noexcept	core/task.hh	/^    virtual void run() noexcept = 0;$/;"	m	class:task
 noexcept	core/thread.hh	/^    thread& operator=(thread&& x) noexcept = default;$/;"	m	class:seastar::thread
 noexcept	core/thread.hh	/^    thread(thread&& x) noexcept = default;$/;"	m	class:seastar::thread
 noexcept	net/packet.hh	/^    packet(packet&& x) noexcept;$/;"	m	class:net::final
@@ -3779,6 +3830,7 @@ now	core/reactor.hh	/^    static time_point now() {$/;"	f	class:lowres_clock
 now	core/timer-set.hh	/^    time_point now() {$/;"	f	class:seastar::timer_set
 npos	core/sstring.hh	/^    static constexpr size_type  npos = static_cast<size_type>(-1);$/;"	m	class:basic_sstring
 npos	core/sstring.hh	/^constexpr Size basic_sstring<char_type, Size, max_size>::npos;$/;"	m	class:basic_sstring
+nr	core/semaphore.hh	/^        size_t nr;$/;"	m	struct:semaphore::entry
 nr_done	apps/seawreck/seawreck.cc	/^        uint64_t nr_done() {$/;"	f	class:http_client::connection
 nr_ents	net/xenfront.hh	/^    static constexpr uint32_t nr_ents = 256; \/* FIXME : DYN *\/$/;"	m	class:xen::front_ring
 nr_frags	net/net.hh	/^    uint64_t nr_frags;   \/\/ total number of fragments$/;"	m	struct:net::qp_stats_good
@@ -3907,6 +3959,8 @@ operator +	net/tcp.hh	/^inline tcp_seq operator+(tcp_seq s, int32_t n) { return 
 operator ++	core/bitset-iter.hh	/^    void operator++()$/;"	f	class:bitsets::set_iterator
 operator ++	core/circular_buffer.hh	/^        cbiterator<CB, ValueType> operator++(int unused) {$/;"	f	struct:circular_buffer::cbiterator
 operator ++	core/circular_buffer.hh	/^        cbiterator<CB, ValueType>& operator++() {$/;"	f	struct:circular_buffer::cbiterator
+operator ++	core/shared_ptr_debug_helper.hh	/^    debug_shared_ptr_counter_type& operator++() {$/;"	f	class:debug_shared_ptr_counter_type
+operator ++	core/shared_ptr_debug_helper.hh	/^    long operator++(int) {$/;"	f	class:debug_shared_ptr_counter_type
 operator ++	util/function_input_iterator.hh	/^    function_input_iterator operator++(int) {$/;"	f	struct:function_input_iterator
 operator ++	util/function_input_iterator.hh	/^    function_input_iterator& operator++() {$/;"	f	struct:function_input_iterator
 operator ++	util/transform_iterator.hh	/^    transform_iterator operator++(int) {$/;"	f	class:transform_iterator
@@ -3925,6 +3979,8 @@ operator -	net/tcp.hh	/^inline int32_t operator-(tcp_seq s, tcp_seq q) { return 
 operator -	net/tcp.hh	/^inline tcp_seq operator-(tcp_seq s, int32_t n) { return s -= n; }$/;"	f	class:net::tcp_state::tcp_option::option_kind
 operator --	core/circular_buffer.hh	/^        cbiterator<CB, ValueType> operator--(int unused) {$/;"	f	struct:circular_buffer::cbiterator
 operator --	core/circular_buffer.hh	/^        cbiterator<CB, ValueType>& operator--() {$/;"	f	struct:circular_buffer::cbiterator
+operator --	core/shared_ptr_debug_helper.hh	/^    debug_shared_ptr_counter_type& operator--() {$/;"	f	class:debug_shared_ptr_counter_type
+operator --	core/shared_ptr_debug_helper.hh	/^    long operator--(int) {$/;"	f	class:debug_shared_ptr_counter_type
 operator -=	core/circular_buffer.hh	/^        cbiterator<CB, ValueType>& operator-=(typename super_t::difference_type n) {$/;"	f	struct:circular_buffer::cbiterator
 operator -=	net/tcp.hh	/^inline tcp_seq& operator-=(tcp_seq& s, int32_t n) { s.raw -= n; return s; }$/;"	f	class:net::tcp_state::tcp_option::option_kind
 operator ->	core/circular_buffer.hh	/^        ValueType* operator->() const { return &cb->_impl.storage[cb->mask(idx)]; }$/;"	f	struct:circular_buffer::cbiterator
@@ -3962,8 +4018,6 @@ operator =	core/posix.hh	/^    file_desc& operator=(file_desc&& x) {$/;"	f	class
 operator =	core/reactor.cc	/^reactor::poller::operator=(poller&& x) {$/;"	f	class:reactor::poller
 operator =	core/scollectd.hh	/^    registrations& operator=(const std::initializer_list<type_instance_id>& l) {$/;"	f	class:scollectd::registrations
 operator =	core/scollectd.hh	/^    registrations& operator=(vector_type&& v) {$/;"	f	class:scollectd::registrations
-operator =	core/shared_ptr.hh	/^    enable_lw_shared_from_this& operator=(const enable_lw_shared_from_this&) { return *this; }$/;"	f	class:enable_lw_shared_from_this
-operator =	core/shared_ptr.hh	/^    enable_lw_shared_from_this& operator=(enable_lw_shared_from_this&&) { return *this; }$/;"	f	class:enable_lw_shared_from_this
 operator =	core/sstring.hh	/^    basic_sstring& operator=(const basic_sstring& x) {$/;"	f	class:basic_sstring
 operator =	core/temporary_buffer.hh	/^    temporary_buffer& operator=(temporary_buffer&& x) {$/;"	f	class:temporary_buffer
 operator =	core/unaligned.hh	/^    unaligned& operator=(const T& x) { raw = x; return *this; }$/;"	f	struct:unaligned
@@ -4015,6 +4069,7 @@ operator Reader	apps/imdb/hashprotocol.capnp.hh	/^  inline operator Reader() con
 operator Reader	apps/imdb/hashprotocol.capnp.hh	/^  inline operator Reader() const { return Reader(_builder.asReader()); }$/;"	f	class:HashProtocol::SetParams::Builder
 operator Reader	apps/imdb/hashprotocol.capnp.hh	/^  inline operator Reader() const { return Reader(_builder.asReader()); }$/;"	f	class:HashProtocol::SetResults::Builder
 operator T	core/unaligned.hh	/^    operator T() const { return raw; }$/;"	f	struct:unaligned
+operator []	apps/imdb/vmts-rpc.hh	/^  inline char operator[](size_t i){$/;"	f	struct:kj::ZeroCopyScratchspace
 operator []	core/array_map.hh	/^    Value& operator[](size_t key) { return _a[key]; }$/;"	f	class:array_map
 operator []	core/array_map.hh	/^    const Value& operator[](size_t key) const { return _a[key]; }$/;"	f	class:array_map
 operator []	core/circular_buffer.hh	/^circular_buffer<T, Alloc>::operator[](size_t idx) {$/;"	f	class:circular_buffer
@@ -4046,6 +4101,7 @@ operator delete[]	core/memory.cc	/^void operator delete[](void* ptr, size_t size
 operator delete[]	core/memory.cc	/^void operator delete[](void* ptr, size_t size, std::nothrow_t) throw () {$/;"	f
 operator delete[]	core/memory.cc	/^void operator delete[](void* ptr, std::nothrow_t) throw () {$/;"	f
 operator delete[]	core/memory.cc	/^void operator delete[](void* ptr, with_alignment wa) {$/;"	f
+operator long	core/shared_ptr_debug_helper.hh	/^    operator long() const {$/;"	f	class:debug_shared_ptr_counter_type
 operator new	core/memory.cc	/^void* operator new(size_t size) {$/;"	f
 operator new	core/memory.cc	/^void* operator new(size_t size, std::nothrow_t) throw () {$/;"	f
 operator new	core/memory.cc	/^void* operator new(size_t size, with_alignment wa) {$/;"	f
@@ -4101,6 +4157,9 @@ override	apps/imdb/vmts-rpc.hh	/^  kj::Promise<kj::Own<TwoPartyVatNetworkBase::C
 override	apps/imdb/vmts-rpc.hh	/^  kj::Promise<void> shutdown() override;$/;"	m	class:capnp::final
 override	apps/imdb/vmts-rpc.hh	/^  rpc::twoparty::VatId::Reader getPeerVatId() override;$/;"	m	class:capnp::final
 override	apps/imdb/vmts-rpc.hh	/^  void taskFailed(kj::Exception&& exception) override;$/;"	m	class:capnp::SeastarServer
+override	core/file.hh	/^	kj::Promise<void> kj_allocate(uint64_t position, uint64_t length) override;$/;"	m	class:posix_file_impl
+override	core/file.hh	/^	virtual future<> allocate(uint64_t position, uint64_t length) override;$/;"	m	class:blockdev_file_impl
+override	core/file.hh	/^	virtual kj::Promise<void> kj_allocate(uint64_t position, uint64_t length) override;$/;"	m	class:blockdev_file_impl
 override	core/file.hh	/^    future<> discard(uint64_t offset, uint64_t length) override;$/;"	m	class:blockdev_file_impl
 override	core/file.hh	/^    future<> truncate(uint64_t length) override;$/;"	m	class:blockdev_file_impl
 override	core/file.hh	/^    future<size_t> size(void) override;$/;"	m	class:blockdev_file_impl
@@ -4113,6 +4172,7 @@ override	core/file.hh	/^    kj::Promise<struct stat> kj_stat(void) override;$/;"
 override	core/file.hh	/^    kj::Promise<void> kj_discard(uint64_t offset, uint64_t length) override;$/;"	m	class:posix_file_impl
 override	core/file.hh	/^    kj::Promise<void> kj_flush(void) override;$/;"	m	class:posix_file_impl
 override	core/file.hh	/^    kj::Promise<void> kj_truncate(uint64_t length) override;$/;"	m	class:posix_file_impl
+override	core/file.hh	/^    virtual future<> allocate(uint64_t position, uint64_t length) override;$/;"	m	class:posix_file_impl
 override	core/file.hh	/^    virtual subscription<directory_entry> list_directory(std::function<future<> (directory_entry de)> next) override;$/;"	m	class:posix_file_impl
 override	core/reactor.hh	/^    virtual bool kj_wait_and_process() override;$/;"	m	class:reactor_backend_epoll
 override	core/reactor.hh	/^    virtual bool kj_wait_and_process() override;$/;"	m	class:reactor_backend_osv
@@ -4162,6 +4222,9 @@ override	net/native-stack-impl.hh	/^    virtual future<connected_socket, socket_
 override	net/native-stack-impl.hh	/^    virtual input_stream<char> input() override;$/;"	m	class:net::native_connected_socket_impl
 override	net/native-stack-impl.hh	/^    virtual kj::Promise<std::pair<connected_socket, socket_address>> kj_accept() override;$/;"	m	class:net::native_server_socket_impl
 override	net/native-stack-impl.hh	/^    virtual output_stream<char> output() override;$/;"	m	class:net::native_connected_socket_impl
+override	net/native-stack-impl.hh	/^    virtual void abort_accept() override;$/;"	m	class:net::native_server_socket_impl
+override	net/native-stack-impl.hh	/^    virtual void shutdown_input() override;$/;"	m	class:net::native_connected_socket_impl
+override	net/native-stack-impl.hh	/^    virtual void shutdown_output() override;$/;"	m	class:net::native_connected_socket_impl
 override	net/native-stack.cc	/^    virtual future<> initialize() override;$/;"	m	class:net::native_network_stack	file:
 override	net/native-stack.cc	/^    virtual future<connected_socket> connect(socket_address sa, socket_address local) override;$/;"	m	class:net::native_network_stack	file:
 override	net/native-stack.cc	/^    virtual kj::Promise<connected_socket> kj_connect(socket_address sa, socket_address local = socket_address(::sockaddr_in{AF_INET, INADDR_ANY, 0})) override;$/;"	m	class:net::native_network_stack	file:
@@ -4184,6 +4247,9 @@ override	net/posix-stack.hh	/^    virtual kj::Promise<temporary_buffer<char>> kj
 override	net/posix-stack.hh	/^    virtual net::udp_channel make_udp_channel(ipv4_addr addr) override;$/;"	m	class:net::posix_network_stack
 override	net/posix-stack.hh	/^    virtual server_socket listen(socket_address sa, listen_options opts) override;$/;"	m	class:net::posix_ap_network_stack
 override	net/posix-stack.hh	/^    virtual server_socket listen(socket_address sa, listen_options opts) override;$/;"	m	class:net::posix_network_stack
+override	net/posix-stack.hh	/^    virtual void abort_accept() override;$/;"	m	class:net::posix_ap_server_socket_impl
+override	net/posix-stack.hh	/^    virtual void abort_accept() override;$/;"	m	class:net::posix_reuseport_server_socket_impl
+override	net/posix-stack.hh	/^    virtual void abort_accept() override;$/;"	m	class:net::posix_server_socket_impl
 override	net/proxy.cc	/^    virtual uint32_t send(circular_buffer<packet>& p) override;$/;"	m	class:net::proxy_net_device	file:
 override	net/virtio.cc	/^    virtual std::unique_ptr<net::qp> init_local_queue(boost::program_options::variables_map opts, uint16_t qid) override;$/;"	m	class:virtio::device	file:
 override	net/virtio.cc	/^    virtual uint32_t send(circular_buffer<packet>& p) override;$/;"	m	class:virtio::qp	file:
@@ -4224,7 +4290,7 @@ packet_read_size	net/dpdk.cc	/^static constexpr uint8_t packet_read_size        
 packet_stream	net/net.hh	/^        stream<packet, ethernet_address> packet_stream;$/;"	m	struct:net::interface::l3_rx_stream
 packets	net/net.hh	/^    uint64_t packets;    \/\/ total number of packets$/;"	m	struct:net::qp_stats_good
 pad	core/sstring.hh	/^            int8_t pad;$/;"	m	struct:basic_sstring::contents::external_type
-pad	net/xenfront.hh	/^        uint16_t pad : 12;$/;"	m	struct:xen::netif_tx_request::__anon4
+pad	net/xenfront.hh	/^        uint16_t pad : 12;$/;"	m	struct:xen::netif_tx_request::__anon8
 pad	net/xenfront.hh	/^    uint8_t  pad[48] = { 0 };$/;"	m	class:xen::sring
 pad	rpc/rpc_impl.hh	/^        typename std::aligned_storage<sizeof(T), alignof(T)>::type pad;$/;"	m	union:rpc::reply_payload::U
 page	core/memory.cc	/^struct page {$/;"	s	namespace:memory	file:
@@ -4369,6 +4435,7 @@ possibly_available	core/iostream.hh	/^    size_t possibly_available() const { re
 post	net/virtio.cc	/^qp::txq::post(circular_buffer<packet>& pb) {$/;"	f	class:virtio::qp::txq
 post	net/virtio.cc	/^void vring<BufferChain, Completion>::post(Iterator begin, Iterator end) {$/;"	f	class:virtio::vring
 postpop	core/ragel.hh	/^    void postpop() {}$/;"	f	class:ragel_parser_base
+pr	core/semaphore.hh	/^        promise<> pr;$/;"	m	struct:semaphore::entry
 pr1	tests/timertest.cc	/^    promise<> pr1;$/;"	m	struct:timer_test	file:
 pr2	tests/timertest.cc	/^    promise<> pr2;$/;"	m	struct:timer_test	file:
 pread	core/posix.hh	/^    size_t pread(void* buf, size_t len, off_t off) {$/;"	f	class:file_desc
@@ -4779,6 +4846,7 @@ rte_mbuf_pkt_len	core/dpdk_rte.hh	49;"	d
 rte_mbuf_pkt_len	core/dpdk_rte.hh	66;"	d
 rte_mbuf_rss_hash	core/dpdk_rte.hh	47;"	d
 rte_mbuf_rss_hash	core/dpdk_rte.hh	64;"	d
+rte_mbuf_to_baddr	net/dpdk.cc	/^rte_mbuf_to_baddr(rte_mbuf* mbuf) {$/;"	f	file:
 rte_mbuf_vlan_tci	core/dpdk_rte.hh	46;"	d
 rte_mbuf_vlan_tci	core/dpdk_rte.hh	63;"	d
 rttvar	net/tcp.hh	/^            std::chrono::milliseconds rttvar;$/;"	m	struct:net::tcp_state::tcp_option::option_kind::tcp::tcb::send
@@ -4803,7 +4871,7 @@ rw	core/reactor.hh	/^    rw = O_RDWR,$/;"	m	class:open_flags
 rwlock	core/rwlock.hh	/^    rwlock()$/;"	f	class:rwlock
 rwlock	core/rwlock.hh	/^class rwlock {$/;"	c
 rx	net/dpdk.cc	/^    } rx;$/;"	m	struct:dpdk::port_stats	typeref:struct:dpdk::port_stats::__anon9	file:
-rx	net/net.hh	/^    } rx;$/;"	m	struct:net::qp_stats	typeref:struct:net::qp_stats::__anon5
+rx	net/net.hh	/^    } rx;$/;"	m	struct:net::qp_stats	typeref:struct:net::qp_stats::__anon2
 rx	net/xenfront.hh	/^union rx {$/;"	u	namespace:xen
 rx_csum_offload	net/net.hh	/^    bool rx_csum_offload = false;$/;"	m	struct:net::hw_features
 rx_gc	net/dpdk.cc	/^bool dpdk_qp<HugetlbfsMemBackend>::rx_gc()$/;"	f	class:dpdk::dpdk_qp
@@ -4834,11 +4902,11 @@ s_de47f7e9fb27c285	apps/imdb/hashprotocol.capnp.cc	/^const ::capnp::_::RawSchema
 s_fbf504be45a7de98	apps/imdb/hashprotocol.capnp.cc	/^const ::capnp::_::RawSchema s_fbf504be45a7de98 = {$/;"	m	namespace:capnp::schemas	file:
 s_feaac643283b7cea	apps/imdb/hashprotocol.capnp.cc	/^const ::capnp::_::RawSchema s_feaac643283b7cea = {$/;"	m	namespace:capnp::schemas	file:
 s_main	core/thread.cc	/^thread_context::s_main(unsigned int lo, unsigned int hi) {$/;"	f	class:seastar::thread_context
-sa	net/api.hh	/^        ::sockaddr sa;$/;"	m	union:socket_address::__anon8
+sa	net/api.hh	/^        ::sockaddr sa;$/;"	m	union:socket_address::__anon5
 sack	net/tcp.hh	/^    enum class option_kind: uint8_t { mss = 2, win_scale = 3, sack = 4, timestamps = 8,  nop = 1, eol = 0 };$/;"	m	class:net::tcp_state::tcp_option::option_kind
 sack	net/tcp.hh	/^    enum class option_len:  uint8_t { mss = 4, win_scale = 3, sack = 2, timestamps = 10, nop = 1, eol = 1 };$/;"	m	class:net::tcp_state::tcp_option::option_kind::option_len
 sack	net/tcp.hh	/^    struct sack {$/;"	s	class:net::tcp_state::tcp_option::option_kind::option_len
-sas	net/api.hh	/^        ::sockaddr_storage sas;$/;"	m	union:socket_address::__anon8
+sas	net/api.hh	/^        ::sockaddr_storage sas;$/;"	m	union:socket_address::__anon5
 scattered_message	core/scattered_message.hh	/^    scattered_message() {}$/;"	f	class:scattered_message
 scattered_message	core/scattered_message.hh	/^class scattered_message {$/;"	c
 schedule	core/reactor.cc	/^void schedule(std::unique_ptr<task> t) {$/;"	f
@@ -4876,6 +4944,7 @@ sem	tests/blkdiscard_test.cc	/^    semaphore sem = { 0 };$/;"	m	struct:file_test
 sem	tests/fileiotest.cc	/^    semaphore sem = { 0 };$/;"	m	struct:file_test	file:
 semaphore	core/semaphore.hh	/^    semaphore(size_t count = 1) : _count(count) {}$/;"	f	class:semaphore
 semaphore	core/semaphore.hh	/^class semaphore {$/;"	c
+semaphore_timed_out	core/semaphore.hh	/^class semaphore_timed_out : public std::exception {$/;"	c
 send	core/posix.hh	/^    boost::optional<size_t> send(const void* buffer, size_t len, int flags) {        $/;"	f	class:file_desc
 send	net/api.hh	/^    future<> send(ipv4_addr dst, const char* msg) { return _impl->send(std::move(dst), msg); }$/;"	f	class:net::udp_channel
 send	net/api.hh	/^    future<> send(ipv4_addr dst, packet p) { return _impl->send(std::move(dst), std::move(p)); }$/;"	f	class:net::udp_channel
@@ -5041,6 +5110,13 @@ shift	net/tcp.hh	/^        uint8_t shift;$/;"	m	struct:net::tcp_state::tcp_optio
 should_send_ack	net/tcp.hh	/^bool tcp<InetTraits>::tcb::should_send_ack(uint16_t seg_len) {$/;"	f	class:net::tcp_state::tcp_option::option_kind::tcp::tcb::tcp::tcb
 shrink_to_fit	apps/imdb/vmts-rpc.hh	/^  inline shrink_to_fit(size_t sz = DEFAUlT_SCRATCH_SPACE_SIZE) {$/;"	f	struct:kj::ZeroCopyScratchspace
 shutdown	apps/imdb/vmts-rpc.cc	/^kj::Promise<void> SeastarNetwork::shutdown() {$/;"	f	class:capnp::SeastarNetwork
+shutdown	core/posix.hh	/^    void shutdown(int how) {$/;"	f	class:file_desc
+shutdown	core/reactor.hh	/^    void shutdown(int how) { _s->fd.shutdown(how); }$/;"	f	class:pollable_fd
+shutdown	http/httpd.hh	/^        void shutdown() {$/;"	f	class:httpd::http_server::connection
+shutdown_input	core/reactor.hh	/^connected_socket::shutdown_input() {$/;"	f	class:connected_socket
+shutdown_input	net/native-stack-impl.hh	/^native_connected_socket_impl<Protocol>::shutdown_input() {$/;"	f	class:net::native_connected_socket_impl
+shutdown_output	core/reactor.hh	/^connected_socket::shutdown_output() {$/;"	f	class:connected_socket
+shutdown_output	net/native-stack-impl.hh	/^native_connected_socket_impl<Protocol>::shutdown_output() {$/;"	f	class:net::native_connected_socket_impl
 siaddr	net/dhcp.cc	/^        ipv4_address siaddr;  \/\/ IP address of next server to use in bootstrap$/;"	m	struct:net::dhcp::impl::m_type::htype::opt_type::msg_type::dhcp_header	file:
 side	apps/imdb/vmts-rpc.hh	/^  rpc::twoparty::Side side;$/;"	m	class:capnp::final
 signal	core/reactor.cc	/^void writeable_eventfd::signal(size_t count) {$/;"	f	class:writeable_eventfd
@@ -5050,6 +5126,7 @@ signal_handler	core/reactor.cc	/^reactor::signals::signal_handler::signal_handle
 signal_handler	core/reactor.hh	/^        struct signal_handler {$/;"	s	class:reactor::signals
 signals	core/reactor.cc	/^reactor::signals::signals() : _pending_signals(0) {$/;"	f	class:reactor::signals
 signals	core/reactor.hh	/^    class signals {$/;"	c	class:reactor
+size	apps/imdb/vmts-rpc.cc	/^  size_t size(){$/;"	f	class:capnp::SeastarAsyncMessageReader
 size	apps/imdb/vmts-rpc.hh	/^  inline size_t size() {$/;"	f	struct:kj::ZeroCopyScratchspace
 size	apps/memcached/memcache.cc	/^    size_t size() {$/;"	f	class:memcache::cache
 size	core/circular_buffer.hh	/^circular_buffer<T, Alloc>::size() const {$/;"	f	class:circular_buffer
@@ -5057,7 +5134,7 @@ size	core/file.hh	/^    future<size_t> size() {$/;"	f	class:file
 size	core/memory.hh	/^    size_t size = 0;$/;"	m	struct:memory::translation
 size	core/posix.hh	/^        struct stack_size { size_t size = 0; };$/;"	m	struct:posix_thread::attr::stack_size
 size	core/posix.hh	/^    size_t size() {$/;"	f	class:file_desc
-size	core/queue.hh	/^    size_t size() const { return _q.size(); }$/;"	f	class:queue
+size	core/queue.hh	/^	size_t size() const { return _q.size(); }$/;"	f	class:queue
 size	core/reactor.cc	/^blockdev_file_impl::size(void) {$/;"	f	class:blockdev_file_impl
 size	core/reactor.cc	/^posix_file_impl::size(void) {$/;"	f	class:posix_file_impl
 size	core/scattered_message.hh	/^    size_t size() {$/;"	f	class:scattered_message
@@ -5199,6 +5276,8 @@ stop	apps/seawreck/seawreck.cc	/^    future<> stop() {$/;"	f	class:http_client
 stop	core/distributed.hh	/^distributed<Service>::stop() {$/;"	f	class:distributed
 stop	core/reactor.cc	/^void reactor::stop() {$/;"	f	class:reactor
 stop	core/scollectd.cc	/^    void stop() {$/;"	f	class:scollectd::impl
+stop	http/httpd.hh	/^    future<> stop() {$/;"	f	class:httpd::http_server
+stop	http/httpd.hh	/^    future<> stop() {$/;"	f	class:httpd::http_server_control
 stop	tests/distributed_test.cc	/^    future<> stop() { return make_ready_future<>(); }$/;"	f	struct:X
 stop	tests/distributed_test.cc	/^    future<> stop() { return make_ready_future<>(); }$/;"	f	struct:Y
 stop	tests/tcp_client.cc	/^    future<> stop() {$/;"	f	class:client
@@ -5280,7 +5359,7 @@ take	tests/exchanger.hh	/^    T take() {$/;"	f	class:exchanger
 take_action	json/argparse.py	/^        def take_action(action, argument_strings, option_string=None):$/;"	f	function:ArgumentParser._parse_known_args
 target_hwaddr	net/arp.hh	/^        l2addr target_hwaddr;$/;"	m	struct:net::arp_for::arp_hdr
 target_paddr	net/arp.hh	/^        l3addr target_paddr;$/;"	m	struct:net::arp_for::arp_hdr
-task	core/future.hh	/^class task {$/;"	c
+task	core/task.hh	/^class task {$/;"	c
 taskFailed	apps/imdb/main.cc	/^    void taskFailed(kj::Exception&& exception) {$/;"	f	class:tcp_server
 taskFailed	apps/imdb/vmts-rpc.cc	/^void SeastarServer::taskFailed(kj::Exception&& exception) {$/;"	f	class:capnp::SeastarServer
 task_quota	core/reactor.cc	/^__thread size_t task_quota = 0;$/;"	v
@@ -5305,7 +5384,7 @@ tcp_pseudo_header_checksum	net/ip.hh	/^    static void tcp_pseudo_header_checksu
 tcp_refused_error	net/tcp.hh	/^inline auto tcp_refused_error() {$/;"	f	namespace:net
 tcp_reset_error	net/tcp.hh	/^inline auto tcp_reset_error() {$/;"	f	namespace:net
 tcp_seq	net/tcp.hh	/^struct tcp_seq {$/;"	s	class:net::tcp_state::tcp_option::option_kind
-tcp_server	apps/imdb/main.cc	/^    tcp_server(): waitScope(engine()), done(false), serverImpl(kj::heap<HashProtocolImpl>()), server(serverImpl), tasks(*this) {};$/;"	f	class:tcp_server
+tcp_server	apps/imdb/main.cc	/^    tcp_server(): waitScope(engine()), done(false), serverImpl(kj::heap<HashProtocolImpl>()), server(serverImpl), tasks(*this) {       $/;"	f	class:tcp_server
 tcp_server	apps/imdb/main.cc	/^class tcp_server : private kj::TaskSet::ErrorHandler {$/;"	c	file:
 tcp_server	apps/memcached/memcache.cc	/^    tcp_server(sharded_cache& cache, distributed<system_stats>& system_stats, uint16_t port = 11211)$/;"	f	class:memcache::tcp_server
 tcp_server	apps/memcached/memcache.cc	/^class tcp_server {$/;"	c	namespace:memcache	file:
@@ -5376,6 +5455,7 @@ tests	tests/smp_test.cc	/^int tests, fails;$/;"	v
 tests	tests/tcp_client.cc	/^    static const std::map<std::string, test_fn> tests;$/;"	m	class:client	file:
 tests	tests/tcp_client.cc	/^const std::map<std::string, client::test_fn> client::tests = {$/;"	m	class:client	file:
 tests	tests/test-utils.cc	/^static std::vector<seastar_test*>* tests;$/;"	v	file:
+thread	core/thread.hh	/^    thread_context* thread;$/;"	m	struct:seastar::jmp_buf_link
 thread	core/thread.hh	/^class thread {$/;"	c	namespace:seastar
 thread	core/thread.hh	/^thread::thread(Func func)$/;"	f	class:seastar::thread
 thread_context	core/thread.cc	/^thread_context::thread_context(std::function<void ()> func)$/;"	f	class:seastar::thread_context
@@ -5393,9 +5473,9 @@ time	net/dhcp.cc	/^        packed<uint32_t> time;$/;"	m	struct:net::dhcp::impl::
 time_option	net/dhcp.cc	/^        time_option(opt_type t, uint32_t v) : option(t, sizeof(uint32_t)), time(::htonl(v)) {}$/;"	f	struct:net::dhcp::impl::m_type::htype::opt_type::msg_type::time_option
 time_option	net/dhcp.cc	/^    struct time_option : public option {$/;"	s	class:net::dhcp::impl::m_type::htype::opt_type::msg_type	file:
 time_point	core/reactor.hh	/^    typedef std::chrono::time_point<lowres_clock, duration> time_point;$/;"	t	class:lowres_clock
-time_point	core/reactor.hh	/^    typedef typename Clock::time_point time_point;$/;"	t	class:timer
-timer	core/reactor.hh	/^class timer {$/;"	c
+time_point	core/timer.hh	/^    typedef typename Clock::time_point time_point;$/;"	t	class:timer
 timer	core/reactor.hh	/^timer<Clock>::timer(callback_t&& callback) : _callback(std::move(callback)) {$/;"	f	class:timer
+timer	core/timer.hh	/^class timer {$/;"	c
 timer_set	core/timer-set.hh	/^    timer_set()$/;"	f	class:seastar::timer_set
 timer_set	core/timer-set.hh	/^class timer_set {$/;"	c	namespace:seastar
 timer_test	tests/timertest.cc	/^struct timer_test {$/;"	s	file:
@@ -5432,6 +5512,7 @@ to_json	json/formatter.cc	/^sstring formatter::to_json(const char* str) {$/;"	f	
 to_json	json/formatter.cc	/^sstring formatter::to_json(const date_time& d) {$/;"	f	class:json::formatter
 to_json	json/formatter.cc	/^sstring formatter::to_json(const jsonable& obj) {$/;"	f	class:json::formatter
 to_json	json/formatter.cc	/^sstring formatter::to_json(const sstring& str) {$/;"	f	class:json::formatter
+to_json	json/formatter.cc	/^sstring formatter::to_json(double d) {$/;"	f	class:json::formatter
 to_json	json/formatter.cc	/^sstring formatter::to_json(float f) {$/;"	f	class:json::formatter
 to_json	json/formatter.cc	/^sstring formatter::to_json(int n) {$/;"	f	class:json::formatter
 to_json	json/formatter.cc	/^sstring formatter::to_json(long n) {$/;"	f	class:json::formatter
@@ -5465,7 +5546,7 @@ to_value	core/shared_ptr.hh	/^    T* to_value() { return static_cast<T*>(this); 
 toeplitz_hash	net/toeplitz.hh	/^toeplitz_hash(const rss_key_type& key, const T& data)$/;"	f
 total	net/dpdk.cc	/^            uint64_t total;        \/\/ total number of erroneous received packets$/;"	m	struct:dpdk::port_stats::__anon9::__anon11	file:
 total	net/dpdk.cc	/^            uint64_t total;   \/\/ total number of failed transmitted packets$/;"	m	struct:dpdk::port_stats::__anon12::__anon14	file:
-total	net/net.hh	/^            uint64_t total;        \/\/ total number of erroneous packets$/;"	m	struct:net::qp_stats::__anon5::__anon6
+total	net/net.hh	/^            uint64_t total;        \/\/ total number of erroneous packets$/;"	m	struct:net::qp_stats::__anon2::__anon3
 totalSize	apps/imdb/adder.capnp.hh	/^  inline ::capnp::MessageSize totalSize() const { return asReader().totalSize(); }$/;"	f	class:Adder::AddParams::Builder
 totalSize	apps/imdb/adder.capnp.hh	/^  inline ::capnp::MessageSize totalSize() const { return asReader().totalSize(); }$/;"	f	class:Adder::AddResults::Builder
 totalSize	apps/imdb/adder.capnp.hh	/^  inline ::capnp::MessageSize totalSize() const {$/;"	f	class:Adder::AddParams::Reader
@@ -5485,6 +5566,7 @@ total_memory	core/resource.hh	/^    optional<size_t> total_memory;$/;"	m	struct:
 total_reqs	apps/seawreck/seawreck.cc	/^    future<uint64_t> total_reqs() {$/;"	f	class:http_client
 touch	core/slab.hh	/^    void touch(Item *item) {$/;"	f	class:slab_allocator
 touch_item	core/slab.hh	/^    void touch_item(Item *item) {$/;"	f	class:slab_class
+tr	core/semaphore.hh	/^        timer<> tr;$/;"	m	struct:semaphore::entry
 trace_err	json/json2code.py	/^def trace_err(*params):$/;"	f
 trace_verbose	json/json2code.py	/^def trace_verbose(*params):$/;"	f
 transfer_pass1	core/transfer.hh	/^transfer_pass1(Alloc& a, T* from, T* to,$/;"	f
@@ -5522,7 +5604,7 @@ try_write_lock	core/rwlock.hh	/^    bool try_write_lock() {$/;"	f	class:rwlock
 tso_seg_size	net/packet.hh	/^    uint16_t tso_seg_size = 0;$/;"	m	struct:net::offload_info
 ttl	net/ip.hh	/^    uint8_t ttl;$/;"	m	class:net::ip_hdr::frag_bits
 tx	net/dpdk.cc	/^    } tx;$/;"	m	struct:dpdk::port_stats	typeref:struct:dpdk::port_stats::__anon12	file:
-tx	net/net.hh	/^    } tx;$/;"	m	struct:net::qp_stats	typeref:struct:net::qp_stats::__anon7
+tx	net/net.hh	/^    } tx;$/;"	m	struct:net::qp_stats	typeref:struct:net::qp_stats::__anon4
 tx	net/xenfront.hh	/^union tx {$/;"	u	namespace:xen
 tx_buf	net/dpdk.cc	/^        tx_buf(tx_buf_factory& fc) : _fc(fc) {$/;"	f	class:dpdk::dpdk_qp::tx_buf
 tx_buf	net/dpdk.cc	/^    class tx_buf {$/;"	c	class:dpdk::dpdk_qp	file:
@@ -5573,7 +5655,7 @@ u	core/memory.cc	/^        u() {$/;"	f	union:memory::small_pool_array::u
 u	core/memory.cc	/^    union u {$/;"	u	class:memory::small_pool_array	file:
 u	core/scollectd_api.hh	/^    } u;$/;"	m	struct:scollectd::collectd_value	typeref:union:scollectd::collectd_value::__anon1
 u	core/sstring.hh	/^    } u;$/;"	m	class:basic_sstring	typeref:union:basic_sstring::contents
-u	net/api.hh	/^    } u;$/;"	m	class:socket_address	typeref:union:socket_address::__anon8
+u	net/api.hh	/^    } u;$/;"	m	class:socket_address	typeref:union:socket_address::__anon5
 u	rpc/rpc_impl.hh	/^    } u;$/;"	m	struct:rpc::in_message	typeref:union:rpc::in_message::U
 u	rpc/rpc_impl.hh	/^    } u;$/;"	m	struct:rpc::reply_payload	typeref:union:rpc::reply_payload::U
 udp	net/const.hh	/^    icmp = 1, tcp = 6, udp = 17, unused = 255$/;"	m	class:net::ip_protocol_num
@@ -5657,8 +5739,10 @@ v_set	rpc/rpc_impl.hh	/^    bool v_set = false; \/\/ set it to true when U::v is
 val	core/print.hh	/^    TimePoint val;$/;"	m	struct:usecfmt_wrapper
 valid_type	json/json2code.py	/^def valid_type(param):$/;"	f
 valid_vars	json/json2code.py	/^valid_vars = {'string': 'sstring', 'int': 'int', 'double': 'double',$/;"	v
+validate	core/reactor.cc	/^void validate(boost::any& v,$/;"	f
 value	apps/memcached/memcache.cc	/^    const std::experimental::string_view value() const {$/;"	f	class:memcache::item
 value	core/future.hh	/^        std::tuple<T...> value;$/;"	m	union:future_state::any
+value	core/reactor.cc	/^    resource::cpuset value;$/;"	m	struct:cpuset_wrapper	file:
 value	core/scollectd.hh	/^    T value;$/;"	m	struct:scollectd::typed
 value	core/scollectd.hh	/^    value(const typed<T> & args)$/;"	f	class:scollectd::value
 value	core/scollectd.hh	/^    value(const value_type & t)$/;"	f	class:scollectd::value

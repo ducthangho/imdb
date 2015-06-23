@@ -378,18 +378,25 @@ public:
 private:
     kj::Promise<void> writeInternal(kj::ArrayPtr<const kj::byte> firstPiece,
                                     kj::ArrayPtr<const kj::ArrayPtr<const kj::byte>> morePieces) {
+        
+        scattered_message<char> msg;
+        msg.append_static((char*)firstPiece.begin(),firstPiece.size() );
+        for (size_t i =0;i<morePieces.size();++i){
+            auto& buf = morePieces[i];
+            msg.append_static((char*)buf.begin(),buf.size() );
+        }
+        return kj_write(std::move(msg));
+        // auto promise = kj_write((const char_type*)firstPiece.begin(),firstPiece.size() );
+        // for (size_t i = 0;i<morePieces.size();++i){
+        //     auto & pieces = morePieces[i];
+        //     promise = promise.then([&pieces,this](){   
+        //         return kj_write((const char_type*)pieces.begin(),pieces.size() );
+        //     });
+        // };
 
-        auto promise = kj_write((const char_type*)firstPiece.begin(),firstPiece.size() );
-        for (size_t i = 0;i<morePieces.size();++i){
-            auto & pieces = morePieces[i];
-            promise = promise.then([&pieces,this](){   
-                return kj_write((const char_type*)pieces.begin(),pieces.size() );
-            });
-        };
-
-        return promise.then([this]() {            
-            return kj_flush();
-        });
+        // return promise.then([this]() {            
+        //     return kj_flush();
+        // });
         /*KJ_NONBLOCKING_SYSCALL(writeResult = ::writev(fd, iov.begin(), iov.size())) {
           // Error.
 

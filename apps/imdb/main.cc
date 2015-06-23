@@ -411,7 +411,7 @@ int main(int ac, char** av)
 { 
 
     app_template app;
-    app.add_options()("port", bpo::value<uint16_t>()->default_value(10000),
+    app.add_options()("port", bpo::value<uint16_t>()->default_value(9090),
                       "Database Server port");
     return app.kj_run(ac, av,
     [&] {

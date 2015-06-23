@@ -195,9 +195,14 @@ posix_data_source_impl::kj_get(size_t maxBytes) {
         KJ_DBG("READ FROM SOCKET ", size);
 
         _buf.trim(size);
-        auto m = kj::min(8, size);
-        for (int i = 0; i < m; ++i) {
-            printf("%d\t", (int)(_buf[i] ));
+        // auto m = kj::min(8, size);
+        int count = 0;
+        for (size_t i = 0; i < size; ++i) {
+            printf("0x%02x ,", (unsigned char)(_buf[i] ));
+            if (count++==7){
+                printf("\n");
+                count = 0;        
+            }
         }
         printf("\n");
         auto ret = std::move(_buf);

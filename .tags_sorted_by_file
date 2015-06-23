@@ -428,13 +428,13 @@ server	apps/imdb/main.cc	/^    capnp::SeastarServer server;$/;"	m	class:tcp_serv
 serverImpl	apps/imdb/main.cc	/^    capnp::Capability::Client serverImpl;$/;"	m	class:tcp_server	file:
 taskFailed	apps/imdb/main.cc	/^    void taskFailed(kj::Exception&& exception) {$/;"	f	class:tcp_server
 tasks	apps/imdb/main.cc	/^    kj::TaskSet tasks;$/;"	m	class:tcp_server	file:
-tcp_server	apps/imdb/main.cc	/^    tcp_server(): waitScope(engine()), done(false), serverImpl(kj::heap<HashProtocolImpl>()), server(serverImpl), tasks(*this) {};$/;"	f	class:tcp_server
+tcp_server	apps/imdb/main.cc	/^    tcp_server(): waitScope(engine()), done(false), serverImpl(kj::heap<HashProtocolImpl>()), server(serverImpl), tasks(*this) {       $/;"	f	class:tcp_server
 tcp_server	apps/imdb/main.cc	/^class tcp_server : private kj::TaskSet::ErrorHandler {$/;"	c	file:
 waitScope	apps/imdb/main.cc	/^    kj::WaitScope waitScope;    $/;"	m	class:tcp_server	file:
 ~tcp_server	apps/imdb/main.cc	/^    ~tcp_server(){$/;"	f	class:tcp_server
 AcceptedConnection	apps/imdb/vmts-rpc.cc	/^  explicit AcceptedConnection(kj::Maybe<Capability::Client> bootstrapInterface,$/;"	f	struct:capnp::SeastarServer::AcceptedConnection
 AcceptedConnection	apps/imdb/vmts-rpc.cc	/^struct SeastarServer::AcceptedConnection {$/;"	s	class:capnp::SeastarServer	file:
-IncomingMessageImpl	apps/imdb/vmts-rpc.cc	/^  IncomingMessageImpl(kj::Own<MessageReader> message): message(kj::mv(message)) {    $/;"	f	class:capnp::final
+IncomingMessageImpl	apps/imdb/vmts-rpc.cc	/^  IncomingMessageImpl(kj::Own<SeastarAsyncMessageReader> message): message(kj::mv(message)) {    $/;"	f	class:capnp::final
 OutgoingMessageImpl	apps/imdb/vmts-rpc.cc	/^  OutgoingMessageImpl(SeastarNetwork& network, uint firstSegmentWordSize)$/;"	f	class:capnp::final
 SeastarAsyncMessageReader	apps/imdb/vmts-rpc.cc	/^  inline SeastarAsyncMessageReader(kj::UvIoStream& _inputStream, ReaderOptions options): MessageReader(options), inputStream(_inputStream), totalWords(0), ownership(true) {$/;"	f	class:capnp::SeastarAsyncMessageReader
 SeastarAsyncMessageReader	apps/imdb/vmts-rpc.cc	/^class SeastarAsyncMessageReader: public MessageReader {$/;"	c	namespace:capnp	file:
@@ -454,7 +454,7 @@ getPeerVatId	apps/imdb/vmts-rpc.cc	/^rpc::twoparty::VatId::Reader SeastarNetwork
 inputStream	apps/imdb/vmts-rpc.cc	/^  kj::UvIoStream& inputStream;$/;"	m	class:capnp::SeastarAsyncMessageReader	file:
 listen	apps/imdb/vmts-rpc.cc	/^kj::Promise<void> SeastarServer::listen(ipv4_addr addr) {$/;"	f	class:capnp::SeastarServer
 message	apps/imdb/vmts-rpc.cc	/^  MallocMessageBuilder message;$/;"	m	class:capnp::final	file:
-message	apps/imdb/vmts-rpc.cc	/^  kj::Own<MessageReader> message;$/;"	m	class:capnp::final	file:
+message	apps/imdb/vmts-rpc.cc	/^  kj::Own<SeastarAsyncMessageReader> message;$/;"	m	class:capnp::final	file:
 moreSizes	apps/imdb/vmts-rpc.cc	/^  kj::Array<_::WireValue<uint32_t>> moreSizes;$/;"	m	class:capnp::SeastarAsyncMessageReader	file:
 network	apps/imdb/vmts-rpc.cc	/^  SeastarNetwork network;$/;"	m	struct:capnp::SeastarServer::AcceptedConnection	file:
 network	apps/imdb/vmts-rpc.cc	/^  SeastarNetwork& network;$/;"	m	class:capnp::final	file:
@@ -471,6 +471,7 @@ segment0Size	apps/imdb/vmts-rpc.cc	/^  inline uint segment0Size() { return first
 segmentCount	apps/imdb/vmts-rpc.cc	/^  inline uint segmentCount() { return firstWord[0].get() + 1; }$/;"	f	class:capnp::SeastarAsyncMessageReader	file:
 segmentStarts	apps/imdb/vmts-rpc.cc	/^  kj::Array<const word*> segmentStarts;$/;"	m	class:capnp::SeastarAsyncMessageReader	file:
 shutdown	apps/imdb/vmts-rpc.cc	/^kj::Promise<void> SeastarNetwork::shutdown() {$/;"	f	class:capnp::SeastarNetwork
+size	apps/imdb/vmts-rpc.cc	/^  size_t size(){$/;"	f	class:capnp::SeastarAsyncMessageReader
 taskFailed	apps/imdb/vmts-rpc.cc	/^void SeastarServer::taskFailed(kj::Exception&& exception) {$/;"	f	class:capnp::SeastarServer
 totalWords	apps/imdb/vmts-rpc.cc	/^  size_t totalWords;$/;"	m	class:capnp::SeastarAsyncMessageReader	file:
 ArrDisposer	apps/imdb/vmts-rpc.hh	/^    ArrDisposer() : parent(nullptr) {};$/;"	f	class:kj::ZeroCopyScratchspace::ArrDisposer
@@ -507,7 +508,6 @@ disconnectFulfiller	apps/imdb/vmts-rpc.hh	/^  FulfillerDisposer disconnectFulfil
 disconnectPromise	apps/imdb/vmts-rpc.hh	/^  kj::ForkedPromise<void> disconnectPromise = nullptr;$/;"	m	class:capnp::final
 disposeImpl	apps/imdb/vmts-rpc.hh	/^    virtual void disposeImpl(void* firstElement, size_t elementSize, size_t elementCount,$/;"	f	class:kj::ZeroCopyScratchspace::ArrDisposer
 disposer	apps/imdb/vmts-rpc.hh	/^  kj::Maybe<ArrDisposer> disposer;$/;"	m	struct:kj::ZeroCopyScratchspace
-dumper	apps/imdb/vmts-rpc.hh	/^  RpcDumper dumper;$/;"	m	class:capnp::final
 final	apps/imdb/vmts-rpc.hh	/^class SeastarNetwork final : public TwoPartyVatNetworkBase,$/;"	c	namespace:capnp
 freed	apps/imdb/vmts-rpc.hh	/^  size_t freed;$/;"	m	struct:kj::ZeroCopyScratchspace
 fulfiller	apps/imdb/vmts-rpc.hh	/^    mutable kj::Own<kj::PromiseFulfiller<void>> fulfiller;$/;"	m	class:capnp::final::FulfillerDisposer
@@ -515,6 +515,7 @@ kj	apps/imdb/vmts-rpc.hh	/^namespace kj {$/;"	n
 maxReadable	apps/imdb/vmts-rpc.hh	/^  inline size_t maxReadable() {$/;"	f	struct:kj::ZeroCopyScratchspace
 noexcept	apps/imdb/vmts-rpc.hh	/^  ~UvIoStream() noexcept(false) {$/;"	f	struct:kj::UvIoStream
 onDisconnect	apps/imdb/vmts-rpc.hh	/^  kj::Promise<void> onDisconnect() { return disconnectPromise.addBranch(); }$/;"	f	class:capnp::final
+operator []	apps/imdb/vmts-rpc.hh	/^  inline char operator[](size_t i){$/;"	f	struct:kj::ZeroCopyScratchspace
 override	apps/imdb/vmts-rpc.hh	/^        rpc::twoparty::VatId::Reader ref) override;$/;"	m	class:capnp::final
 override	apps/imdb/vmts-rpc.hh	/^    void disposeImpl(void* pointer) const override;$/;"	m	class:capnp::final::FulfillerDisposer
 override	apps/imdb/vmts-rpc.hh	/^  kj::Own<OutgoingRpcMessage> newOutgoingMessage(uint firstSegmentWordSize) override;$/;"	m	class:capnp::final
@@ -990,8 +991,8 @@ impl	core/deleter.hh	/^struct deleter::impl {$/;"	s	class:deleter
 is_raw_object	core/deleter.hh	/^    bool is_raw_object() const {$/;"	f	class:final
 is_raw_object	core/deleter.hh	/^    static bool is_raw_object(impl* i) {$/;"	f	class:final
 lambda_deleter_impl	core/deleter.hh	/^    lambda_deleter_impl(deleter next, Deleter&& del)$/;"	f	struct:final
-make_deleter	core/deleter.hh	/^make_deleter(Deleter d) {$/;"	f
-make_deleter	core/deleter.hh	/^make_deleter(deleter next, Deleter d) {$/;"	f
+make_deleter	core/deleter.hh	/^make_deleter(Object o) {$/;"	f
+make_deleter	core/deleter.hh	/^make_deleter(deleter next, Object o) {$/;"	f
 make_free_deleter	core/deleter.hh	/^make_free_deleter(deleter next, void* obj) {$/;"	f
 make_free_deleter	core/deleter.hh	/^make_free_deleter(void* obj) {$/;"	f
 make_object_deleter	core/deleter.hh	/^make_object_deleter(T&& obj) {$/;"	f
@@ -1027,7 +1028,9 @@ invoke_on	core/distributed.hh	/^    void invoke_on(unsigned id, void (Service::*
 invoke_on_all	core/distributed.hh	/^distributed<Service>::invoke_on_all(Func&& func) {$/;"	f	class:distributed
 invoke_on_all	core/distributed.hh	/^distributed<Service>::invoke_on_all(void (Service::*func)(Args...), Args... args) {$/;"	f	class:distributed
 local	core/distributed.hh	/^Service& distributed<Service>::local() {$/;"	f	class:distributed
+local_is_initialized	core/distributed.hh	/^inline bool distributed<Service>::local_is_initialized() {$/;"	f	class:distributed
 make_foreign	core/distributed.hh	/^foreign_ptr<T> make_foreign(T ptr) {$/;"	f
+make_local_and_release	core/distributed.hh	/^    element_type make_local_and_release() {$/;"	f	class:foreign_ptr
 map_reduce0	core/distributed.hh	/^    map_reduce0(Mapper map, Initial initial, Reduce reduce) {$/;"	f	class:distributed
 on_origin	core/distributed.hh	/^    bool on_origin() {$/;"	f	class:foreign_ptr
 operator *	core/distributed.hh	/^    element_type& operator*() const { return *_value; }$/;"	f	class:foreign_ptr
@@ -1085,6 +1088,7 @@ _file_impl	core/file.hh	/^    std::unique_ptr<file_impl> _file_impl;$/;"	m	class
 _front	core/file.hh	/^        uint64_t     _front;$/;"	m	struct:file::read_state
 _offset	core/file.hh	/^        uint64_t     _offset;$/;"	m	struct:file::read_state
 _to_read	core/file.hh	/^        size_t       _to_read;$/;"	m	struct:file::read_state
+allocate	core/file.hh	/^    future<> allocate(uint64_t position, uint64_t length) {$/;"	f	class:file
 append_new_data	core/file.hh	/^        void append_new_data(tmp_buf_type& new_data) {$/;"	f	struct:file::read_state
 block_device	core/file.hh	/^    block_device,$/;"	m	class:directory_entry_type
 blockdev_file_impl	core/file.hh	/^    blockdev_file_impl(int fd) : posix_file_impl(fd) {}$/;"	f	class:blockdev_file_impl
@@ -1114,6 +1118,7 @@ file	core/file.hh	/^class file {$/;"	c
 file_impl	core/file.hh	/^class file_impl {$/;"	c
 flush	core/file.hh	/^    future<> flush() {$/;"	f	class:file
 have_good_bytes	core/file.hh	/^        bool have_good_bytes() const {$/;"	f	struct:file::read_state
+kj_allocate	core/file.hh	/^    kj::Promise<void> kj_allocate(uint64_t position, uint64_t length) {$/;"	f	class:file
 kj_discard	core/file.hh	/^    kj::Promise<void> kj_discard(uint64_t offset, uint64_t length) {$/;"	f	class:file
 kj_dma_read	core/file.hh	/^    kj::Promise<size_t> kj_dma_read(uint64_t pos, CharType* buffer, size_t len) {$/;"	f	class:file
 kj_dma_read	core/file.hh	/^    kj::Promise<size_t> kj_dma_read(uint64_t pos, std::vector<iovec> iov) {$/;"	f	class:file
@@ -1132,6 +1137,9 @@ list_directory	core/file.hh	/^    subscription<directory_entry> list_directory(s
 make_file_impl	core/file.hh	/^make_file_impl(int fd) {$/;"	f
 name	core/file.hh	/^    sstring name;$/;"	m	struct:directory_entry
 noexcept	core/file.hh	/^    file& operator=(file&& x) noexcept = default;$/;"	m	class:file
+override	core/file.hh	/^	kj::Promise<void> kj_allocate(uint64_t position, uint64_t length) override;$/;"	m	class:posix_file_impl
+override	core/file.hh	/^	virtual future<> allocate(uint64_t position, uint64_t length) override;$/;"	m	class:blockdev_file_impl
+override	core/file.hh	/^	virtual kj::Promise<void> kj_allocate(uint64_t position, uint64_t length) override;$/;"	m	class:blockdev_file_impl
 override	core/file.hh	/^    future<> discard(uint64_t offset, uint64_t length) override;$/;"	m	class:blockdev_file_impl
 override	core/file.hh	/^    future<> truncate(uint64_t length) override;$/;"	m	class:blockdev_file_impl
 override	core/file.hh	/^    future<size_t> size(void) override;$/;"	m	class:blockdev_file_impl
@@ -1144,6 +1152,7 @@ override	core/file.hh	/^    kj::Promise<struct stat> kj_stat(void) override;$/;"
 override	core/file.hh	/^    kj::Promise<void> kj_discard(uint64_t offset, uint64_t length) override;$/;"	m	class:posix_file_impl
 override	core/file.hh	/^    kj::Promise<void> kj_flush(void) override;$/;"	m	class:posix_file_impl
 override	core/file.hh	/^    kj::Promise<void> kj_truncate(uint64_t length) override;$/;"	m	class:posix_file_impl
+override	core/file.hh	/^    virtual future<> allocate(uint64_t position, uint64_t length) override;$/;"	m	class:posix_file_impl
 override	core/file.hh	/^    virtual subscription<directory_entry> list_directory(std::function<future<> (directory_entry de)> next) override;$/;"	m	class:posix_file_impl
 pos	core/file.hh	/^        size_t       pos      = 0;$/;"	m	struct:file::read_state
 posix_file_impl	core/file.hh	/^    posix_file_impl(int fd) : _fd(fd) {}$/;"	f	class:posix_file_impl
@@ -1218,8 +1227,7 @@ when_all	core/future-util.hh	/^when_all(future<FutureArgs...>&& fut, Rest&&... r
 when_all_estimate_vector_capacity	core/future-util.hh	/^when_all_estimate_vector_capacity(Iterator begin, Iterator end, IteratorCategory category) {$/;"	f
 when_all_estimate_vector_capacity	core/future-util.hh	/^when_all_estimate_vector_capacity(Iterator begin, Iterator end, std::forward_iterator_tag category) {$/;"	f
 FUTURE_HH_	core/future.hh	23;"	d
-KJ_DETACH	core/future.hh	719;"	d
-_func	core/future.hh	/^    Func _func;$/;"	m	class:final
+KJ_DETACH	core/future.hh	946;"	d
 _func	core/future.hh	/^    Func _func;$/;"	m	struct:final
 _future	core/future.hh	/^    future<T...>* _future = nullptr;$/;"	m	class:promise
 _local_state	core/future.hh	/^    future_state<T...> _local_state;  \/\/ valid if !_promise$/;"	m	class:future
@@ -1251,7 +1259,6 @@ ex	core/future.hh	/^        std::exception_ptr ex;$/;"	m	union:future_state::any
 exception	core/future.hh	/^         exception,$/;"	m	class:future_state::state
 exception_future_marker	core/future.hh	/^struct exception_future_marker {};$/;"	s
 exception_min	core/future.hh	/^         exception_min = 3,  \/\/ or anything greater$/;"	m	class:future_state::state
-final	core/future.hh	/^class lambda_task final : public task {$/;"	c
 final	core/future.hh	/^struct continuation final : task {$/;"	s
 future	core/future.hh	/^         future = 1,$/;"	m	class:future_state::state
 future	core/future.hh	/^         future,$/;"	m	class:future_state::state
@@ -1266,17 +1273,20 @@ futurize	core/future.hh	/^struct futurize<void> {$/;"	s
 get	core/future.hh	/^    std::tuple<> get() {$/;"	f	struct:future_state
 get	core/future.hh	/^    std::tuple<T...> get() {$/;"	f	class:future
 get	core/future.hh	/^    std::tuple<T...> get() {$/;"	f	struct:future_state
+get0	core/future.hh	/^    static get0_return_type get0(std::tuple<>&&) {$/;"	f	struct:future_state
+get0	core/future.hh	/^    static get0_return_type get0(std::tuple<T...>&& x) {$/;"	f	struct:future_state
+get0	core/future.hh	/^    typename future_state<T...>::get0_return_type get0() {$/;"	f	class:future
+get_available_state	core/future.hh	/^    future_state<T...> get_available_state() {$/;"	f	class:future
 invalid	core/future.hh	/^         invalid = 0,$/;"	m	class:future_state::state
 invalid	core/future.hh	/^         invalid,$/;"	m	class:future_state::state
 is_future	core/future.hh	/^template <typename... T> struct is_future : std::false_type {};$/;"	s
 is_future	core/future.hh	/^template <typename... T> struct is_future<future<T...>> : std::true_type {};$/;"	s
-lambda_task	core/future.hh	/^    lambda_task(Func&& func) : _func(std::move(func)) {}$/;"	f	class:final
-lambda_task	core/future.hh	/^    lambda_task(const Func& func) : _func(func) {}$/;"	f	class:final
 make_kj_promise	core/future.hh	/^inline kj::Promise< std::pair<T,V> > make_kj_promise(future<T,V>&& pm) {$/;"	f
 make_kj_promise	core/future.hh	/^inline kj::Promise<T> make_kj_promise(future<T>&& pm) {$/;"	f
 make_kj_promise	core/future.hh	/^inline kj::Promise<void> make_kj_promise(future<>&& pm) {$/;"	f
 make_ready_future	core/future.hh	/^future<T...> make_ready_future(A&&... value) {$/;"	f
-make_task	core/future.hh	/^make_task(Func&& func) {$/;"	f
+max_inlined_continuations	core/future.hh	/^static constexpr unsigned max_inlined_continuations = 1;$/;"	v
+max_inlined_continuations	core/future.hh	/^static constexpr unsigned max_inlined_continuations = 256;$/;"	v
 move	core/future.hh	/^            : _promise(nullptr), _local_state(std::move(state)) {$/;"	f	class:future
 move_noexcept	core/future.hh	/^    static constexpr bool move_noexcept = future_state<T...>::move_noexcept;$/;"	m	class:future
 move_noexcept	core/future.hh	/^    static constexpr bool move_noexcept = future_state<T...>::move_noexcept;$/;"	m	class:promise
@@ -1290,7 +1300,6 @@ noexcept	core/future.hh	/^    future_state& operator=(future_state&& x) noexcept
 noexcept	core/future.hh	/^    future_state(future_state&& x) noexcept(move_noexcept)$/;"	f	struct:future_state
 noexcept	core/future.hh	/^    promise& operator=(promise&& x) noexcept(move_noexcept) {$/;"	f	class:promise
 noexcept	core/future.hh	/^    promise(promise&& x) noexcept(move_noexcept) : _future(x._future), _state(x._state), _task(std::move(x._task)) {$/;"	f	class:promise
-noexcept	core/future.hh	/^    virtual void run() noexcept = 0;$/;"	m	class:task
 noexcept	core/future.hh	/^    void forward_to(promise<>& pr) noexcept;$/;"	m	struct:future_state
 noexcept	core/future.hh	/^    void make_ready() noexcept;$/;"	m	class:promise
 noexcept	core/future.hh	/^    void migrated() noexcept;$/;"	m	class:promise
@@ -1312,7 +1321,6 @@ sizeof	core/future.hh	/^    static_assert(sizeof(std::exception_ptr) == sizeof(v
 st	core/future.hh	/^        state st;$/;"	m	union:future_state::any
 state	core/future.hh	/^    enum class state : uintptr_t {$/;"	c	struct:future_state
 state	core/future.hh	/^    enum class state {$/;"	c	struct:future_state
-task	core/future.hh	/^class task {$/;"	c
 thread_impl	core/future.hh	/^namespace thread_impl {$/;"	n	namespace:seastar
 value	core/future.hh	/^        std::tuple<T...> value;$/;"	m	union:future_state::any
 wait	core/future.hh	/^    void wait() {$/;"	f	class:future
@@ -1652,6 +1660,7 @@ set	core/posix.hh	/^        void set(A a, Rest... rest) {$/;"	f	class:posix_thre
 set	core/posix.hh	/^        void set(stack_size ss) { _stack_size = ss; }$/;"	f	class:posix_thread::attr
 setsockopt	core/posix.hh	/^    int setsockopt(int level, int optname, X&& data) {$/;"	f	class:file_desc
 setsockopt	core/posix.hh	/^    int setsockopt(int level, int optname, const char* data) {$/;"	f	class:file_desc
+shutdown	core/posix.hh	/^    void shutdown(int how) {$/;"	f	class:file_desc
 size	core/posix.hh	/^        struct stack_size { size_t size = 0; };$/;"	m	struct:posix_thread::attr::stack_size
 size	core/posix.hh	/^    size_t size() {$/;"	f	class:file_desc
 socket	core/posix.hh	/^    static file_desc socket(int family, int type, int protocol = 0) {$/;"	f	class:file_desc
@@ -1698,6 +1707,7 @@ _max	core/queue.hh	/^    size_t _max;$/;"	m	class:queue
 _not_empty	core/queue.hh	/^    std::experimental::optional<promise<>> _not_empty;$/;"	m	class:queue
 _not_full	core/queue.hh	/^    std::experimental::optional<promise<>> _not_full;$/;"	m	class:queue
 _q	core/queue.hh	/^    std::queue<T, circular_buffer<T>> _q;$/;"	m	class:queue
+abort	core/queue.hh	/^    void abort(std::exception_ptr ex) {$/;"	f	class:queue
 consume	core/queue.hh	/^bool queue<T>::consume(Func&& func) {$/;"	f	class:queue
 empty	core/queue.hh	/^bool queue<T>::empty() const {$/;"	f	class:queue
 full	core/queue.hh	/^bool queue<T>::full() const {$/;"	f	class:queue
@@ -1715,7 +1725,7 @@ push	core/queue.hh	/^bool queue<T>::push(T&& data) {$/;"	f	class:queue
 push_eventually	core/queue.hh	/^future<> queue<T>::push_eventually(T&& data) {$/;"	f	class:queue
 queue	core/queue.hh	/^class queue {$/;"	c
 queue	core/queue.hh	/^queue<T>::queue(size_t size)$/;"	f	class:queue
-size	core/queue.hh	/^    size_t size() const { return _q.size(); }$/;"	f	class:queue
+size	core/queue.hh	/^	size_t size() const { return _q.size(); }$/;"	f	class:queue
 RAGEL_HH_	core/ragel.hh	23;"	d
 _block_end	core/ragel.hh	/^    const char* _block_end;$/;"	m	class:sstring_builder::guard
 _builder	core/ragel.hh	/^    sstring_builder _builder;$/;"	m	class:ragel_parser_base
@@ -1754,9 +1764,14 @@ _read	core/reactor.cc	/^    readable_eventfd _read;$/;"	m	class:reactor_notifier
 _threads	core/reactor.cc	/^std::vector<smp::thread_adaptor> smp::_threads;$/;"	m	class:smp	file:
 _tmain	core/reactor.cc	/^std::thread::id smp::_tmain;$/;"	m	class:smp	file:
 _write	core/reactor.cc	/^    writeable_eventfd _write;$/;"	m	class:reactor_notifier_epoll	file:
+abort_fd	core/reactor.cc	/^void reactor_backend_epoll::abort_fd(pollable_fd_state& pfd, std::exception_ptr ex,$/;"	f	class:reactor_backend_epoll
+abort_reader	core/reactor.cc	/^void reactor_backend_epoll::abort_reader(pollable_fd_state& fd, std::exception_ptr ex) {$/;"	f	class:reactor_backend_epoll
+abort_writer	core/reactor.cc	/^void reactor_backend_epoll::abort_writer(pollable_fd_state& fd, std::exception_ptr ex) {$/;"	f	class:reactor_backend_epoll
 action	core/reactor.cc	/^void reactor::signals::action(int signo, siginfo_t* siginfo, void* ignore) {$/;"	f	class:reactor::signals
 add_timer	core/reactor.cc	/^void reactor::add_timer(timer<>* tmr) {$/;"	f	class:reactor
 add_timer	core/reactor.cc	/^void reactor::add_timer(timer<lowres_clock>* tmr) {$/;"	f	class:reactor
+allocate	core/reactor.cc	/^blockdev_file_impl::allocate(uint64_t position, uint64_t length) {$/;"	f	class:blockdev_file_impl
+allocate	core/reactor.cc	/^posix_file_impl::allocate(uint64_t position, uint64_t length) {$/;"	f	class:posix_file_impl
 allocate_reactor	core/reactor.cc	/^void smp::allocate_reactor() {$/;"	f	class:smp
 cancel	core/reactor.cc	/^    void cancel() {$/;"	f	class:reactor::poller::registration_task
 cleanup	core/reactor.cc	/^void smp::cleanup() {$/;"	f	class:smp
@@ -1768,6 +1783,7 @@ configure	core/reactor.cc	/^void smp::configure(boost::program_options::variable
 connect	core/reactor.cc	/^future<connected_socket> connect(socket_address sa) {$/;"	f
 connect	core/reactor.cc	/^reactor::connect(socket_address sa) {$/;"	f	class:reactor
 count	core/reactor.cc	/^unsigned smp::count = 1;$/;"	m	class:smp	file:
+cpuset_wrapper	core/reactor.cc	/^struct cpuset_wrapper {$/;"	s	file:
 create	core/reactor.cc	/^network_stack_registry::create(options opts) {$/;"	f	class:network_stack_registry
 create	core/reactor.cc	/^network_stack_registry::create(sstring name, options opts) {$/;"	f	class:network_stack_registry
 default_stack	core/reactor.cc	/^sstring network_stack_registry::default_stack() {$/;"	f	class:network_stack_registry
@@ -1789,6 +1805,7 @@ exit	core/reactor.cc	/^void reactor::exit(int ret) {$/;"	f	class:reactor
 extra	core/reactor.cc	/^    Extra extra;$/;"	m	struct:syscall_result_extra	file:
 file_type	core/reactor.cc	/^reactor::file_type(sstring name) {$/;"	f	class:reactor
 flush	core/reactor.cc	/^posix_file_impl::flush(void) {$/;"	f	class:posix_file_impl
+flush_pending_aio	core/reactor.cc	/^reactor::flush_pending_aio() {$/;"	f	class:reactor
 flush_request_batch	core/reactor.cc	/^void smp_message_queue::flush_request_batch() {$/;"	f	class:smp_message_queue
 flush_response_batch	core/reactor.cc	/^void smp_message_queue::flush_response_batch() {$/;"	f	class:smp_message_queue
 forget	core/reactor.cc	/^reactor_backend_osv::forget(pollable_fd_state& fd) {$/;"	f	class:reactor_backend_osv
@@ -1800,6 +1817,8 @@ get_options_description	core/reactor.cc	/^smp::get_options_description()$/;"	f	c
 handle_signal	core/reactor.cc	/^reactor::signals::handle_signal(int signo, std::function<void ()>&& handler) {$/;"	f	class:reactor::signals
 handle_signal_once	core/reactor.cc	/^reactor::signals::handle_signal_once(int signo, std::function<void ()>&& handler) {$/;"	f	class:reactor::signals
 join_all	core/reactor.cc	/^void smp::join_all()$/;"	f	class:smp
+kj_allocate	core/reactor.cc	/^blockdev_file_impl::kj_allocate(uint64_t position, uint64_t length) {$/;"	f	class:blockdev_file_impl
+kj_allocate	core/reactor.cc	/^posix_file_impl::kj_allocate(uint64_t position, uint64_t length) {$/;"	f	class:posix_file_impl
 kj_complete_epoll_event	core/reactor.cc	/^void reactor_backend_epoll::kj_complete_epoll_event(pollable_fd_state& pfd, kj::Own<kj::PromiseFulfiller<void>>& pr,$/;"	f	class:reactor_backend_epoll
 kj_connect	core/reactor.cc	/^kj::Promise<connected_socket> kj_connect(socket_address sa) {$/;"	f
 kj_connect	core/reactor.cc	/^reactor::kj_connect(socket_address sa) {$/;"	f	class:reactor
@@ -1922,6 +1941,8 @@ try_create_eventfd	core/reactor.cc	/^file_desc readable_eventfd::try_create_even
 try_create_eventfd	core/reactor.cc	/^file_desc writeable_eventfd::try_create_eventfd(size_t initial) {$/;"	f	class:writeable_eventfd
 unregister_poller	core/reactor.cc	/^void reactor::unregister_poller(pollfn* p) {$/;"	f	class:reactor
 update	core/reactor.cc	/^void lowres_clock::update() {$/;"	f	class:lowres_clock
+validate	core/reactor.cc	/^void validate(boost::any& v,$/;"	f
+value	core/reactor.cc	/^    resource::cpuset value;$/;"	m	struct:cpuset_wrapper	file:
 wait	core/reactor.cc	/^future<size_t> readable_eventfd::wait() {$/;"	f	class:readable_eventfd
 wait_and_process	core/reactor.cc	/^reactor_backend_epoll::wait_and_process() {$/;"	f	class:reactor_backend_epoll
 wait_and_process	core/reactor.cc	/^reactor_backend_osv::wait_and_process() {$/;"	f	class:reactor_backend_osv
@@ -1941,11 +1962,9 @@ REACTOR_HH_	core/reactor.hh	23;"	d
 _aio_reads	core/reactor.hh	/^    uint64_t _aio_reads = 0;$/;"	m	class:reactor
 _aio_threaded_fallbacks	core/reactor.hh	/^    uint64_t _aio_threaded_fallbacks = 0;$/;"	m	class:thread_pool
 _aio_writes	core/reactor.hh	/^    uint64_t _aio_writes = 0;$/;"	m	class:reactor
-_armed	core/reactor.hh	/^    bool _armed = false;$/;"	m	class:timer
 _at_destroy_tasks	core/reactor.hh	/^    circular_buffer<std::unique_ptr<task>> _at_destroy_tasks;$/;"	m	class:reactor
 _backend	core/reactor.hh	/^    reactor_backend_epoll _backend;$/;"	m	class:reactor
 _backend	core/reactor.hh	/^    reactor_backend_osv _backend;$/;"	m	class:reactor
-_callback	core/reactor.hh	/^    callback_t _callback;$/;"	m	class:timer
 _collectd_regs	core/reactor.hh	/^    std::vector<scollectd::registration> _collectd_regs;$/;"	m	class:smp_message_queue
 _completed	core/reactor.hh	/^    lf_queue _completed;$/;"	m	class:smp_message_queue
 _completed	core/reactor.hh	/^    lf_queue _completed;$/;"	m	class:syscall_work_queue
@@ -1959,10 +1978,8 @@ _epollfd	core/reactor.hh	/^    file_desc _epollfd;$/;"	m	class:reactor_backend_e
 _ex	core/reactor.hh	/^        std::exception_ptr _ex; \/\/ if !_result$/;"	m	struct:smp_message_queue::async_work_item
 _exit_future	core/reactor.hh	/^    future<> _exit_future;$/;"	m	class:reactor
 _exit_promise	core/reactor.hh	/^    promise<> _exit_promise;$/;"	m	class:reactor
-_expired	core/reactor.hh	/^    bool _expired = false;$/;"	m	class:timer
 _expired_lowres_timers	core/reactor.hh	/^    seastar::timer_set<timer<lowres_clock>, &timer<lowres_clock>::_link>::timer_list_t _expired_lowres_timers;$/;"	m	class:reactor
 _expired_timers	core/reactor.hh	/^    seastar::timer_set<timer<>, &timer<>::_link>::timer_list_t _expired_timers;$/;"	m	class:reactor
-_expiry	core/reactor.hh	/^    time_point _expiry;$/;"	m	class:timer
 _fd	core/reactor.hh	/^    file_desc _fd;$/;"	m	class:writeable_eventfd
 _fd	core/reactor.hh	/^    pollable_fd _fd;$/;"	m	class:readable_eventfd
 _fsyncs	core/reactor.hh	/^    uint64_t _fsyncs = 0;$/;"	m	class:reactor
@@ -1983,9 +2000,9 @@ _network_stack	core/reactor.hh	/^    std::unique_ptr<network_stack> _network_sta
 _network_stack_ready_promise	core/reactor.hh	/^    promise<std::unique_ptr<network_stack>> _network_stack_ready_promise;$/;"	m	class:reactor
 _notify	core/reactor.hh	/^    pthread_t _notify;$/;"	m	class:thread_pool
 _now	core/reactor.hh	/^    static std::atomic<rep> _now [[gnu::aligned(64)]];$/;"	m	class:lowres_clock
+_pending_aio	core/reactor.hh	/^    std::vector<struct ::iocb> _pending_aio;$/;"	m	class:reactor
 _pending_signals	core/reactor.hh	/^        std::atomic<uint64_t> _pending_signals;$/;"	m	class:reactor::signals
 _pending_tasks	core/reactor.hh	/^    circular_buffer<std::unique_ptr<task>> _pending_tasks;$/;"	m	class:reactor
-_period	core/reactor.hh	/^    std::experimental::optional<duration> _period;$/;"	m	class:timer
 _poller	core/reactor.hh	/^    osv::newpoll::poller _poller;$/;"	m	class:reactor_backend_osv
 _pollers	core/reactor.hh	/^    std::vector<pollfn*> _pollers;$/;"	m	class:reactor
 _pollfn	core/reactor.hh	/^        std::unique_ptr<pollfn> _pollfn;$/;"	m	class:reactor::poller
@@ -1993,7 +2010,6 @@ _promise	core/reactor.hh	/^        promise<T> _promise;$/;"	m	struct:syscall_wor
 _promise	core/reactor.hh	/^        typename futurator::promise_type _promise; \/\/ used on local side$/;"	m	struct:smp_message_queue::async_work_item
 _qs	core/reactor.hh	/^    static smp_message_queue** _qs;$/;"	m	class:smp
 _queue_has_room	core/reactor.hh	/^    semaphore _queue_has_room = { queue_length };$/;"	m	class:syscall_work_queue
-_queued	core/reactor.hh	/^    bool _queued = false;$/;"	m	class:timer
 _registration_task	core/reactor.hh	/^        registration_task* _registration_task;$/;"	m	class:reactor::poller
 _result	core/reactor.hh	/^        boost::optional<T> _result;$/;"	m	struct:syscall_work_queue::work_item_returning
 _return	core/reactor.hh	/^    int _return = 0;$/;"	m	class:reactor
@@ -2023,6 +2039,11 @@ _tx	core/reactor.hh	/^    } _tx;$/;"	m	class:smp_message_queue	typeref:union:smp
 _worker_thread	core/reactor.hh	/^    posix_thread _worker_thread;$/;"	m	class:thread_pool
 a	core/reactor.hh	/^        } a;$/;"	m	union:smp_message_queue::tx_side	typeref:struct:smp_message_queue::tx_side::aa
 aa	core/reactor.hh	/^        struct aa {$/;"	s	union:smp_message_queue::tx_side
+abort_accept	core/reactor.hh	/^    void abort_accept() {$/;"	f	class:server_socket
+abort_reader	core/reactor.hh	/^	void abort_reader(pollable_fd_state& fd, std::exception_ptr ex) {$/;"	f	class:reactor
+abort_reader	core/reactor.hh	/^pollable_fd::abort_reader(std::exception_ptr ex) {$/;"	f	class:pollable_fd
+abort_writer	core/reactor.hh	/^    void abort_writer(pollable_fd_state& fd, std::exception_ptr ex) {$/;"	f	class:reactor
+abort_writer	core/reactor.hh	/^pollable_fd::abort_writer(std::exception_ptr ex) {$/;"	f	class:pollable_fd
 accept	core/reactor.hh	/^    future<connected_socket, socket_address> accept() {$/;"	f	class:server_socket
 accept	core/reactor.hh	/^future<pollable_fd, socket_address> pollable_fd::accept() {$/;"	f	class:pollable_fd
 accept	core/reactor.hh	/^reactor::accept(pollable_fd_state& listenfd) {$/;"	f	class:reactor
@@ -2033,14 +2054,12 @@ arm	core/reactor.hh	/^void timer<Clock>::arm(duration delta) {$/;"	f	class:timer
 arm	core/reactor.hh	/^void timer<Clock>::arm(time_point until, std::experimental::optional<duration> period) {$/;"	f	class:timer
 arm_periodic	core/reactor.hh	/^void timer<Clock>::arm_periodic(duration delta) {$/;"	f	class:timer
 arm_state	core/reactor.hh	/^void timer<Clock>::arm_state(time_point until, std::experimental::optional<duration> period) {$/;"	f	class:timer
-armed	core/reactor.hh	/^    bool armed() const { return _armed; }$/;"	f	class:timer
 async_work_item	core/reactor.hh	/^        async_work_item(Func&& func) : _func(std::move(func)) {}$/;"	f	struct:smp_message_queue::async_work_item
 async_work_item	core/reactor.hh	/^    struct async_work_item : work_item {$/;"	s	class:smp_message_queue
 at_destroy	core/reactor.hh	/^    void at_destroy(Func&& func) {$/;"	f	class:reactor
 at_exit	core/reactor.hh	/^    void at_exit(Func&& func) {$/;"	f	class:reactor
 batch_size	core/reactor.hh	/^    static constexpr size_t batch_size = 16;$/;"	m	class:smp_message_queue
 cancel	core/reactor.hh	/^bool timer<Clock>::cancel() {$/;"	f	class:timer
-clock	core/reactor.hh	/^    typedef Clock clock;$/;"	t	class:timer
 close	core/reactor.hh	/^    void close() { _s.reset(); }$/;"	f	class:pollable_fd
 complete_timers	core/reactor.hh	/^void reactor::complete_timers(T& timers, E& expired_timers, EnableFunc&& enable_fn) {$/;"	f	class:reactor
 connected_socket	core/reactor.hh	/^    connected_socket() {};$/;"	f	class:connected_socket
@@ -2053,7 +2072,6 @@ create	core/reactor.hh	/^    create = O_CREAT,$/;"	m	class:open_flags
 cs	core/reactor.hh	/^    connected_socket& operator=(connected_socket&& cs) = default;$/;"	m	class:connected_socket
 cs	core/reactor.hh	/^    connected_socket(connected_socket&& cs) = default;$/;"	m	class:connected_socket
 duration	core/reactor.hh	/^    typedef std::chrono::duration<rep, period> duration;$/;"	t	class:lowres_clock
-duration	core/reactor.hh	/^    typedef typename Clock::duration duration;$/;"	t	class:timer
 engine	core/reactor.hh	/^inline reactor& engine() {$/;"	f
 events	core/reactor.hh	/^        int events = 0;$/;"	m	struct:pollable_fd_state::speculation
 events_epoll	core/reactor.hh	/^    int events_epoll = 0;     \/\/ installed in epoll$/;"	m	class:pollable_fd_state
@@ -2188,6 +2206,9 @@ server_socket	core/reactor.hh	/^    explicit server_socket(std::unique_ptr<serve
 server_socket	core/reactor.hh	/^class server_socket {$/;"	c
 server_socket_impl	core/reactor.hh	/^class server_socket_impl {$/;"	c
 set_callback	core/reactor.hh	/^void timer<Clock>::set_callback(callback_t&& callback) {$/;"	f	class:timer
+shutdown	core/reactor.hh	/^    void shutdown(int how) { _s->fd.shutdown(how); }$/;"	f	class:pollable_fd
+shutdown_input	core/reactor.hh	/^connected_socket::shutdown_input() {$/;"	f	class:connected_socket
+shutdown_output	core/reactor.hh	/^connected_socket::shutdown_output() {$/;"	f	class:connected_socket
 signal_handler	core/reactor.hh	/^        struct signal_handler {$/;"	s	class:reactor::signals
 signals	core/reactor.hh	/^    class signals {$/;"	c	class:reactor
 smp	core/reactor.hh	/^class smp {$/;"	c
@@ -2205,8 +2226,6 @@ submit_to	core/reactor.hh	/^    static futurize_t<std::result_of_t<Func()>> subm
 syscall_work_queue	core/reactor.hh	/^class syscall_work_queue {$/;"	c
 thread_pool	core/reactor.hh	/^class thread_pool {$/;"	c
 time_point	core/reactor.hh	/^    typedef std::chrono::time_point<lowres_clock, duration> time_point;$/;"	t	class:lowres_clock
-time_point	core/reactor.hh	/^    typedef typename Clock::time_point time_point;$/;"	t	class:timer
-timer	core/reactor.hh	/^class timer {$/;"	c
 timer	core/reactor.hh	/^timer<Clock>::timer(callback_t&& callback) : _callback(std::move(callback)) {$/;"	f	class:timer
 truncate	core/reactor.hh	/^    truncate = O_TRUNC,$/;"	m	class:open_flags
 tx_side	core/reactor.hh	/^        tx_side() {}$/;"	f	union:smp_message_queue::tx_side
@@ -2254,6 +2273,7 @@ bytes	core/resource.hh	/^    size_t bytes;$/;"	m	struct:resource::memory
 configuration	core/resource.hh	/^struct configuration {$/;"	s	namespace:resource
 cpu	core/resource.hh	/^struct cpu {$/;"	s	namespace:resource
 cpu_id	core/resource.hh	/^    unsigned cpu_id;$/;"	m	struct:resource::cpu
+cpu_set	core/resource.hh	/^    optional<cpuset> cpu_set;$/;"	m	struct:resource::configuration
 cpus	core/resource.hh	/^    optional<size_t> cpus;$/;"	m	struct:resource::configuration
 mem	core/resource.hh	/^    std::vector<memory> mem;$/;"	m	struct:resource::cpu
 memory	core/resource.hh	/^struct memory {$/;"	s	namespace:resource
@@ -2474,21 +2494,27 @@ scollectd	core/scollectd_api.hh	/^namespace scollectd {$/;"	n
 u	core/scollectd_api.hh	/^    } u;$/;"	m	struct:scollectd::collectd_value	typeref:union:scollectd::collectd_value::__anon1
 CORE_SEMAPHORE_HH_	core/semaphore.hh	23;"	d
 _count	core/semaphore.hh	/^    size_t _count;$/;"	m	class:semaphore
-_wait_list	core/semaphore.hh	/^    circular_buffer<std::pair<promise<>, size_t>> _wait_list;$/;"	m	class:semaphore
+_wait_list	core/semaphore.hh	/^    circular_buffer<entry> _wait_list;$/;"	m	class:semaphore
 broken	core/semaphore.hh	/^    void broken() { broken(broken_semaphore()); }$/;"	f	class:semaphore
 broken	core/semaphore.hh	/^void semaphore::broken(const Exception& ex) {$/;"	f	class:semaphore
 broken_semaphore	core/semaphore.hh	/^class broken_semaphore : public std::exception {$/;"	c
 current	core/semaphore.hh	/^    size_t current() const { return _count; }$/;"	f	class:semaphore
+entry	core/semaphore.hh	/^        entry(promise<>&& pr_, size_t nr_) : pr(std::move(pr_)), nr(nr_) {}$/;"	f	struct:semaphore::entry
+entry	core/semaphore.hh	/^    struct entry {$/;"	s	class:semaphore
 kj_wait	core/semaphore.hh	/^    kj::Promise<void> kj_wait(size_t nr = 1) {$/;"	f	class:semaphore
+nr	core/semaphore.hh	/^        size_t nr;$/;"	m	struct:semaphore::entry
+pr	core/semaphore.hh	/^        promise<> pr;$/;"	m	struct:semaphore::entry
 semaphore	core/semaphore.hh	/^    semaphore(size_t count = 1) : _count(count) {}$/;"	f	class:semaphore
 semaphore	core/semaphore.hh	/^class semaphore {$/;"	c
+semaphore_timed_out	core/semaphore.hh	/^class semaphore_timed_out : public std::exception {$/;"	c
 signal	core/semaphore.hh	/^    void signal(size_t nr = 1) {$/;"	f	class:semaphore
+tr	core/semaphore.hh	/^        timer<> tr;$/;"	m	struct:semaphore::entry
 try_wait	core/semaphore.hh	/^    bool try_wait(size_t nr = 1) {$/;"	f	class:semaphore
 wait	core/semaphore.hh	/^    future<> wait(size_t nr = 1) {$/;"	f	class:semaphore
 SHARED_PTR_HH_	core/shared_ptr.hh	23;"	d
 _b	core/shared_ptr.hh	/^    mutable shared_ptr_count_base* _b = nullptr;$/;"	m	class:shared_ptr
-_count	core/shared_ptr.hh	/^    long _count = 0;$/;"	m	class:enable_lw_shared_from_this
-_count	core/shared_ptr.hh	/^    long _count = 0;$/;"	m	struct:shared_ptr_no_esft
+_count	core/shared_ptr.hh	/^    shared_ptr_counter_type _count = 0;$/;"	m	class:enable_lw_shared_from_this
+_count	core/shared_ptr.hh	/^    shared_ptr_counter_type _count = 0;$/;"	m	struct:shared_ptr_no_esft
 _p	core/shared_ptr.hh	/^            , _p(x._p) {$/;"	f	class:shared_ptr
 _p	core/shared_ptr.hh	/^    lw_shared_ptr(const lw_shared_ptr& x) noexcept : _p(x._p) {$/;"	f	class:lw_shared_ptr
 _p	core/shared_ptr.hh	/^    lw_shared_ptr(lw_shared_ptr&& x) noexcept  : _p(x._p) {$/;"	f	class:lw_shared_ptr
@@ -2498,7 +2524,7 @@ _p	core/shared_ptr.hh	/^    mutable shared_ptr_impl<T>* _p = nullptr;$/;"	m	clas
 _p	core/shared_ptr.hh	/^    shared_ptr(shared_ptr_count_base* b, T* p) noexcept : _b(b), _p(p) {$/;"	f	class:shared_ptr
 _value	core/shared_ptr.hh	/^    T _value;$/;"	m	struct:shared_ptr_no_esft
 const_pointer_cast	core/shared_ptr.hh	/^const_pointer_cast(const shared_ptr<U>& p) {$/;"	f
-count	core/shared_ptr.hh	/^    long count = 0;$/;"	m	struct:shared_ptr_count_base
+count	core/shared_ptr.hh	/^    shared_ptr_counter_type count = 0;$/;"	m	struct:shared_ptr_count_base
 data	core/shared_ptr.hh	/^    T data;$/;"	m	struct:shared_ptr_count_for
 dynamic_pointer_cast	core/shared_ptr.hh	/^dynamic_pointer_cast(const shared_ptr<U>& p) {$/;"	f
 enable_lw_shared_from_this	core/shared_ptr.hh	/^class enable_lw_shared_from_this {$/;"	c
@@ -2532,8 +2558,6 @@ operator <<	core/shared_ptr.hh	/^std::ostream& operator<<(std::ostream& out, con
 operator <=	core/shared_ptr.hh	/^operator<=(const shared_ptr<T>& x, const shared_ptr<U>& y) {$/;"	f
 operator <=	core/shared_ptr.hh	/^operator<=(const shared_ptr<T>& x, std::nullptr_t) {$/;"	f
 operator <=	core/shared_ptr.hh	/^operator<=(std::nullptr_t, const shared_ptr<T>& y) {$/;"	f
-operator =	core/shared_ptr.hh	/^    enable_lw_shared_from_this& operator=(const enable_lw_shared_from_this&) { return *this; }$/;"	f	class:enable_lw_shared_from_this
-operator =	core/shared_ptr.hh	/^    enable_lw_shared_from_this& operator=(enable_lw_shared_from_this&&) { return *this; }$/;"	f	class:enable_lw_shared_from_this
 operator ==	core/shared_ptr.hh	/^    bool operator==(const lw_shared_ptr<const T>& x) const {$/;"	f	class:lw_shared_ptr
 operator ==	core/shared_ptr.hh	/^    bool operator==(const lw_shared_ptr<std::remove_const_t<T>>& x) const {$/;"	f	class:lw_shared_ptr
 operator ==	core/shared_ptr.hh	/^operator==(const shared_ptr<T>& x, const shared_ptr<U>& y) {$/;"	f
@@ -2572,6 +2596,16 @@ to_value	core/shared_ptr.hh	/^    T* to_value() { return static_cast<T*>(this); 
 ~lw_shared_ptr	core/shared_ptr.hh	/^    ~lw_shared_ptr() {$/;"	f	class:lw_shared_ptr
 ~shared_ptr	core/shared_ptr.hh	/^    ~shared_ptr() {$/;"	f	class:shared_ptr
 ~shared_ptr_count_base	core/shared_ptr.hh	/^    virtual ~shared_ptr_count_base() {}$/;"	f	struct:shared_ptr_count_base
+_counter	core/shared_ptr_debug_helper.hh	/^    long _counter = 0;$/;"	m	class:debug_shared_ptr_counter_type
+_cpu	core/shared_ptr_debug_helper.hh	/^    std::thread::id _cpu = std::this_thread::get_id();$/;"	m	class:debug_shared_ptr_counter_type
+check	core/shared_ptr_debug_helper.hh	/^    void check() const {$/;"	f	class:debug_shared_ptr_counter_type
+debug_shared_ptr_counter_type	core/shared_ptr_debug_helper.hh	/^    debug_shared_ptr_counter_type(long x) : _counter(x) {}$/;"	f	class:debug_shared_ptr_counter_type
+debug_shared_ptr_counter_type	core/shared_ptr_debug_helper.hh	/^class debug_shared_ptr_counter_type {$/;"	c
+operator ++	core/shared_ptr_debug_helper.hh	/^    debug_shared_ptr_counter_type& operator++() {$/;"	f	class:debug_shared_ptr_counter_type
+operator ++	core/shared_ptr_debug_helper.hh	/^    long operator++(int) {$/;"	f	class:debug_shared_ptr_counter_type
+operator --	core/shared_ptr_debug_helper.hh	/^    debug_shared_ptr_counter_type& operator--() {$/;"	f	class:debug_shared_ptr_counter_type
+operator --	core/shared_ptr_debug_helper.hh	/^    long operator--(int) {$/;"	f	class:debug_shared_ptr_counter_type
+operator long	core/shared_ptr_debug_helper.hh	/^    operator long() const {$/;"	f	class:debug_shared_ptr_counter_type
 SLAB_MAGIC_NUMBER	core/slab.hh	/^static constexpr uint16_t SLAB_MAGIC_NUMBER = 0x51AB; \/\/ meant to be 'SLAB' :-)$/;"	v
 __SLAB_ALLOCATOR__	core/slab.hh	22;"	d
 _available_slab_pages	core/slab.hh	/^    uint64_t _available_slab_pages;$/;"	m	class:slab_allocator
@@ -2756,6 +2790,13 @@ subscription	core/stream.hh	/^subscription<T...>::subscription(stream<T...>* s)$
 subscription	core/stream.hh	/^subscription<T...>::subscription(subscription&& x)$/;"	f	class:subscription
 ~stream	core/stream.hh	/^stream<T...>::~stream() {$/;"	f	class:stream
 ~subscription	core/stream.hh	/^subscription<T...>::~subscription() {$/;"	f	class:subscription
+_func	core/task.hh	/^    Func _func;$/;"	m	class:final
+final	core/task.hh	/^class lambda_task final : public task {$/;"	c
+lambda_task	core/task.hh	/^    lambda_task(Func&& func) : _func(std::move(func)) {}$/;"	f	class:final
+lambda_task	core/task.hh	/^    lambda_task(const Func& func) : _func(func) {}$/;"	f	class:final
+make_task	core/task.hh	/^make_task(Func&& func) {$/;"	f
+noexcept	core/task.hh	/^    virtual void run() noexcept = 0;$/;"	m	class:task
+task	core/task.hh	/^class task {$/;"	c
 TEMPORARY_BUFFER_HH_	core/temporary_buffer.hh	23;"	d
 _buffer	core/temporary_buffer.hh	/^    CharType* _buffer;$/;"	m	class:temporary_buffer
 _deleter	core/temporary_buffer.hh	/^    deleter _deleter;$/;"	m	class:temporary_buffer
@@ -2781,9 +2822,8 @@ temporary_buffer	core/temporary_buffer.hh	/^    temporary_buffer(temporary_buffe
 temporary_buffer	core/temporary_buffer.hh	/^class temporary_buffer {$/;"	c
 trim	core/temporary_buffer.hh	/^    void trim(size_t pos) {$/;"	f	class:temporary_buffer
 trim_front	core/temporary_buffer.hh	/^    void trim_front(size_t pos) {        $/;"	f	class:temporary_buffer
-g_current_context	core/thread.cc	/^thread_local jmp_buf* g_current_context;$/;"	m	namespace:seastar	file:
-g_current_thread	core/thread.cc	/^thread_local thread_context* g_current_thread;$/;"	m	namespace:seastar	file:
-g_unthreaded_context	core/thread.cc	/^thread_local jmp_buf g_unthreaded_context;$/;"	m	namespace:seastar	file:
+g_current_context	core/thread.cc	/^thread_local jmp_buf_link* g_current_context;$/;"	m	namespace:seastar	file:
+g_unthreaded_context	core/thread.cc	/^thread_local jmp_buf_link g_unthreaded_context;$/;"	m	namespace:seastar	file:
 get	core/thread.cc	/^thread_context* get() {$/;"	f	namespace:seastar::thread_impl
 init	core/thread.cc	/^void init() {$/;"	f	namespace:seastar::thread_impl
 main	core/thread.cc	/^thread_context::main() {$/;"	f	class:seastar::thread_context
@@ -2796,17 +2836,22 @@ switch_out	core/thread.cc	/^thread_context::switch_out() {$/;"	f	class:seastar::
 switch_out	core/thread.cc	/^void switch_out(thread_context* from) {$/;"	f	namespace:seastar::thread_impl
 thread_context	core/thread.cc	/^thread_context::thread_context(std::function<void ()> func)$/;"	f	class:seastar::thread_context
 thread_impl	core/thread.cc	/^namespace thread_impl {$/;"	n	namespace:seastar	file:
-_context	core/thread.hh	/^    jmp_buf _context;$/;"	m	class:seastar::thread_context
+_context	core/thread.hh	/^    jmp_buf_link _context;$/;"	m	class:seastar::thread_context
 _context	core/thread.hh	/^    std::unique_ptr<thread_context> _context;$/;"	m	class:seastar::thread
 _current	core/thread.hh	/^    static thread_local thread* _current;$/;"	m	class:seastar::thread
 _done	core/thread.hh	/^    promise<> _done;$/;"	m	class:seastar::thread_context
 _func	core/thread.hh	/^    std::function<void ()> _func;$/;"	m	class:seastar::thread_context
 _joined	core/thread.hh	/^    bool _joined = false;$/;"	m	class:seastar::thread_context
 _stack_size	core/thread.hh	/^    static constexpr size_t _stack_size = 128*1024;$/;"	m	class:seastar::thread_context
+async	core/thread.hh	/^async(Func&& func, Args&&... args) {$/;"	f	namespace:seastar
+jmp_buf_link	core/thread.hh	/^struct jmp_buf_link {$/;"	s	namespace:seastar
+jmpbuf	core/thread.hh	/^    jmp_buf jmpbuf;$/;"	m	struct:seastar::jmp_buf_link
 join	core/thread.hh	/^thread::join() {$/;"	f	class:seastar::thread
+link	core/thread.hh	/^    jmp_buf_link* link;$/;"	m	struct:seastar::jmp_buf_link
 noexcept	core/thread.hh	/^    thread& operator=(thread&& x) noexcept = default;$/;"	m	class:seastar::thread
 noexcept	core/thread.hh	/^    thread(thread&& x) noexcept = default;$/;"	m	class:seastar::thread
 seastar	core/thread.hh	/^namespace seastar {$/;"	n
+thread	core/thread.hh	/^    thread_context* thread;$/;"	m	struct:seastar::jmp_buf_link
 thread	core/thread.hh	/^class thread {$/;"	c	namespace:seastar
 thread	core/thread.hh	/^thread::thread(Func func)$/;"	f	class:seastar::thread
 thread_context	core/thread.hh	/^class thread_context {$/;"	c	namespace:seastar
@@ -2837,6 +2882,18 @@ timer_set	core/timer-set.hh	/^    timer_set()$/;"	f	class:seastar::timer_set
 timer_set	core/timer-set.hh	/^class timer_set {$/;"	c	namespace:seastar
 timestamp_bits	core/timer-set.hh	/^    static constexpr int timestamp_bits = std::numeric_limits<timestamp_t>::digits;$/;"	m	class:seastar::timer_set
 ~timer_set	core/timer-set.hh	/^    ~timer_set() {$/;"	f	class:seastar::timer_set
+_armed	core/timer.hh	/^    bool _armed = false;$/;"	m	class:timer
+_callback	core/timer.hh	/^    callback_t _callback;$/;"	m	class:timer
+_expired	core/timer.hh	/^            _armed(t._armed), _queued(t._queued), _expired(t._expired) {$/;"	f	class:timer
+_expired	core/timer.hh	/^    bool _expired = false;$/;"	m	class:timer
+_expiry	core/timer.hh	/^    time_point _expiry;$/;"	m	class:timer
+_period	core/timer.hh	/^    std::experimental::optional<duration> _period;$/;"	m	class:timer
+_queued	core/timer.hh	/^    bool _queued = false;$/;"	m	class:timer
+armed	core/timer.hh	/^    bool armed() const { return _armed; }$/;"	f	class:timer
+clock	core/timer.hh	/^    typedef Clock clock;$/;"	t	class:timer
+duration	core/timer.hh	/^    typedef typename Clock::duration duration;$/;"	t	class:timer
+time_point	core/timer.hh	/^    typedef typename Clock::time_point time_point;$/;"	t	class:timer
+timer	core/timer.hh	/^class timer {$/;"	c
 TRANSFER_HH_	core/transfer.hh	23;"	d
 transfer_pass1	core/transfer.hh	/^transfer_pass1(Alloc& a, T* from, T* to,$/;"	f
 transfer_pass2	core/transfer.hh	/^transfer_pass2(Alloc& a, T* from, T* to,$/;"	f
@@ -3122,6 +3179,9 @@ mandatory	http/handlers.hh	/^    handler_base& mandatory(const sstring& param) {
 http_stats	http/httpd.cc	/^http_stats::http_stats(http_server& server)$/;"	f	class:httpd::http_stats
 httpd	http/httpd.cc	/^namespace httpd {$/;"	n	file:
 APPS_HTTPD_HTTPD_HH_	http/httpd.hh	23;"	d
+_all_connections_stopped	http/httpd.hh	/^    promise<> _all_connections_stopped;$/;"	m	class:httpd::http_server
+_connections	http/httpd.hh	/^    boost::intrusive::list<connection> _connections;$/;"	m	class:httpd::http_server
+_connections_being_accepted	http/httpd.hh	/^    uint64_t _connections_being_accepted = 0;$/;"	m	class:httpd::http_server
 _current_connections	http/httpd.hh	/^    uint64_t _current_connections = 0;$/;"	m	class:httpd::http_server
 _date	http/httpd.hh	/^    sstring _date = http_date();$/;"	m	class:httpd::http_server
 _done	http/httpd.hh	/^        queue<std::unique_ptr<reply>> _replies { 10 };bool _done = false;$/;"	m	class:httpd::http_server::connection
@@ -3135,13 +3195,15 @@ _resp	http/httpd.hh	/^        std::unique_ptr<reply> _resp;$/;"	m	class:httpd::h
 _routes	http/httpd.hh	/^    routes _routes;$/;"	m	class:httpd::http_server
 _server	http/httpd.hh	/^        http_server& _server;$/;"	m	class:httpd::http_server::connection
 _server_dist	http/httpd.hh	/^    distributed<http_server>* _server_dist;$/;"	m	class:httpd::http_server_control
+_stopped	http/httpd.hh	/^    future<> _stopped = _all_connections_stopped.get_future();$/;"	m	class:httpd::http_server
+_stopping	http/httpd.hh	/^    bool _stopping = false;$/;"	m	class:httpd::http_server
 _total_connections	http/httpd.hh	/^    uint64_t _total_connections = 0;$/;"	m	class:httpd::http_server
 _write_buf	http/httpd.hh	/^        output_stream<char> _write_buf;$/;"	m	class:httpd::http_server::connection
 add_param	http/httpd.hh	/^        static void add_param(request& req, const std::experimental::string_view& param) {$/;"	f	class:httpd::http_server::connection
 connection	http/httpd.hh	/^        connection(http_server& server, connected_socket&& fd,$/;"	f	class:httpd::http_server::connection
-connection	http/httpd.hh	/^    class connection {$/;"	c	class:httpd::http_server
+connection	http/httpd.hh	/^    class connection : public boost::intrusive::list_base_hook<> {$/;"	c	class:httpd::http_server
 current_connections	http/httpd.hh	/^    uint64_t current_connections() const {$/;"	f	class:httpd::http_server
-do_accepts	http/httpd.hh	/^    void do_accepts(int which) {$/;"	f	class:httpd::http_server
+do_accepts	http/httpd.hh	/^    future<> do_accepts(int which) {$/;"	f	class:httpd::http_server
 generate_reply	http/httpd.hh	/^        future<bool> generate_reply(std::unique_ptr<request> req) {$/;"	f	class:httpd::http_server::connection
 hex_to_byte	http/httpd.hh	/^        static short hex_to_byte(char c) {$/;"	f	class:httpd::http_server::connection
 hexstr_to_char	http/httpd.hh	/^        static char hexstr_to_char(const std::experimental::string_view& in, size_t from) {$/;"	f	class:httpd::http_server::connection
@@ -3155,6 +3217,7 @@ httpd	http/httpd.hh	/^namespace httpd {$/;"	n
 limit	http/httpd.hh	/^        static constexpr size_t limit = 4096;$/;"	m	class:httpd::http_server::connection
 listen	http/httpd.hh	/^    future<> listen(ipv4_addr addr) {$/;"	f	class:httpd::http_server
 listen	http/httpd.hh	/^    future<> listen(uint16_t port) {$/;"	f	class:httpd::http_server_control
+maybe_idle	http/httpd.hh	/^    void maybe_idle() {$/;"	f	class:httpd::http_server
 process	http/httpd.hh	/^        future<> process() {$/;"	f	class:httpd::http_server::connection
 read	http/httpd.hh	/^        future<> read() {$/;"	f	class:httpd::http_server::connection
 read_one	http/httpd.hh	/^        future<> read_one() {$/;"	f	class:httpd::http_server::connection
@@ -3163,8 +3226,11 @@ respond	http/httpd.hh	/^        future<> respond() {$/;"	f	class:httpd::http_ser
 server	http/httpd.hh	/^    distributed<http_server>& server() {$/;"	f	class:httpd::http_server_control
 set_query_param	http/httpd.hh	/^        static sstring set_query_param(request& req) {$/;"	f	class:httpd::http_server::connection
 set_routes	http/httpd.hh	/^    future<> set_routes(std::function<void(routes& r)> fun) {$/;"	f	class:httpd::http_server_control
+shutdown	http/httpd.hh	/^        void shutdown() {$/;"	f	class:httpd::http_server::connection
 start	http/httpd.hh	/^    future<> start() {$/;"	f	class:httpd::http_server_control
 start_response	http/httpd.hh	/^        future<> start_response() {$/;"	f	class:httpd::http_server::connection
+stop	http/httpd.hh	/^    future<> stop() {$/;"	f	class:httpd::http_server
+stop	http/httpd.hh	/^    future<> stop() {$/;"	f	class:httpd::http_server_control
 total_connections	http/httpd.hh	/^    uint64_t total_connections() const {$/;"	f	class:httpd::http_server
 url_decode	http/httpd.hh	/^        static bool url_decode(const std::experimental::string_view& in, sstring& out) {$/;"	f	class:httpd::http_server::connection
 write_body	http/httpd.hh	/^        future<> write_body() {$/;"	f	class:httpd::http_server::connection
@@ -3507,6 +3573,7 @@ to_json	json/formatter.cc	/^sstring formatter::to_json(const char* str) {$/;"	f	
 to_json	json/formatter.cc	/^sstring formatter::to_json(const date_time& d) {$/;"	f	class:json::formatter
 to_json	json/formatter.cc	/^sstring formatter::to_json(const jsonable& obj) {$/;"	f	class:json::formatter
 to_json	json/formatter.cc	/^sstring formatter::to_json(const sstring& str) {$/;"	f	class:json::formatter
+to_json	json/formatter.cc	/^sstring formatter::to_json(double d) {$/;"	f	class:json::formatter
 to_json	json/formatter.cc	/^sstring formatter::to_json(float f) {$/;"	f	class:json::formatter
 to_json	json/formatter.cc	/^sstring formatter::to_json(int n) {$/;"	f	class:json::formatter
 to_json	json/formatter.cc	/^sstring formatter::to_json(long n) {$/;"	f	class:json::formatter
@@ -3595,7 +3662,7 @@ get_data	net/api.hh	/^    packet& get_data() { return _impl->get_data(); }$/;"	f
 get_dst	net/api.hh	/^    ipv4_addr get_dst() { return _impl->get_dst(); }$/;"	f	class:net::final
 get_dst_port	net/api.hh	/^    uint16_t get_dst_port() { return _impl->get_dst_port(); }$/;"	f	class:net::final
 get_src	net/api.hh	/^    ipv4_addr get_src() { return _impl->get_src(); }$/;"	f	class:net::final
-in	net/api.hh	/^        ::sockaddr_in in;$/;"	m	union:socket_address::__anon8
+in	net/api.hh	/^        ::sockaddr_in in;$/;"	m	union:socket_address::__anon5
 ip	net/api.hh	/^    uint32_t ip;$/;"	m	struct:ipv4_addr
 ipv4_addr	net/api.hh	/^    ipv4_addr() : ip(0), port(0) {}$/;"	f	struct:ipv4_addr
 ipv4_addr	net/api.hh	/^    ipv4_addr(const socket_address &sa) {$/;"	f	struct:ipv4_addr
@@ -3616,13 +3683,13 @@ operator <<	net/api.hh	/^std::ostream& operator<<(std::ostream &os, ipv4_addr ad
 port	net/api.hh	/^    uint16_t port;$/;"	m	struct:ipv4_addr
 receive	net/api.hh	/^    future<udp_datagram> receive() { return _impl->receive(); }$/;"	f	class:net::udp_channel
 reuse_address	net/api.hh	/^    bool reuse_address = false;$/;"	m	struct:listen_options
-sa	net/api.hh	/^        ::sockaddr sa;$/;"	m	union:socket_address::__anon8
-sas	net/api.hh	/^        ::sockaddr_storage sas;$/;"	m	union:socket_address::__anon8
+sa	net/api.hh	/^        ::sockaddr sa;$/;"	m	union:socket_address::__anon5
+sas	net/api.hh	/^        ::sockaddr_storage sas;$/;"	m	union:socket_address::__anon5
 send	net/api.hh	/^    future<> send(ipv4_addr dst, const char* msg) { return _impl->send(std::move(dst), msg); }$/;"	f	class:net::udp_channel
 send	net/api.hh	/^    future<> send(ipv4_addr dst, packet p) { return _impl->send(std::move(dst), std::move(p)); }$/;"	f	class:net::udp_channel
 socket_address	net/api.hh	/^    socket_address(sockaddr_in sa) {$/;"	f	class:socket_address
 socket_address	net/api.hh	/^class socket_address {$/;"	c
-u	net/api.hh	/^    } u;$/;"	m	class:socket_address	typeref:union:socket_address::__anon8
+u	net/api.hh	/^    } u;$/;"	m	class:socket_address	typeref:union:socket_address::__anon5
 udp_channel	net/api.hh	/^    udp_channel() {}$/;"	f	class:net::udp_channel
 udp_channel	net/api.hh	/^    udp_channel(std::unique_ptr<udp_channel_impl> impl) : _impl(std::move(impl)) {}$/;"	f	class:net::udp_channel
 udp_channel	net/api.hh	/^class udp_channel {$/;"	c	namespace:net
@@ -3928,6 +3995,7 @@ _tx_gc_poller	net/dpdk.cc	/^    reactor::poller _tx_gc_poller;$/;"	m	class:dpdk:
 _use_lro	net/dpdk.cc	/^    bool _use_lro;$/;"	m	class:dpdk::dpdk_device	file:
 _xmem	net/dpdk.cc	/^        std::unique_ptr<void, free_deleter> _xmem;$/;"	m	class:dpdk::dpdk_qp::tx_buf_factory	file:
 alloc_mempool_xmem	net/dpdk.cc	/^void* dpdk_qp<HugetlbfsMemBackend>::alloc_mempool_xmem($/;"	f	class:dpdk::dpdk_qp
+as_cookie	net/dpdk.cc	/^void* as_cookie(struct rte_pktmbuf_pool_private& p) {$/;"	f
 bad	net/dpdk.cc	/^        } bad;$/;"	m	struct:dpdk::port_stats::__anon12	typeref:struct:dpdk::port_stats::__anon12::__anon14	file:
 bad	net/dpdk.cc	/^        } bad;$/;"	m	struct:dpdk::port_stats::__anon9	typeref:struct:dpdk::port_stats::__anon9::__anon11	file:
 check_frag0	net/dpdk.cc	/^        static bool check_frag0(packet& p)$/;"	f	class:dpdk::dpdk_qp::tx_buf	file:
@@ -4009,6 +4077,7 @@ refill_one_cluster	net/dpdk.cc	/^inline bool dpdk_qp<HugetlbfsMemBackend>::refil
 refill_rx_mbuf	net/dpdk.cc	/^    static bool refill_rx_mbuf(rte_mbuf* m, size_t size = mbuf_data_size) {$/;"	f	class:dpdk::dpdk_qp	file:
 reset_zc	net/dpdk.cc	/^        void reset_zc() {$/;"	f	class:dpdk::dpdk_qp::tx_buf
 rte_mbuf_p	net/dpdk.cc	/^        rte_mbuf* rte_mbuf_p() { return &_mbuf; }$/;"	f	class:dpdk::dpdk_qp::tx_buf
+rte_mbuf_to_baddr	net/dpdk.cc	/^rte_mbuf_to_baddr(rte_mbuf* mbuf) {$/;"	f	file:
 rx	net/dpdk.cc	/^    } rx;$/;"	m	struct:dpdk::port_stats	typeref:struct:dpdk::port_stats::__anon9	file:
 rx_gc	net/dpdk.cc	/^bool dpdk_qp<HugetlbfsMemBackend>::rx_gc()$/;"	f	class:dpdk::dpdk_qp
 rx_gc_thresh	net/dpdk.cc	/^static constexpr uint16_t rx_gc_thresh           = 64;$/;"	m	namespace:dpdk	file:
@@ -4246,6 +4315,7 @@ _conn	net/native-stack-impl.hh	/^    typename Protocol::connection& _conn;$/;"	m
 _cur_frag	net/native-stack-impl.hh	/^    size_t _cur_frag = 0;$/;"	m	class:net::final
 _eof	net/native-stack-impl.hh	/^    bool _eof = false;$/;"	m	class:net::final
 _listener	net/native-stack-impl.hh	/^    typename Protocol::listener _listener;$/;"	m	class:net::native_server_socket_impl
+abort_accept	net/native-stack-impl.hh	/^native_server_socket_impl<Protocol>::abort_accept() {$/;"	f	class:net::native_server_socket_impl
 accept	net/native-stack-impl.hh	/^native_server_socket_impl<Protocol>::accept() {$/;"	f	class:net::native_server_socket_impl
 final	net/native-stack-impl.hh	/^class native_connected_socket_impl<Protocol>::native_data_sink_impl final$/;"	c	namespace:net
 final	net/native-stack-impl.hh	/^class native_connected_socket_impl<Protocol>::native_data_source_impl final$/;"	c	namespace:net
@@ -4263,6 +4333,11 @@ override	net/native-stack-impl.hh	/^    virtual future<connected_socket, socket_
 override	net/native-stack-impl.hh	/^    virtual input_stream<char> input() override;$/;"	m	class:net::native_connected_socket_impl
 override	net/native-stack-impl.hh	/^    virtual kj::Promise<std::pair<connected_socket, socket_address>> kj_accept() override;$/;"	m	class:net::native_server_socket_impl
 override	net/native-stack-impl.hh	/^    virtual output_stream<char> output() override;$/;"	m	class:net::native_connected_socket_impl
+override	net/native-stack-impl.hh	/^    virtual void abort_accept() override;$/;"	m	class:net::native_server_socket_impl
+override	net/native-stack-impl.hh	/^    virtual void shutdown_input() override;$/;"	m	class:net::native_connected_socket_impl
+override	net/native-stack-impl.hh	/^    virtual void shutdown_output() override;$/;"	m	class:net::native_connected_socket_impl
+shutdown_input	net/native-stack-impl.hh	/^native_connected_socket_impl<Protocol>::shutdown_input() {$/;"	f	class:net::native_connected_socket_impl
+shutdown_output	net/native-stack-impl.hh	/^native_connected_socket_impl<Protocol>::shutdown_output() {$/;"	f	class:net::native_connected_socket_impl
 _config	net/native-stack.cc	/^    promise<> _config;$/;"	m	class:net::native_network_stack	file:
 _dhcp	net/native-stack.cc	/^    bool _dhcp = false;$/;"	m	class:net::native_network_stack	file:
 _inet	net/native-stack.cc	/^    ipv4 _inet;$/;"	m	class:net::native_network_stack	file:
@@ -4337,11 +4412,11 @@ _stats_plugin_name	net/net.hh	/^    const std::string _stats_plugin_name;$/;"	m	
 _sw_reta	net/net.hh	/^    std::experimental::optional<std::array<uint8_t, 128>> _sw_reta;$/;"	m	class:net::qp
 _tx_packetq	net/net.hh	/^    circular_buffer<packet> _tx_packetq;$/;"	m	class:net::qp
 _tx_poller	net/net.hh	/^    reactor::poller _tx_poller;$/;"	m	class:net::qp
-bad	net/net.hh	/^        } bad;$/;"	m	struct:net::qp_stats::__anon5	typeref:struct:net::qp_stats::__anon5::__anon6
+bad	net/net.hh	/^        } bad;$/;"	m	struct:net::qp_stats::__anon2	typeref:struct:net::qp_stats::__anon2::__anon3
 bytes	net/net.hh	/^    uint64_t bytes;      \/\/ total number of bytes$/;"	m	struct:net::qp_stats_good
 copy_bytes	net/net.hh	/^    uint64_t copy_bytes; \/\/ bytes that were copied on L2 level$/;"	m	struct:net::qp_stats_good
 copy_frags	net/net.hh	/^    uint64_t copy_frags; \/\/ fragments that were copied on L2 level$/;"	m	struct:net::qp_stats_good
-csum	net/net.hh	/^            uint64_t csum;         \/\/ packets with bad checksum$/;"	m	struct:net::qp_stats::__anon5::__anon6
+csum	net/net.hh	/^            uint64_t csum;         \/\/ packets with bad checksum$/;"	m	struct:net::qp_stats::__anon2::__anon3
 data	net/net.hh	/^    uint8_t data[64];$/;"	m	class:net::forward_hash
 device	net/net.hh	/^    device() {$/;"	f	class:net::device
 device	net/net.hh	/^class device {$/;"	c	namespace:net
@@ -4349,16 +4424,16 @@ end_idx	net/net.hh	/^    size_t end_idx = 0;$/;"	m	class:net::forward_hash
 forward	net/net.hh	/^        std::function<bool (forward_hash&, packet&, size_t)> forward;$/;"	m	struct:net::interface::l3_rx_stream
 forward_dst	net/net.hh	/^    unsigned forward_dst(unsigned src_cpuid, Func&& hashfn) {$/;"	f	class:net::device
 forward_hash	net/net.hh	/^class forward_hash {$/;"	c	namespace:net
-good	net/net.hh	/^        struct qp_stats_good good;$/;"	m	struct:net::qp_stats::__anon5	typeref:struct:net::qp_stats::__anon5::qp_stats_good
-good	net/net.hh	/^        struct qp_stats_good good;$/;"	m	struct:net::qp_stats::__anon7	typeref:struct:net::qp_stats::__anon7::qp_stats_good
+good	net/net.hh	/^        struct qp_stats_good good;$/;"	m	struct:net::qp_stats::__anon2	typeref:struct:net::qp_stats::__anon2::qp_stats_good
+good	net/net.hh	/^        struct qp_stats_good good;$/;"	m	struct:net::qp_stats::__anon4	typeref:struct:net::qp_stats::__anon4::qp_stats_good
 hash2cpu	net/net.hh	/^    virtual unsigned hash2cpu(uint32_t hash) {$/;"	f	class:net::device
 hash2qid	net/net.hh	/^    virtual unsigned hash2qid(uint32_t hash) {$/;"	f	class:net::device
 hw_address	net/net.hh	/^    ethernet_address hw_address() { return _hw_address; }$/;"	f	class:net::interface
 hw_features	net/net.hh	/^    const net::hw_features& hw_features() const { return _hw_features; }$/;"	f	class:net::interface
 hw_features	net/net.hh	/^struct hw_features {$/;"	s	namespace:net
 hw_queues_count	net/net.hh	/^    virtual uint16_t hw_queues_count() { return 1; }$/;"	f	class:net::device
-inc_csum_err	net/net.hh	/^            void inc_csum_err() {$/;"	f	struct:net::qp_stats::__anon5::__anon6
-inc_no_mem	net/net.hh	/^            void inc_no_mem() {$/;"	f	struct:net::qp_stats::__anon5::__anon6
+inc_csum_err	net/net.hh	/^            void inc_csum_err() {$/;"	f	struct:net::qp_stats::__anon2::__anon3
+inc_no_mem	net/net.hh	/^            void inc_no_mem() {$/;"	f	struct:net::qp_stats::__anon2::__anon3
 interface	net/net.hh	/^class interface {$/;"	c	namespace:net
 l2receive	net/net.hh	/^    void l2receive(packet p) { _queues[engine().cpu_id()]->_rx_stream.produce(std::move(p)); }$/;"	f	class:net::device
 l3_protocol	net/net.hh	/^class l3_protocol {$/;"	c	namespace:net
@@ -4371,7 +4446,7 @@ local_queue	net/net.hh	/^    qp& local_queue() { return queue_for_cpu(engine().c
 max_packet_len	net/net.hh	/^    uint16_t max_packet_len = net::ip_packet_len_max - net::eth_hdr_len;$/;"	m	struct:net::hw_features
 mtu	net/net.hh	/^    uint16_t mtu = 1500;$/;"	m	struct:net::hw_features
 net	net/net.hh	/^namespace net {$/;"	n
-no_mem	net/net.hh	/^            uint64_t no_mem;       \/\/ Packets dropped due to allocation failure$/;"	m	struct:net::qp_stats::__anon5::__anon6
+no_mem	net/net.hh	/^            uint64_t no_mem;       \/\/ Packets dropped due to allocation failure$/;"	m	struct:net::qp_stats::__anon2::__anon3
 nr_frags	net/net.hh	/^    uint64_t nr_frags;   \/\/ total number of fragments$/;"	m	struct:net::qp_stats_good
 operator []	net/net.hh	/^    const uint8_t& operator[](size_t idx) const {$/;"	f	class:net::forward_hash
 p	net/net.hh	/^        packet p;$/;"	m	struct:net::l3_protocol::l3packet
@@ -4390,15 +4465,15 @@ queue_for_cpu	net/net.hh	/^    qp& queue_for_cpu(unsigned cpu) { return *_queues
 ready	net/net.hh	/^        future<> ready;$/;"	m	struct:net::interface::l3_rx_stream
 register_packet_provider	net/net.hh	/^    void register_packet_provider(l3_protocol::packet_provider_type func) {$/;"	f	class:net::interface
 register_packet_provider	net/net.hh	/^    void register_packet_provider(packet_provider_type func) {$/;"	f	class:net::qp
-rx	net/net.hh	/^    } rx;$/;"	m	struct:net::qp_stats	typeref:struct:net::qp_stats::__anon5
+rx	net/net.hh	/^    } rx;$/;"	m	struct:net::qp_stats	typeref:struct:net::qp_stats::__anon2
 rx_csum_offload	net/net.hh	/^    bool rx_csum_offload = false;$/;"	m	struct:net::hw_features
 rx_lro	net/net.hh	/^    bool rx_lro = false;$/;"	m	struct:net::hw_features
 rx_start	net/net.hh	/^    virtual void rx_start() {};$/;"	f	class:net::qp
 send	net/net.hh	/^    virtual uint32_t send(circular_buffer<packet>& p) {$/;"	f	class:net::qp
 size	net/net.hh	/^    size_t size() const {$/;"	f	class:net::forward_hash
 to	net/net.hh	/^        ethernet_address to;$/;"	m	struct:net::l3_protocol::l3packet
-total	net/net.hh	/^            uint64_t total;        \/\/ total number of erroneous packets$/;"	m	struct:net::qp_stats::__anon5::__anon6
-tx	net/net.hh	/^    } tx;$/;"	m	struct:net::qp_stats	typeref:struct:net::qp_stats::__anon7
+total	net/net.hh	/^            uint64_t total;        \/\/ total number of erroneous packets$/;"	m	struct:net::qp_stats::__anon2::__anon3
+tx	net/net.hh	/^    } tx;$/;"	m	struct:net::qp_stats	typeref:struct:net::qp_stats::__anon4
 tx_csum_ip_offload	net/net.hh	/^    bool tx_csum_ip_offload = false;$/;"	m	struct:net::hw_features
 tx_csum_l4_offload	net/net.hh	/^    bool tx_csum_l4_offload = false;$/;"	m	struct:net::hw_features
 tx_tso	net/net.hh	/^    bool tx_tso = false;$/;"	m	struct:net::hw_features
@@ -4541,6 +4616,9 @@ _recv	net/posix-stack.cc	/^    recv_ctx _recv;$/;"	m	class:net::posix_udp_channe
 _send	net/posix-stack.cc	/^    send_ctx _send;$/;"	m	class:net::posix_udp_channel	file:
 _src	net/posix-stack.cc	/^    ipv4_addr _src;$/;"	m	class:net::posix_datagram	file:
 _src_addr	net/posix-stack.cc	/^        socket_address _src_addr;$/;"	m	struct:net::posix_udp_channel::recv_ctx	file:
+abort_accept	net/posix-stack.cc	/^posix_ap_server_socket_impl::abort_accept() {$/;"	f	class:net::posix_ap_server_socket_impl
+abort_accept	net/posix-stack.cc	/^posix_reuseport_server_socket_impl::abort_accept() {$/;"	f	class:net::posix_reuseport_server_socket_impl
+abort_accept	net/posix-stack.cc	/^posix_server_socket_impl::abort_accept() {$/;"	f	class:net::posix_server_socket_impl
 accept	net/posix-stack.cc	/^future<connected_socket, socket_address> posix_ap_server_socket_impl::accept() {$/;"	f	class:net::posix_ap_server_socket_impl
 accept	net/posix-stack.cc	/^posix_reuseport_server_socket_impl::accept() {$/;"	f	class:net::posix_reuseport_server_socket_impl
 accept	net/posix-stack.cc	/^posix_server_socket_impl::accept() {$/;"	f	class:net::posix_server_socket_impl
@@ -4550,12 +4628,12 @@ connect	net/posix-stack.cc	/^posix_ap_network_stack::connect(socket_address sa, 
 connect	net/posix-stack.cc	/^posix_network_stack::connect(socket_address sa, socket_address local) {$/;"	f	class:net::posix_network_stack
 final	net/posix-stack.cc	/^class posix_connected_socket_impl final : public connected_socket_impl {$/;"	c	namespace:net	file:
 get	net/posix-stack.cc	/^posix_data_source_impl::get() {$/;"	f	class:net::posix_data_source_impl
-kj_accept	net/posix-stack.cc	/^kj::Promise<  std::pair<connected_socket, socket_address> > posix_ap_server_socket_impl::kj_accept() {    $/;"	f	class:net::posix_ap_server_socket_impl
-kj_accept	net/posix-stack.cc	/^posix_reuseport_server_socket_impl::kj_accept() {        $/;"	f	class:net::posix_reuseport_server_socket_impl
-kj_accept	net/posix-stack.cc	/^posix_server_socket_impl::kj_accept() {    $/;"	f	class:net::posix_server_socket_impl
+kj_accept	net/posix-stack.cc	/^kj::Promise<  std::pair<connected_socket, socket_address> > posix_ap_server_socket_impl::kj_accept() {$/;"	f	class:net::posix_ap_server_socket_impl
+kj_accept	net/posix-stack.cc	/^posix_reuseport_server_socket_impl::kj_accept() {$/;"	f	class:net::posix_reuseport_server_socket_impl
+kj_accept	net/posix-stack.cc	/^posix_server_socket_impl::kj_accept() {$/;"	f	class:net::posix_server_socket_impl
 kj_connect	net/posix-stack.cc	/^posix_ap_network_stack::kj_connect(socket_address sa, socket_address local) {$/;"	f	class:net::posix_ap_network_stack
 kj_connect	net/posix-stack.cc	/^posix_network_stack::kj_connect(socket_address sa, socket_address local) {$/;"	f	class:net::posix_network_stack
-kj_get	net/posix-stack.cc	/^posix_data_source_impl::kj_get(size_t maxBytes) {        $/;"	f	class:net::posix_data_source_impl
+kj_get	net/posix-stack.cc	/^posix_data_source_impl::kj_get(size_t maxBytes) {$/;"	f	class:net::posix_data_source_impl
 kj_put	net/posix-stack.cc	/^posix_data_sink_impl::kj_put(packet p) {$/;"	f	class:net::posix_data_sink_impl
 kj_put	net/posix-stack.cc	/^posix_data_sink_impl::kj_put(temporary_buffer<char> buf) {$/;"	f	class:net::posix_data_sink_impl
 kj_receive	net/posix-stack.cc	/^posix_udp_channel::kj_receive() {$/;"	f	class:net::posix_udp_channel
@@ -4628,6 +4706,9 @@ override	net/posix-stack.hh	/^    virtual kj::Promise<temporary_buffer<char>> kj
 override	net/posix-stack.hh	/^    virtual net::udp_channel make_udp_channel(ipv4_addr addr) override;$/;"	m	class:net::posix_network_stack
 override	net/posix-stack.hh	/^    virtual server_socket listen(socket_address sa, listen_options opts) override;$/;"	m	class:net::posix_ap_network_stack
 override	net/posix-stack.hh	/^    virtual server_socket listen(socket_address sa, listen_options opts) override;$/;"	m	class:net::posix_network_stack
+override	net/posix-stack.hh	/^    virtual void abort_accept() override;$/;"	m	class:net::posix_ap_server_socket_impl
+override	net/posix-stack.hh	/^    virtual void abort_accept() override;$/;"	m	class:net::posix_reuseport_server_socket_impl
+override	net/posix-stack.hh	/^    virtual void abort_accept() override;$/;"	m	class:net::posix_server_socket_impl
 posix_ap_network_stack	net/posix-stack.hh	/^    posix_ap_network_stack(boost::program_options::variables_map opts) : posix_network_stack(std::move(opts)), _reuseport(engine().posix_reuseport_available()) {}$/;"	f	class:net::posix_ap_network_stack
 posix_ap_network_stack	net/posix-stack.hh	/^class posix_ap_network_stack : public posix_network_stack {$/;"	c	namespace:net
 posix_ap_server_socket_impl	net/posix-stack.hh	/^    explicit posix_ap_server_socket_impl(socket_address sa) : _sa(sa) {}$/;"	f	class:net::posix_ap_server_socket_impl
@@ -4727,6 +4808,7 @@ _tcp	net/tcp.hh	/^        tcp& _tcp;$/;"	m	class:net::tcp_state::tcp_option::opt
 _timestamps_received	net/tcp.hh	/^    bool _timestamps_received = false;$/;"	m	class:net::tcp_state::tcp_option::option_kind::option_len
 _win_scale_received	net/tcp.hh	/^    bool _win_scale_received = false;$/;"	m	class:net::tcp_state::tcp_option::option_kind::option_len
 _window_opened	net/tcp.hh	/^            promise<> _window_opened;$/;"	m	struct:net::tcp_state::tcp_option::option_kind::tcp::tcb::send
+abort_reader	net/tcp.hh	/^tcp<InetTraits>::tcb::abort_reader() {$/;"	f	class:net::tcp_state::tcp_option::option_kind::tcp::tcb::tcp::tcb
 ack	net/tcp.hh	/^    packed<tcp_seq> ack;$/;"	m	struct:net::tcp_state::tcp_option::option_kind::tcp_hdr
 adjust_endianness	net/tcp.hh	/^        void adjust_endianness(Adjuster a) { a(mss); }$/;"	f	struct:net::tcp_state::tcp_option::option_kind::option_len::mss
 adjust_endianness	net/tcp.hh	/^        void adjust_endianness(Adjuster a) { a(t1, t2); }$/;"	f	struct:net::tcp_state::tcp_option::option_kind::option_len::timestamps
@@ -5084,13 +5166,13 @@ get_virtio_net_options_description	net/virtio.cc	/^get_virtio_net_options_descri
 getconfig	net/virtio.cc	/^        const ring_config& getconfig() {$/;"	f	class:virtio::qp::rxq
 getconfig	net/virtio.cc	/^        const ring_config& getconfig() {$/;"	f	class:virtio::qp::txq
 getconfig	net/virtio.cc	/^    const ring_config& getconfig() {$/;"	f	class:virtio::vring
-gso_ecn	net/virtio.cc	/^        enum { gso_none = 0, gso_tcpv4 = 1, gso_udp = 3, gso_tcpv6 = 4, gso_ecn = 0x80 };$/;"	e	enum:virtio::qp::net_hdr::__anon3	file:
-gso_none	net/virtio.cc	/^        enum { gso_none = 0, gso_tcpv4 = 1, gso_udp = 3, gso_tcpv6 = 4, gso_ecn = 0x80 };$/;"	e	enum:virtio::qp::net_hdr::__anon3	file:
+gso_ecn	net/virtio.cc	/^        enum { gso_none = 0, gso_tcpv4 = 1, gso_udp = 3, gso_tcpv6 = 4, gso_ecn = 0x80 };$/;"	e	enum:virtio::qp::net_hdr::__anon7	file:
+gso_none	net/virtio.cc	/^        enum { gso_none = 0, gso_tcpv4 = 1, gso_udp = 3, gso_tcpv6 = 4, gso_ecn = 0x80 };$/;"	e	enum:virtio::qp::net_hdr::__anon7	file:
 gso_size	net/virtio.cc	/^        uint16_t gso_size;$/;"	m	struct:virtio::qp::net_hdr	file:
-gso_tcpv4	net/virtio.cc	/^        enum { gso_none = 0, gso_tcpv4 = 1, gso_udp = 3, gso_tcpv6 = 4, gso_ecn = 0x80 };$/;"	e	enum:virtio::qp::net_hdr::__anon3	file:
-gso_tcpv6	net/virtio.cc	/^        enum { gso_none = 0, gso_tcpv4 = 1, gso_udp = 3, gso_tcpv6 = 4, gso_ecn = 0x80 };$/;"	e	enum:virtio::qp::net_hdr::__anon3	file:
+gso_tcpv4	net/virtio.cc	/^        enum { gso_none = 0, gso_tcpv4 = 1, gso_udp = 3, gso_tcpv6 = 4, gso_ecn = 0x80 };$/;"	e	enum:virtio::qp::net_hdr::__anon7	file:
+gso_tcpv6	net/virtio.cc	/^        enum { gso_none = 0, gso_tcpv4 = 1, gso_udp = 3, gso_tcpv6 = 4, gso_ecn = 0x80 };$/;"	e	enum:virtio::qp::net_hdr::__anon7	file:
 gso_type	net/virtio.cc	/^        uint8_t gso_type;$/;"	m	struct:virtio::qp::net_hdr	file:
-gso_udp	net/virtio.cc	/^        enum { gso_none = 0, gso_tcpv4 = 1, gso_udp = 3, gso_tcpv6 = 4, gso_ecn = 0x80 };$/;"	e	enum:virtio::qp::net_hdr::__anon3	file:
+gso_udp	net/virtio.cc	/^        enum { gso_none = 0, gso_tcpv4 = 1, gso_udp = 3, gso_tcpv6 = 4, gso_ecn = 0x80 };$/;"	e	enum:virtio::qp::net_hdr::__anon7	file:
 has_next	net/virtio.cc	/^            uint16_t has_next : 1;$/;"	m	struct:virtio::vring::desc::flags	file:
 hdr_len	net/virtio.cc	/^        uint16_t hdr_len;$/;"	m	struct:virtio::qp::net_hdr	file:
 hw_features	net/virtio.cc	/^    net::hw_features hw_features() {$/;"	f	class:virtio::device
@@ -5107,7 +5189,7 @@ net_hdr	net/virtio.cc	/^    struct net_hdr {$/;"	s	class:virtio::qp	file:
 net_hdr_mrg	net/virtio.cc	/^    struct net_hdr_mrg : net_hdr {$/;"	s	class:virtio::qp	file:
 next_idx	net/virtio.cc	/^        uint16_t next_idx() { return _next; }$/;"	f	class:virtio::vring::desc
 no_interrupts	net/virtio.cc	/^            uint16_t no_interrupts : 1;$/;"	m	struct:virtio::vring::avail_layout::flags	file:
-no_notify	net/virtio.cc	/^            no_notify = 1$/;"	e	enum:virtio::vring::used_layout::__anon2	file:
+no_notify	net/virtio.cc	/^            no_notify = 1$/;"	e	enum:virtio::vring::used_layout::__anon6	file:
 notifications_disabled	net/virtio.cc	/^    bool notifications_disabled() {$/;"	f	class:virtio::vring	file:
 notifier	net/virtio.cc	/^class notifier {$/;"	c	namespace:virtio	file:
 notifier_osv	net/virtio.cc	/^    notifier_osv(osv::assigned_virtio &virtio, uint16_t q_index)$/;"	f	class:virtio::notifier_osv
@@ -5227,8 +5309,8 @@ _next_idx	net/xenfront.hh	/^        std::atomic<uint32_t> _next_idx = { 0 };$/;"
 _ring	net/xenfront.hh	/^        front_ring<T> *_ring;$/;"	m	class:xen::front_ring::entries
 _ring	net/xenfront.hh	/^    T _ring[1];$/;"	m	class:xen::sring
 _sring	net/xenfront.hh	/^    sring<T> *_sring;$/;"	m	class:xen::front_ring
-csum_blank	net/xenfront.hh	/^        uint16_t csum_blank : 1;$/;"	m	struct:xen::netif_tx_request::__anon4
-data_validated	net/xenfront.hh	/^        uint16_t data_validated : 1;$/;"	m	struct:xen::netif_tx_request::__anon4
+csum_blank	net/xenfront.hh	/^        uint16_t csum_blank : 1;$/;"	m	struct:xen::netif_tx_request::__anon8
+data_validated	net/xenfront.hh	/^        uint16_t data_validated : 1;$/;"	m	struct:xen::netif_tx_request::__anon8
 dump	net/xenfront.hh	/^    void dump() {$/;"	f	class:xen::front_ring
 dump	net/xenfront.hh	/^    void dump() {$/;"	f	class:xen::sring
 dump	net/xenfront.hh	/^    void dump(const char *str, netif_rx_response &r) {$/;"	f	class:xen::front_ring
@@ -5236,9 +5318,9 @@ dump	net/xenfront.hh	/^    void dump(const char *str, netif_tx_response &r) {$/;
 entries	net/xenfront.hh	/^        entries(front_ring<T> *ring) : _ring(ring) {}$/;"	f	class:xen::front_ring::entries
 entries	net/xenfront.hh	/^    class entries {$/;"	c	class:xen::front_ring
 entries	net/xenfront.hh	/^    entries entries;$/;"	m	class:xen::front_ring
-extra_info	net/xenfront.hh	/^        uint16_t extra_info : 1;$/;"	m	struct:xen::netif_tx_request::__anon4
+extra_info	net/xenfront.hh	/^        uint16_t extra_info : 1;$/;"	m	struct:xen::netif_tx_request::__anon8
 flags	net/xenfront.hh	/^    uint16_t flags;        \/* NETRXF_* *\/$/;"	m	struct:xen::netif_rx_response
-flags	net/xenfront.hh	/^    } flags;$/;"	m	struct:xen::netif_tx_request	typeref:struct:xen::netif_tx_request::__anon4
+flags	net/xenfront.hh	/^    } flags;$/;"	m	struct:xen::netif_tx_request	typeref:struct:xen::netif_tx_request::__anon8
 front_ring	net/xenfront.hh	/^    front_ring(gntref r, xenfront_qp& dev)$/;"	f	class:xen::front_ring
 front_ring	net/xenfront.hh	/^class front_ring {$/;"	c	namespace:xen
 gref	net/xenfront.hh	/^    uint32_t gref;$/;"	m	struct:xen::netif_rx_request
@@ -5248,7 +5330,7 @@ id	net/xenfront.hh	/^    uint16_t id;$/;"	m	struct:xen::netif_rx_response
 id	net/xenfront.hh	/^    uint16_t id;$/;"	m	struct:xen::netif_tx_request
 id	net/xenfront.hh	/^    uint16_t id;$/;"	m	struct:xen::netif_tx_response
 idx	net/xenfront.hh	/^    static uint32_t idx(int i) { return i & (nr_ents - 1); }$/;"	f	class:xen::front_ring
-more_data	net/xenfront.hh	/^        uint16_t more_data : 1;$/;"	m	struct:xen::netif_tx_request::__anon4
+more_data	net/xenfront.hh	/^        uint16_t more_data : 1;$/;"	m	struct:xen::netif_tx_request::__anon8
 netif_rx_request	net/xenfront.hh	/^struct netif_rx_request {$/;"	s	namespace:xen
 netif_rx_response	net/xenfront.hh	/^struct netif_rx_response {$/;"	s	namespace:xen
 netif_tx_request	net/xenfront.hh	/^struct netif_tx_request {$/;"	s	namespace:xen
@@ -5258,7 +5340,7 @@ offset	net/xenfront.hh	/^    uint16_t offset;       \/* Offset in page of start 
 offset	net/xenfront.hh	/^    uint16_t offset;$/;"	m	struct:xen::netif_tx_request
 operator []	net/xenfront.hh	/^        gntref& operator[](std::size_t i) { return _entries[_ring->idx(i)]; }$/;"	f	class:xen::front_ring::entries
 operator []	net/xenfront.hh	/^    T& operator[](std::size_t i) { return _sring->_ring[idx(i)]; }$/;"	f	class:xen::front_ring
-pad	net/xenfront.hh	/^        uint16_t pad : 12;$/;"	m	struct:xen::netif_tx_request::__anon4
+pad	net/xenfront.hh	/^        uint16_t pad : 12;$/;"	m	struct:xen::netif_tx_request::__anon8
 pad	net/xenfront.hh	/^    uint8_t  pad[48] = { 0 };$/;"	m	class:xen::sring
 ref	net/xenfront.hh	/^    int32_t  ref = -1;$/;"	m	class:xen::front_ring
 req	net/xenfront.hh	/^    struct netif_rx_request  req;$/;"	m	union:xen::rx	typeref:struct:xen::rx::netif_rx_request
@@ -5535,16 +5617,14 @@ SEASTAR_TEST_CASE	tests/futures_test.cc	/^SEASTAR_TEST_CASE(test_when_all_iterat
 expected_exception	tests/futures_test.cc	/^    expected_exception() : runtime_error("expected") {}$/;"	f	class:expected_exception
 expected_exception	tests/futures_test.cc	/^class expected_exception : std::runtime_error {$/;"	c	file:
 forward_dead_unarmed_promise_with_dead_future_to	tests/futures_test.cc	/^static void forward_dead_unarmed_promise_with_dead_future_to(promise<>& p) {$/;"	f	file:
-BOOST_AUTO_TEST_CASE	tests/httpd.cc	/^BOOST_AUTO_TEST_CASE(test_decode_url) {$/;"	f
-BOOST_AUTO_TEST_CASE	tests/httpd.cc	/^BOOST_AUTO_TEST_CASE(test_formatter)$/;"	f
-BOOST_AUTO_TEST_CASE	tests/httpd.cc	/^BOOST_AUTO_TEST_CASE(test_match_rule)$/;"	f
-BOOST_AUTO_TEST_CASE	tests/httpd.cc	/^BOOST_AUTO_TEST_CASE(test_param_matcher)$/;"	f
-BOOST_AUTO_TEST_CASE	tests/httpd.cc	/^BOOST_AUTO_TEST_CASE(test_reply)$/;"	f
-BOOST_AUTO_TEST_CASE	tests/httpd.cc	/^BOOST_AUTO_TEST_CASE(test_routes) {$/;"	f
-BOOST_AUTO_TEST_CASE	tests/httpd.cc	/^BOOST_AUTO_TEST_CASE(test_str_matcher)$/;"	f
-BOOST_AUTO_TEST_CASE	tests/httpd.cc	/^BOOST_AUTO_TEST_CASE(test_transformer) {$/;"	f
-BOOST_TEST_DYN_LINK	tests/httpd.cc	5;"	d	file:
-BOOST_TEST_MODULE	tests/httpd.cc	6;"	d	file:
+SEASTAR_TEST_CASE	tests/httpd.cc	/^SEASTAR_TEST_CASE(test_decode_url) {$/;"	f
+SEASTAR_TEST_CASE	tests/httpd.cc	/^SEASTAR_TEST_CASE(test_formatter)$/;"	f
+SEASTAR_TEST_CASE	tests/httpd.cc	/^SEASTAR_TEST_CASE(test_match_rule)$/;"	f
+SEASTAR_TEST_CASE	tests/httpd.cc	/^SEASTAR_TEST_CASE(test_param_matcher)$/;"	f
+SEASTAR_TEST_CASE	tests/httpd.cc	/^SEASTAR_TEST_CASE(test_reply)$/;"	f
+SEASTAR_TEST_CASE	tests/httpd.cc	/^SEASTAR_TEST_CASE(test_routes) {$/;"	f
+SEASTAR_TEST_CASE	tests/httpd.cc	/^SEASTAR_TEST_CASE(test_str_matcher)$/;"	f
+SEASTAR_TEST_CASE	tests/httpd.cc	/^SEASTAR_TEST_CASE(test_transformer) {$/;"	f
 handl	tests/httpd.cc	/^class handl : public httpd::handler_base {$/;"	c	file:
 handle	tests/httpd.cc	/^    virtual future<std::unique_ptr<reply> > handle(const sstring& path,$/;"	f	class:handl
 main	tests/ip_test.cc	/^int main(int ac, char** av) {$/;"	f
@@ -5664,6 +5744,10 @@ operator ()	tests/rpc.cc	/^    inline auto operator()(output_stream<char>& out, 
 operator ()	tests/rpc.cc	/^    inline auto operator()(output_stream<char>& out, T&& v, std::enable_if_t<std::is_pod<std::remove_reference_t<T>>::value, void*> = nullptr) {$/;"	f	struct:serializer
 operator ()	tests/rpc.cc	/^    inline auto operator()(output_stream<char>& out, sstring& v) {$/;"	f	struct:serializer
 serializer	tests/rpc.cc	/^struct serializer {$/;"	s	file:
+SEASTAR_TEST_CASE	tests/semaphore_test.cc	/^SEASTAR_TEST_CASE(test_semaphore_1) {$/;"	f
+SEASTAR_TEST_CASE	tests/semaphore_test.cc	/^SEASTAR_TEST_CASE(test_semaphore_2) {$/;"	f
+SEASTAR_TEST_CASE	tests/semaphore_test.cc	/^SEASTAR_TEST_CASE(test_semaphore_timeout_1) {$/;"	f
+SEASTAR_TEST_CASE	tests/semaphore_test.cc	/^SEASTAR_TEST_CASE(test_semaphore_timeout_2) {$/;"	f
 A	tests/shared_ptr_test.cc	/^    A() {$/;"	f	struct:A
 A	tests/shared_ptr_test.cc	/^struct A {$/;"	s	file:
 B	tests/shared_ptr_test.cc	/^struct B {$/;"	s	file:

@@ -102,7 +102,7 @@ struct ZeroCopyScratchspace {
       KJ_IF_MAYBE(v, parent) {
         // KJ_DBG("Free ",elementCount,v);
         v->release(elementCount);
-        KJ_DBG("Freed  ",v->freed,v->readCounter,v->writerCounter);
+        // KJ_DBG("Freed  ",v->freed,v->readCounter,v->writerCounter);
       }
     };
 
@@ -151,14 +151,14 @@ struct ZeroCopyScratchspace {
 
   inline void release(size_t amount) {
     freed += amount;    
-    // if (freed > writerCounter) freed = writerCounter;
+    if (freed > writerCounter) freed = writerCounter;
         
-    if (freed == writerCounter && writerCounter == readCounter ) {
-      printf("reset consumed\n");
-      readCounter = 0;
-      writerCounter = 0;
-      freed = 0;
-    }
+    // if (freed == writerCounter && writerCounter == readCounter ) {
+    //   printf("reset consumed\n");
+    //   readCounter = 0;
+    //   writerCounter = 0;
+    //   freed = 0;
+    // }
   }
 
   inline kj::Array<char> consuming(size_t cnt) {
