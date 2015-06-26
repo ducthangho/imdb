@@ -193,6 +193,7 @@ kj::Promise<temporary_buffer<char>>
 posix_data_source_impl::kj_get(size_t maxBytes) {
     return _fd.kj_read_some(_buf.get_write(), maxBytes).then([this, maxBytes] (size_t size) {
         KJ_DBG("READ FROM SOCKET ", size);
+        printf("_buf.begin() = %zu\n",(size_t)_buf.begin());
 
         _buf.trim(size);
         // auto m = kj::min(8, size);

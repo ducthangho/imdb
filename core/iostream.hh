@@ -249,7 +249,7 @@ private:
         }
 
         if (_buf.get() != reinterpret_cast<CharType*>(buffer) + alreadyRead){
-            // printf("Copy here\n");
+            printf("Copy here\n");
             _buf = std::move( temporary_buffer<CharType>(reinterpret_cast<CharType*>(buffer)+alreadyRead, maxBytes, make_free_deleter(NULL) ) );
         }
 
@@ -269,8 +269,10 @@ private:
 
             auto now = kj::min(minBytes, _buf.size());
             // KJ_DBG(now);
-            if (_buf.get() != reinterpret_cast<CharType*>(buffer) + alreadyRead)
+            if (_buf.get() != reinterpret_cast<CharType*>(buffer) + alreadyRead){
+                printf("Oh crap\n");
                 std::copy(_buf.get(), _buf.get() + now, reinterpret_cast<CharType*>(buffer) + alreadyRead);
+            }
 
             alreadyRead += _buf.size();
             minBytes -= now;

@@ -105,6 +105,7 @@ class HashProtocolImpl final: public HashProtocol::Server {
 
         auto response = context.getResults();
         response.setValue(mymap[key]);
+        KJ_DBG(request,response);
         return kj::READY_NOW;
 
     }
@@ -119,8 +120,8 @@ class HashProtocolImpl final: public HashProtocol::Server {
         // KJ_DBG(request);
         // std::cout<<"Client set value "<<value<<endl;
         mymap[key] = value;
-        // auto response = context.getResults();
-        // KJ_DBG(response);
+        auto response = context.getResults();
+        KJ_DBG(request,response);
         return kj::READY_NOW;
     }
 };

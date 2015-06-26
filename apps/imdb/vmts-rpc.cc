@@ -108,7 +108,7 @@ class SeastarAsyncMessageReader: public MessageReader {
 public:
 
   inline SeastarAsyncMessageReader(kj::UvIoStream& _inputStream, ReaderOptions options): MessageReader(options), inputStream(_inputStream), totalWords(0), ownership(true) {
-    memset(firstWord, 0, sizeof(firstWord));
+    // memset(firstWord, 0, sizeof(firstWord));
   }
 
   // SeastarAsyncMessageReader(SeastarAsyncMessageReader&& o) :  MessageReader(o), inputStream(o.inputStream), totalWords(o.totalWords), moreSizes(kj::mv(o.moreSizes)), segmentStarts( kj::mv(o.segmentStarts) ),ownership(o.ownership),ownedSpace(kj::mv(o.ownedSpace))  {
@@ -158,11 +158,14 @@ public:
 
 private:
   kj::UvIoStream& inputStream;
+
+  friend class SeastarNetwork;
+
   size_t totalWords;
   _::WireValue<uint32_t> firstWord[2];
   kj::Array<_::WireValue<uint32_t>> moreSizes;
   kj::Array<const word*> segmentStarts;
-
+  
   bool ownership = false;
 
   kj::Array<word> ownedSpace;
@@ -178,16 +181,26 @@ private:
 kj::Promise<bool> SeastarAsyncMessageReader::read() {  
   size_t consumable = inputStream.buffer->consumable();
   
-  if (consumable >= sizeof(firstWord)) { //If already read        
-    // auto m = kj::min(8,consumable);
-    // for (int i=0;i<m;++i){
-    //   printf("0x%02x, ",(int)((*(inputStream.buffer))[i]));
-    // }
-    // printf("\n");
+  if (consumable >= sizeof(firstWord)) { //If already read            
+    printf("========================\n");
+    int count = 0;
+    for (size_t i=0;i<8;++i){
+      printf("0x%02x, ",(unsigned char)(inputStream[i]));
+      if (++count==8) {
+        printf("\n");
+        count = 0;
+      }
+    }
     inputStream.buffer->copy(firstWord, sizeof(firstWord) );
     inputStream.buffer->consumed(sizeof(firstWord));
     inputStream.buffer->release(sizeof(firstWord));
-    // KJ_DBG(segmentCount() , segment0Size());
+    KJ_DBG(segmentCount() , segment0Size());
+
+    if ( segment0Size() == 0 ){
+      printf("Poor me \n");
+    }
+
+    printf("========================\n");
     // KJ_DBG(inputStream);
     // KJ_DBG(this);
     return readAfterFirstWord().then([]() { return true; });
@@ -223,7 +236,7 @@ kj::Promise<bool> SeastarAsyncMessageReader::read() {
     inputStream.buffer->consumed(sizeof(firstWord));
     inputStream.buffer->release(sizeof(firstWord));
 
-    // KJ_DBG(segmentCount() , segment0Size());
+    KJ_DBG(segmentCount() , segment0Size());
     // KJ_DBG(inputStream.buffer->consumable());
 
     // printf("Read : %zu bytes. Segment count =   %d, segment 0 size   %d\n",segmentCount(),segment0Size());
@@ -330,6 +343,8 @@ kj::Promise<void> SeastarAsyncMessageReader::readSegments() {
   segmentStarts = kj::heapArray<const word*>(segmentCount());
   kj::Array<char> scratchSpace(inputStream.buffer->consuming(totalWords));
   segmentStarts[0] = reinterpret_cast<capnp::word*>(scratchSpace.begin());
+  printf("Segment start = %zu\t%zu\n ",(size_t)segmentStarts[0],(size_t)scratchSpace.begin());
+  printf("Segment end = %zu\t%zu\n ",(size_t)segmentStarts[0]+totalWords,(size_t)scratchSpace.end()  );
 
   if (segmentCount() > 1) {
     size_t offset = segment0Size();
@@ -376,15 +391,28 @@ public:
 
   void send() override {
     network.previousWrite = KJ_ASSERT_NONNULL(network.previousWrite, "already shut down")
-    .then([&]() {
+    .then([this]() {
       // Note that if the write fails, all further writes will be skipped due to the exception.
       // We never actually handle this exception because we assume the read end will fail as well
       // and it's cleaner to handle the failure there.
-      // kj::String msg = dumper.dump(message.getRoot<rpc::Message>(), capnp::RpcDumper::Sender::CLIENT);
-      // printf("----------------------- Outgoing message ---------------------------\n");
-      // KJ_DBG(msg);
-      // printf("Size = %zu\n",message.getSegmentsForOutput()[0].size() * sizeof(word));
-      return writeMessage(network.stream, message);
+      
+      return writeMessage(network.stream, message).then([this](){
+        auto msg = message.getRoot<rpc::Message>();        
+        kj::String msg0 = dumper.dump(msg, capnp::RpcDumper::Sender::CLIENT);
+        printf("----------------------- Outgoing message ---------------------------\n");
+        KJ_DBG(msg0);
+        printf("Size = %zu\n",message.getSegmentsForOutput()[0].size() * sizeof(word));
+        
+        auto ret = msg.getReturn();
+        auto answerId =  ret.getAnswerId();
+
+        auto iter = network.answerIdMap.find(answerId);
+        if (iter != network.answerIdMap.end()){
+          auto info = iter->second;
+          if (info.buffer) info.buffer->release(info.wordUsed);
+          network.answerIdMap.erase(iter);
+        }
+      });
     }).attach(kj::addRef(*this))
     // Note that it's important that the eagerlyEvaluate() come *after* the attach() because
     // otherwise the message (and any capabilities in it) will not be released until a new
@@ -392,7 +420,7 @@ public:
     .eagerlyEvaluate(nullptr);
   }
 
-private:
+private:  
   SeastarNetwork& network;
   MallocMessageBuilder message;
 };
@@ -421,7 +449,7 @@ kj::Own<OutgoingRpcMessage> SeastarNetwork::newOutgoingMessage(uint firstSegment
 kj::Promise<kj::Maybe<kj::Own<SeastarAsyncMessageReader>>> _tryReadMessage(
   kj::UvIoStream& input, ReaderOptions options) {    
   auto reader = kj::heap<SeastarAsyncMessageReader>(input, options);
-  // printf("--------------  READING NEW MESSAGES -------------\n");
+  printf("--------------  READING NEW MESSAGES -------------\n");
   auto promise = reader->read();
   return promise.then(
   [ reader(kj::mv(reader)) ](bool success) mutable -> kj::Maybe<kj::Own<SeastarAsyncMessageReader>> {
@@ -438,10 +466,20 @@ kj::Promise<kj::Maybe<kj::Own<IncomingRpcMessage>>> SeastarNetwork::receiveIncom
     return _tryReadMessage(this->stream, receiveOptions)
            .then([this](kj::Maybe<kj::Own<SeastarAsyncMessageReader>> && message) -> kj::Maybe<kj::Own<IncomingRpcMessage>> {
       KJ_IF_MAYBE(m, message) {
-        kj::String msg = capnp::dumper.dump(m->get()->getRoot<rpc::Message>(), capnp::RpcDumper::Sender::CLIENT);
-        // printf("----------------------- Incoming message ---------------------------\n");
-        // KJ_DBG(msg);
-        // printf("Size = %zu\n",m->get()->getSegment(0).size() * sizeof(word));
+        auto msg = m->get()->getRoot<rpc::Message>();
+        kj::String msg0 = capnp::dumper.dump(msg, capnp::RpcDumper::Sender::CLIENT);
+        printf("----------------------- Incoming message ---------------------------\n");
+        KJ_DBG(msg0);
+        printf("Size = %zu\n",m->get()->getSegment(0).size() * sizeof(word));
+        if (msg.which() == rpc::Message::CALL){
+          printf("MSG %zu\n",(size_t)&msg);
+           auto call = msg.getCall();
+           auto questionId = call.getQuestionId();
+           KJ_DBG(questionId);           
+           BufferInfo info{m->get()->inputStream.buffer.get(),m->get()->totalWords};
+           KJ_DBG(info);
+           this->answerIdMap[questionId] = info;
+        }
         return kj::Own<IncomingRpcMessage>(kj::heap<IncomingMessageImpl>(kj::mv(*m)));
       } else {
         return nullptr;

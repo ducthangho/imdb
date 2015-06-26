@@ -102,12 +102,32 @@ struct ZeroCopyScratchspace {
       KJ_IF_MAYBE(v, parent) {
         // KJ_DBG("Free ",elementCount,v);
         v->release(elementCount);
-        // KJ_DBG("Freed  ",v->freed,v->readCounter,v->writerCounter);
+        KJ_DBG("Freed  ",v->freed,v->readCounter,v->writerCounter);
+        printf("-------------------------------------\n");
+        size_t consumable = v->readCounter - v->writerCounter;
+        if (consumable==168){
+          printf("\n");
+
+          KJ_DBG(v);
+        }        
+    KJ_DBG(consumable);
+    // auto m = kj::min(8,consumable);
+    int count = 0;
+    for (size_t i=0;i<consumable;++i){
+      printf("0x%02x, ",(unsigned char)(v->scratchSpace[v->writerCounter+i]));
+      if (++count==8) {
+        printf("\n");
+        count = 0;
+      }
+    }
+    printf("\n");
+    printf("-------------------------------------\n");
       }
     };
 
     kj::Maybe<ZeroCopyScratchspace&> parent;
   };
+
   kj::ArrayPtr<char> scratchSpace;
   size_t readCounter;
   size_t writerCounter;
@@ -150,23 +170,40 @@ struct ZeroCopyScratchspace {
   }
 
   inline void release(size_t amount) {
+    printf("Releasing %zu bytes\n",amount);
     freed += amount;    
     if (freed > writerCounter) freed = writerCounter;
         
-    // if (freed == writerCounter && writerCounter == readCounter ) {
-    //   printf("reset consumed\n");
-    //   readCounter = 0;
-    //   writerCounter = 0;
-    //   freed = 0;
+    if (freed == writerCounter && writerCounter == readCounter ) {
+      printf("reset consumed\n");
+      readCounter = 0;
+      writerCounter = 0;
+      freed = 0;
+    }
+
+    KJ_DBG(readCounter,writerCounter,freed);
+
+    // auto consumable = readCounter - writerCounter;
+    // // auto m = kj::min(8,consumable);
+    // int count = 0;
+    // for (size_t i=0;i<consumable;++i){
+    //   printf("0x%02x, ",(unsigned char)(scratchSpace[writerCounter+i]));
+    //   if (++count==8) {
+    //     printf("\n");
+    //     count = 0;
+    //   }
     // }
+    // printf("\n");
+    // printf("-------------------------------------\n");
   }
 
   inline kj::Array<char> consuming(size_t cnt) {
     char* start = scratchSpace.begin() + writerCounter;
-    KJ_IF_MAYBE(d, disposer) {
-      return kj::Array<char>(start, cnt, *d );
-    }
-    return kj::Array<char>();
+    return kj::Array<char>(start, cnt, NullArrayDisposer::instance );
+    // KJ_IF_MAYBE(d, disposer) {
+      // return kj::Array<char>(start, cnt, *d );
+    // }
+    // return kj::Array<char>();
   }
 
   inline void copy(void* buffer, size_t len) {
@@ -244,18 +281,22 @@ struct UvIoStream: public kj::AsyncIoStream {
   UvIoStream(UvIoStream&&) = default;
   UvIoStream& operator=(UvIoStream&&) = default;
 
+  inline char operator[](size_t i){
+    return buffer->scratchSpace[buffer->writerCounter+i];
+  }
+
 
   kj::Promise<size_t> read(size_t minBytes) {
     // KJ_DBG(freed,readCounter,writerCounter,amount);    
     
     size_t consumable = buffer->consumable();    
     
-    // if (buffer->freed == buffer->writerCounter && consumable==0 ) {
-    //   printf("reset consumed\n");
-    //   buffer->readCounter = 0;
-    //   buffer->writerCounter = 0;
-    //   buffer->freed = 0;
-    // }
+    if (buffer->freed == buffer->writerCounter && consumable==0 ) {
+      printf("reset consumed\n");
+      buffer->readCounter = 0;
+      buffer->writerCounter = 0;
+      buffer->freed = 0;
+    }
 
     minBytes -= consumable;
     size_t maxReadable = buffer->maxReadable();
@@ -482,6 +523,15 @@ private:
 
 //*/
 
+struct BufferInfo {
+    kj::ZeroCopyScratchspace* buffer;
+    size_t wordUsed;
+
+    kj::String toString(){
+      return kj::str("buffer = ",(size_t)buffer,"  wordUsed = ",wordUsed);
+    }  
+};
+
 class SeastarNetwork final : public TwoPartyVatNetworkBase,
   private TwoPartyVatNetworkBase::Connection {
 
@@ -508,6 +558,9 @@ private:
   rpc::twoparty::Side side;
   MallocMessageBuilder peerVatId;
   ReaderOptions receiveOptions;
+  
+
+  std::map<uint32_t,BufferInfo> answerIdMap;
 
   bool accepted = false;
 
